@@ -1,0 +1,99 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Documentation
+site/
+docs/_build/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Configuration backups
+.pytoolsrc.local
+.pytoolsrc.backup*
+
+# Error logs
+.pytoolserrors/
+.ai_safety_log.json
+
+# Safegit temporary files
+.git/safegit-*.json
+.git/safegit-*.lock
+
+# Safe file manager
+.trash/
+.safe_file_manager_history/
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Lock files
+*.lock
+
+# Java/Gradle (if any Java tools are added)
+*.class
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Spoon output
+spooned/
+spoon-refactor-engine.jar

@@ -1,0 +1,215 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Code Intelligence Toolkit Configuration
+# Project-specific defaults for the development toolkit
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-24
+# Updated: 2025-07-24
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+[defaults]
+# Global defaults applied to all tools
+all = false
+include_build = false
+max_depth = 10
+quiet = false
+ast_context = true
+check_compile = true
+
+# Non-interactive defaults - conservative settings for safety
+non_interactive = false      # Keep interactive for development
+assume_yes = false          # Require explicit confirmation
+force = false              # Never auto-confirm dangerous operations
+auto_confirm = false       # Require user interaction by default
+
+# Development-friendly settings
+verbose = false            # Set to true for debugging
+dry_run = false           # Set to true to preview operations
+backup = true             # Always create backups when modifying files
+
+# Path configurations
+default_scope = .                    # Current directory as default
+source_directory = src/              # Source code directory
+test_directory = test/               # Test directory
+output_directory = output/           # Output directory
+log_directory = logs/                # Log files directory
+backup_directory = .backups/         # Backup directory for safe operations
+
+[paths]
+# Project-specific paths (adjust for your project structure)
+java_source = src/main/java/         # Java source directory
+python_source = .                    # Python tools are in root
+resources = src/main/resources/      # Resources directory
+build_output = build/                # Build output directory
+documentation = docs/                # Documentation directory
+examples = examples/                 # Examples directory
+archive = archive/                   # Archive directory
+
+# Tool paths
+tools_directory = .                  # Where Python tools are located
+config_directory = .                 # Where config files are stored
+
+[smart_ls]
+# Enhanced directory listing defaults
+sort = name                          # Sort by name by default
+reverse = false
+summary = true
+show_size = true
+default_extensions = py,java,md      # Common file types to focus on
+
+[find_files]
+# File search defaults
+sort = time                          # Sort by modification time
+reverse = true                       # Newest first
+limit = 100                          # Reasonable default limit
+default_extensions = py,java         # Focus on code files
+
+[recent_files]
+# Recent files tracker defaults
+since = 2d                           # Show files from last 2 days
+show_size = true
+by_dir = false
+
+[tree_view]
+# Directory tree visualization defaults
+show_size = false                    # Keep tree view clean
+show_stats = false
+max_depth = 5                        # Reasonable depth for overview
+
+[dir_stats]
+# Directory analysis defaults
+show_files = true
+show_dirs = true
+show_recent = true
+show_empty = false
+
+[replace_text]
+# Text replacement defaults
+backup = true                        # Always backup before replacing
+whole_word = false
+dry_run = false
+check_compile = true
+# For automation, set these in environment or use --yes flag
+non_interactive = false
+assume_yes = false
+
+[replace_text_ast]
+# AST-based refactoring defaults
+dry_run = false
+backup = true
+language = auto                      # Auto-detect language
+check_compile = true
+
+[navigate_ast]
+# AST navigation defaults
+context_lines = 10
+json = false
+highlight = true
+
+[method_analyzer_ast]
+# Method analysis defaults
+trace_flow = false
+show_args = true
+max_depth = 3
+ast_context = true
+
+[semantic_diff_ast]
+# Semantic diff defaults
+score = true
+risk_threshold = MEDIUM
+
+[cross_file_analysis_ast]
+# Cross-file analysis defaults
+analyze = true
+show_samples = true
+max_samples = 3
+recursive = false
+max_depth = 3
+threads = 4                          # Parallel processing
+
+[dead_code_detector]
+# Dead code detection defaults
+confidence = medium
+threads = 4
+format = text
+language = auto
+ast_context = true
+
+[trace_calls]
+# Call tracing defaults
+max_depth = 3
+timeout = 30
+direction = both
+ast_context = true
+
+[safe_file_manager]
+# Safe file manager specific settings
+non_interactive = false              # Interactive by default
+assume_yes = false                   # Require confirmation
+force = false                        # Never auto-force
+verify_checksum = true               # Enable safety checks
+preserve_attrs = true                # Preserve file attributes
+paranoid_mode = false                # Set true for extra safety
+# For automation: export SFM_ASSUME_YES=1
+
+[safegit]
+# SafeGIT settings (if using through Python wrapper)
+non_interactive = false
+assume_yes = false
+dry_run = false
+# For automation: export SAFEGIT_NONINTERACTIVE=1
+
+[git_commit_analyzer]
+# Git analysis defaults
+non_interactive = false
+assume_yes = false
+auto_stage = false                   # Don't auto-stage files
+
+[organize_files]
+# File organization defaults
+dry_run = false                      # Set true to preview
+by_type = ext                        # Organize by extension
+non_interactive = false
+assume_yes = false
+
+[error_analyzer]
+# Error analysis defaults
+recent = 10                          # Show 10 most recent errors
+hours = 24                           # Look back 24 hours
+pattern = ""                         # No default pattern filter
+
+[log_analyzer]
+# Log analysis defaults
+tail = false
+follow = false
+lines = 100
+format = text
+
+# ===== AUTOMATION PROFILES =====
+# To use different settings for automation, create additional config files:
+# - .pytoolsrc.ci - For CI/CD environments
+# - .pytoolsrc.test - For testing
+# - .pytoolsrc.prod - For production
+#
+# Then use: export PYTOOLSRC=.pytoolsrc.ci
+
+# ===== ENVIRONMENT VARIABLE OVERRIDES =====
+# These override config file settings:
+#
+# SFM_ASSUME_YES=1                   - Auto-confirm safe_file_manager
+# SAFEGIT_NONINTERACTIVE=1           - Non-interactive git operations
+# PYTOOLSRC_NON_INTERACTIVE=1        - Global non-interactive mode
+# PYTOOLSRC=/path/to/config          - Use different config file
+
+# ===== QUICK AUTOMATION SETUP =====
+# For temporary automation without changing this file:
+#
+# export SFM_ASSUME_YES=1
+# export SAFEGIT_NONINTERACTIVE=1
+# export SAFEGIT_ASSUME_YES=1
+# # Run your automated tasks...
+# unset SFM_ASSUME_YES SAFEGIT_NONINTERACTIVE SAFEGIT_ASSUME_YES

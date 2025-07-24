@@ -1,0 +1,69 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * Gradle build configuration for Java refactoring tools
+ * 
+ * Author: Vaibhav-api-code
+ * Co-Author: Claude Code (https://claude.ai/code)
+ * Created: 2025-07-08
+ * Updated: 2025-07-23
+ * License: Mozilla Public License 2.0 (MPL-2.0)
+ */
+
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.bookmap.tools'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'fr.inria.gforge.spoon:spoon-core:10.4.2'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+application {
+    mainClass = 'JavaRefactorWithSpoonV2'
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'JavaRefactorWithSpoonV2',
+            'Class-Path': configurations.runtimeClasspath.files.collect { it.name }.join(' ')
+        )
+    }
+}
+
+// Task to create a fat JAR for Spoon engine
+task spoonJar(type: Jar) {
+    archiveBaseName = 'spoon-refactor-engine'
+    archiveClassifier = ''
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    manifest {
+        attributes 'Main-Class': 'JavaRefactorWithSpoonV2'
+    }
+    
+    // Handle duplicate files
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    // Exclude signature files to avoid security exceptions
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+}
+
+build.dependsOn spoonJar

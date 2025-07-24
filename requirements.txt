@@ -1,0 +1,30 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Python package requirements
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-23
+# Updated: 2025-07-23
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+# Code Intelligence Toolkit - Python Dependencies
+# 
+# This toolkit has minimal core dependencies and many optional ones
+# for advanced features.
+#
+# Quick Start (core dependencies only):
+#   pip install -r requirements-core.txt
+#
+# Full Installation (all features):
+#   pip install -r requirements-core.txt
+#   pip install -r requirements-optional.txt
+#
+# See requirements-core.txt for essential dependencies
+# See requirements-optional.txt for advanced feature dependencies
+#
+# For convenience, install everything:
+-r requirements-core.txt
+-r requirements-optional.txt

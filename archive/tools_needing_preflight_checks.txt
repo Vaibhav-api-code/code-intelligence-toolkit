@@ -1,0 +1,67 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Tools that need preflight checks
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-20
+# Updated: 2025-07-20
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+analyze_dependencies_with_timeout.py
+analyze_errors.py
+analyze_internal_usage.py
+analyze_unused_methods_with_timeout.py
+analyze_usage.py
+ast_context_finder.py
+ast_refactor_enhanced.py
+ast_refactor.py
+check_java_structure.py
+common_usage_fixes.py
+cross_file_analysis_ast.py
+cross_file_analysis.py
+dead_code_detector_with_timeout.py
+dead_code_detector.py
+dependency_checker.py
+diagnose_parsing_issues.py
+dir_stats.py
+error_dashboard.py
+error_handling.py
+error_usage_hints.py
+extract_block.py
+extract_class_structure.py
+extract_methods_v2.py
+find_files.py
+find_text_v4.py
+find_text.py
+git_commit_analyzer.py
+java_parsing_utils.py
+java_scope_refactor.py
+java_tools_batch.py
+log_analyzer.py
+method_analyzer_ast_v2.py
+method_analyzer.py
+migrate_to_config_paths.py
+multiline_reader.py
+navigate_ast_v2.py
+navigate.py
+organize_files.py
+pattern_analysis.py
+recent_files_v2.py
+refactor_rename.py
+replace_text_ast.py
+replace_text.py
+run_with_error_logging.py
+safe_java_tools_fixed.py
+safe_java_tools.py
+semantic_diff_v3.py
+semantic_diff.py
+show_structure_ast_v4.py
+show_structure_ast.py
+smart_diff.py
+smart_find_references.py
+suggest_refactoring.py
+trace_calls_with_timeout.py
+tree_view.py

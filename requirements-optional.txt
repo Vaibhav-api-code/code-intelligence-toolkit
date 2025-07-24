@@ -1,0 +1,44 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Optional Python package requirements
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-20
+# Updated: 2025-07-20
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+# Optional Dependencies - For advanced features
+# Install with: pip install -r requirements-optional.txt
+
+# Advanced Python refactoring (required for ast_refactor_enhanced.py)
+rope>=1.0.0
+
+# Advanced semantic diff features (semantic_diff_v3.py)
+numpy>=1.19.0
+networkx>=2.5
+pandas>=1.2.0
+scikit-learn>=0.24.0
+pygments>=2.7.0
+
+# Additional language support for semantic_diff_v3.py
+tree-sitter>=0.20.0
+
+# Python AST analysis (for better Python support)
+astroid>=2.0.0
+
+# Development and Testing
+pytest>=6.0.0
+pytest-timeout>=2.0.0
+
+# Code quality and formatting
+pylint>=2.0.0
+black>=22.0.0
+autopep8>=1.5.0
+mypy>=0.900
+
+# Documentation generation
+sphinx>=4.0.0
+sphinx-rtd-theme>=1.0.0

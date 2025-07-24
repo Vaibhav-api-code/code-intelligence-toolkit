@@ -1,0 +1,234 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Python Development Tools Configuration - SAMPLE
+# This file defines project-wide defaults for the development toolkit
+# Copy this file to .pytoolsrc and customize for your project
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-19
+# Updated: 2025-07-19
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+[defaults]
+# Global defaults applied to all tools
+all = false
+include_build = false
+max_depth = 10
+quiet = false
+ast_context = true
+check_compile = true
+
+# Path configurations - CUSTOMIZE THESE FOR YOUR PROJECT
+default_scope = .                    # Default search scope (. = current directory)
+source_directory = src/              # Your source code directory
+test_directory = test/               # Your test directory
+output_directory = output/           # Default output directory
+log_directory = logs/                # Log files directory
+backup_directory = .backups/         # Backup directory for safe operations
+
+[paths]
+# Project-specific paths - CUSTOMIZE THESE
+# These paths will be resolved relative to the project root
+# (where .pytoolsrc is located)
+java_source = src/main/java/         # Java source directory
+python_source = src/main/python/     # Python source directory
+resources = src/main/resources/      # Resources directory
+build_output = build/                # Build output directory
+documentation = docs/                # Documentation directory
+
+# Example project-specific paths (uncomment and customize)
+# indicators_path = src/main/java/com/mycompany/indicators/
+# strategies_path = src/main/java/com/mycompany/strategies/
+# utils_path = src/main/java/com/mycompany/utils/
+
+[smart_ls]
+# Enhanced directory listing defaults
+# ext = java  # Uncomment to filter by extension
+sort = name
+reverse = false
+summary = true
+# Custom search path for this tool
+# default_path = src/
+
+[find_files]
+# File search defaults
+# ext = java  # Uncomment to filter by extension
+sort = time
+reverse = true
+limit = 100
+# Search paths
+# search_paths = src/,test/,docs/
+
+[recent_files]
+# Recent files tracker defaults
+# ext = java  # Uncomment to filter by extension
+since = 2d
+show_size = true
+by_dir = false
+# Paths to monitor
+# monitor_paths = src/,test/
+
+[tree_view]
+# Directory tree visualization defaults
+# ext = java  # Uncomment to filter by extension
+show_size = false
+show_stats = false
+max_depth = 5
+# Root paths for tree view
+# root_paths = src/,test/
+
+[dir_stats]
+# Directory analysis defaults
+# ext = java  # Uncomment to filter by extension
+show_files = true
+show_dirs = true
+show_recent = true
+show_empty = false
+# Analysis paths
+# analysis_paths = src/,test/,build/
+
+[replace_text]
+# Text replacement defaults
+backup = true
+whole_word = false
+dry_run = false
+check_compile = true
+# Backup location
+# backup_dir = .backups/replace_text/
+
+[replace_text_ast]
+# AST-based refactoring defaults
+dry_run = false
+backup = true
+language = auto
+check_compile = true
+# Backup location
+# backup_dir = .backups/ast_refactor/
+
+[navigate_ast]
+# AST navigation defaults
+context_lines = 10
+json = false
+
+[method_analyzer_ast]
+# Method analysis defaults
+trace_flow = false
+show_args = true
+max_depth = 3
+ast_context = true
+
+[semantic_diff_ast]
+# Semantic diff defaults
+score = true
+risk_threshold = MEDIUM
+
+[cross_file_analysis_ast]
+# Cross-file analysis defaults
+analyze = true
+show_samples = true
+max_samples = 3
+recursive = false
+max_depth = 3
+threads = 4
+
+[dead_code_detector]
+# Dead code detection defaults
+confidence = medium
+threads = 4
+format = text
+language = auto
+ast_context = true
+# Paths to analyze
+# analyze_paths = src/main/
+
+[trace_calls]
+# Call tracing defaults
+max_depth = 3
+timeout = 30
+direction = both
+ast_context = true
+
+[safe_move]
+# Safe file operations defaults
+check_compile = true
+# Backup location for moved files
+# backup_dir = .backups/moved/
+
+[refactor_rename]
+# Code refactoring defaults
+check_compile = true
+# Backup location
+# backup_dir = .backups/refactor/
+
+[navigate]
+# Navigation defaults
+encoding = utf-8
+context = 10
+
+[log_analyzer]
+# Log analysis defaults
+# Log file locations - CUSTOMIZE THESE
+# log_paths = logs/,/var/log/myapp/
+# trade_log_path = logs/trade/
+# error_log_path = logs/error/
+
+[git_commit_analyzer]
+# Git analysis defaults
+# Files to monitor for special handling
+# important_files = README.md,CHANGELOG.md,VERSION
+
+[analyze_usage]
+# Usage analysis defaults
+# Default analysis paths
+# analysis_scope = src/main/
+
+[pattern_analysis]
+# Pattern analysis defaults
+# Search patterns directory
+# patterns_dir = config/patterns/
+
+[comprehensive_indicator_analysis]
+# Indicator analysis - PROJECT SPECIFIC EXAMPLE
+# Remove or customize for your project
+# indicators_path = src/main/java/indicators/
+# specific_files = []  # Add specific files to analyze
+
+[extract_indicators]
+# Indicator extraction - PROJECT SPECIFIC EXAMPLE
+# Remove or customize for your project
+# source_path = src/main/java/
+# output_path = output/indicators/
+
+# ==============================================================================
+# CUSTOMIZATION GUIDE:
+# ==============================================================================
+# 
+# 1. Copy this file to .pytoolsrc in your project root
+# 2. Update the [paths] section with your project structure
+# 3. Customize tool-specific paths as needed
+# 4. Remove any project-specific sections that don't apply
+# 5. Uncomment and modify example configurations as needed
+#
+# Path Resolution:
+# - Relative paths are resolved from the project root (where .pytoolsrc lives)
+# - Absolute paths are used as-is
+# - Use forward slashes (/) even on Windows
+#
+# Command Line Override:
+# - Any setting can be overridden via command line arguments
+# - CLI args always take precedence over config file settings
+#
+# Examples:
+# - To use a different source directory:
+#   [defaults]
+#   default_scope = my_src/
+#
+# - To configure project-specific tool behavior:
+#   [find_text]
+#   default_paths = src/,lib/,vendor/
+#   exclude_paths = build/,dist/,*.pyc
+#
+# ==============================================================================

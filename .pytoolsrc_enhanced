@@ -1,0 +1,122 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Enhanced Python Development Tools Configuration
+# This file defines project-wide defaults including non-interactive settings
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-24
+# Updated: 2025-07-24
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+[defaults]
+# Global defaults applied to all tools
+all = false
+include_build = false
+max_depth = 10
+quiet = false
+ast_context = true
+check_compile = true
+
+# ===== NON-INTERACTIVE DEFAULTS =====
+# These settings prevent EOF errors in non-interactive environments (CI/CD, automation)
+non_interactive = false      # Set to true for fully non-interactive mode
+assume_yes = false          # Set to true to auto-confirm medium-risk operations
+force = false              # Set to true to auto-confirm high-risk operations (use carefully!)
+auto_confirm = false       # Set to true to skip all confirmations
+
+# For specific tools that commonly need non-interactive mode:
+# Set environment variables or add tool-specific sections below
+
+# Path configurations
+default_scope = .                    # Default search scope (. = current directory)
+source_directory = src/              # Your source code directory
+test_directory = test/               # Your test directory
+output_directory = output/           # Default output directory
+log_directory = logs/                # Log files directory
+backup_directory = .backups/         # Backup directory for safe operations
+
+[paths]
+# Project-specific paths
+java_source = src/main/java/         # Java source directory
+python_source = src/main/python/     # Python source directory
+resources = src/main/resources/      # Resources directory
+build_output = build/                # Build output directory
+documentation = docs/                # Documentation directory
+
+# ===== TOOL-SPECIFIC NON-INTERACTIVE SETTINGS =====
+
+[safe_file_manager]
+# Safe file manager specific settings
+non_interactive = false    # Set to true for non-interactive file operations
+assume_yes = false        # Auto-confirm medium-risk file operations
+force = false            # Auto-confirm high-risk file operations (deletions, overwrites)
+verify_checksum = true   # Enable checksum verification
+preserve_attrs = true    # Preserve file attributes
+
+[replace_text]
+# Text replacement defaults
+backup = true
+whole_word = false
+dry_run = false
+check_compile = true
+non_interactive = false   # Set to true to skip confirmation prompts
+assume_yes = false       # Auto-confirm replacements
+
+[organize_files]
+# File organization defaults
+dry_run = false
+non_interactive = false   # Set to true to auto-organize without prompts
+assume_yes = false       # Auto-confirm file movements
+
+[git_commit_analyzer]
+# Git analysis defaults
+non_interactive = false   # Set to true for automated git operations
+assume_yes = false       # Auto-confirm git operations
+
+# ===== ENVIRONMENT VARIABLE OVERRIDES =====
+# You can also set these environment variables to enable non-interactive mode:
+#
+# For safe_file_manager:
+#   export SFM_ASSUME_YES=1              # Auto-confirm all safe_file_manager operations
+#   export SAFE_FILE_NONINTERACTIVE=1    # Full non-interactive mode
+#   export SAFE_FILE_ASSUME_YES=1        # Auto-confirm medium-risk operations
+#   export SAFE_FILE_FORCE=1             # Auto-confirm high-risk operations
+#
+# For other tools:
+#   export PYTOOLSRC_NON_INTERACTIVE=1   # Global non-interactive mode
+#   export PYTOOLSRC_ASSUME_YES=1        # Global auto-confirm
+#
+# These environment variables override config file settings
+
+# ===== CI/CD CONFIGURATION EXAMPLE =====
+# For CI/CD environments, create a .pytoolsrc.ci file with:
+#
+# [defaults]
+# non_interactive = true
+# assume_yes = true
+# quiet = true
+#
+# Then use: export PYTOOLSRC=.pytoolsrc.ci
+
+# ===== RECOMMENDATIONS =====
+# 1. For development: Keep interactive mode (current settings)
+# 2. For automation: Use environment variables for temporary non-interactive mode
+# 3. For CI/CD: Create a separate .pytoolsrc.ci with non-interactive defaults
+# 4. For dangerous operations: Always require explicit confirmation
+
+# ==============================================================================
+# CUSTOMIZATION GUIDE:
+# ==============================================================================
+# 
+# 1. Copy this file to .pytoolsrc in your project root
+# 2. For non-interactive environments:
+#    - Set non_interactive = true in [defaults]
+#    - Or use environment variables as shown above
+# 3. For specific tools only:
+#    - Add tool-specific sections with non_interactive = true
+# 4. Test carefully before enabling force = true
+#
+# ==============================================================================

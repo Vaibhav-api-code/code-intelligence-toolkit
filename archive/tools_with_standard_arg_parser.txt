@@ -1,0 +1,27 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Tools that use standard argument parser
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-20
+# Updated: 2025-07-20
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+analyze_dependencies_rg.py
+analyze_unused_methods_rg.py
+check_java_structure.py
+error_dashboard.py
+extract_methods_v2.py
+find_references_rg.py
+find_text_v4.py
+find_text.py
+method_analyzer_ast_v2.py
+navigate_ast_v2.py
+recent_files_v2.py
+semantic_diff_v3.py
+smart_refactor_v2.py
+suggest_refactoring.py
+trace_calls_rg.py

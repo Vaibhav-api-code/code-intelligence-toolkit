@@ -1,0 +1,27 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Core Python package requirements
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-20
+# Updated: 2025-07-20
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+# Core Dependencies - Required for basic functionality
+# Install with: pip install -r requirements-core.txt
+
+# AST parsing for Java (used by many tools)
+javalang>=0.13.0
+
+# AST parsing for JavaScript (used by show_structure_ast)
+esprima>=4.0.0
+
+# System and process utilities (used by many tools)
+psutil>=5.9.0
+
+# Standard library enhancements (usually included with Python)
+configparser>=5.0.0
+pathlib2>=2.3.0; python_version < '3.4'

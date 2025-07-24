@@ -1,0 +1,115 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Code Intelligence Toolkit CI/CD Configuration
+# Non-interactive settings for automated environments
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-24
+# Updated: 2025-07-24
+# License: Mozilla Public License 2.0 (MPL-2.0)
+#
+# Usage: export PYTOOLSRC=.pytoolsrc.ci
+
+[defaults]
+# CI/CD optimized settings
+all = false
+include_build = false
+max_depth = 10
+quiet = true                         # Reduce output noise
+ast_context = true
+check_compile = false                # Skip compile checks in CI
+
+# Non-interactive settings for automation
+non_interactive = true               # No prompts
+assume_yes = true                    # Auto-confirm medium-risk operations
+force = false                        # Still require explicit --force for dangerous ops
+auto_confirm = true                  # Skip all confirmations
+
+# CI-friendly settings
+verbose = false                      # Less output
+dry_run = false                      # Execute operations
+backup = true                        # Still create backups for safety
+
+# Path configurations (same as development)
+default_scope = .
+source_directory = src/
+test_directory = test/
+output_directory = output/
+log_directory = logs/
+backup_directory = .backups/
+
+[paths]
+# Same as development
+java_source = src/main/java/
+python_source = .
+resources = src/main/resources/
+build_output = build/
+documentation = docs/
+examples = examples/
+archive = archive/
+
+[safe_file_manager]
+# Fully automated file operations
+non_interactive = true
+assume_yes = true
+force = false                        # Still require --force for deletions
+verify_checksum = false              # Faster operations
+preserve_attrs = true
+paranoid_mode = false
+
+[replace_text]
+# Automated text replacement
+backup = true                        # Keep backups even in CI
+whole_word = false
+dry_run = false
+check_compile = false                # Skip in CI
+non_interactive = true
+assume_yes = true
+
+[git_commit_analyzer]
+# Automated git operations
+non_interactive = true
+assume_yes = true
+auto_stage = false                   # Still require explicit staging
+
+[organize_files]
+# Automated file organization
+dry_run = false
+non_interactive = true
+assume_yes = true
+
+[error_analyzer]
+# Error analysis in CI
+recent = 50                          # More history in CI
+hours = 168                          # Last week
+clear_on_success = true              # Clean up on successful builds
+
+[dead_code_detector]
+# CI-optimized settings
+confidence = high                    # Only report high-confidence issues
+threads = 8                          # Use more threads in CI
+format = json                        # Machine-readable output
+output_file = dead_code_report.json  # Save to file
+
+[trace_calls]
+# CI performance settings
+max_depth = 2                        # Shallower traces for speed
+timeout = 15                         # Shorter timeout
+direction = both
+ast_context = false                  # Skip for speed
+
+# ===== CI/CD NOTES =====
+# This configuration prioritizes:
+# 1. Speed - Skips unnecessary checks
+# 2. Automation - No user interaction required
+# 3. Safety - Still requires --force for dangerous operations
+# 4. Reporting - JSON output for parsing
+#
+# For even more aggressive automation, you can set:
+# force = true  # DANGEROUS - allows all operations!
+#
+# But this is NOT recommended. Instead, use:
+# SAFE_FILE_FORCE=1 ./run_any_python_tool.sh safe_file_manager.py trash old/
