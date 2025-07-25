@@ -99,3 +99,7 @@ spooned/
 spoon-refactor-engine.jarANNOUNCEMENT_DRAFT.md
 
 ANNOUNCEMENT_DRAFT.md
+
+# Release workflow files (only for main repo)
+release_workflow.sh
+RELEASE_WORKFLOW_GUIDE.md
