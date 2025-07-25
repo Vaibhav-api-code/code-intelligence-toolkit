@@ -42,6 +42,10 @@ DEFAULT_RETRY_DELAY = float(os.getenv("SAFE_MOVE_RETRY_DELAY", "0.5"))
 DEFAULT_OPERATION_TIMEOUT = int(os.getenv("SAFE_MOVE_TIMEOUT", "30"))
 DEFAULT_CHECKSUM_VERIFY = os.getenv("SAFE_MOVE_VERIFY_CHECKSUM", "true").lower() == "true"
 
+# Non-interactive mode environment variables
+DEFAULT_ASSUME_YES = os.getenv("SAFE_MOVE_ASSUME_YES", "false").lower() == "true"
+DEFAULT_NONINTERACTIVE = os.getenv("SAFE_MOVE_NONINTERACTIVE", "false").lower() == "true"
+
 # Specific environment variables for checksum operations
 DEFAULT_CHECKSUM_MAX_RETRIES = int(os.getenv("SAFE_MOVE_CHECKSUM_MAX_RETRIES", "5"))
 DEFAULT_CHECKSUM_RETRY_DELAY = float(os.getenv("SAFE_MOVE_CHECKSUM_RETRY_DELAY", "0.2"))
@@ -68,6 +72,17 @@ except ImportError:
         @staticmethod
         def check_regex_pattern(pattern):
             return True, ""
+
+# Import common config
+try:
+    from common_config import load_config, get_config_value
+    HAS_CONFIG = True
+except ImportError:
+    HAS_CONFIG = False
+    def load_config(project_root=None):
+        return None
+    def get_config_value(key, default=None, tool_name=None, config=None):
+        return default
 
 LOG = logging.getLogger("safe_move")
 logging.basicConfig(
@@ -548,6 +563,8 @@ class SafeMover:
         max_retries: int = DEFAULT_MAX_RETRIES,
         retry_delay: float = DEFAULT_RETRY_DELAY,
         operation_timeout: int = DEFAULT_OPERATION_TIMEOUT,
+        assume_yes: bool = DEFAULT_ASSUME_YES,
+        non_interactive: bool = DEFAULT_NONINTERACTIVE,
     ):
         self.dry_run = dry_run
         self.verbose = verbose
@@ -556,6 +573,8 @@ class SafeMover:
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.operation_timeout = operation_timeout
+        self.assume_yes = assume_yes
+        self.non_interactive = non_interactive
         self.operations_count = 0
         self.undo_log = (undo_log or _default_undo_log()).resolve()
         self.trash_dir = (trash_dir or _default_trash_dir()).resolve()
@@ -819,7 +838,7 @@ def get_operation_history(limit: int = 10) -> List[Dict]:
     
     return operations
 
-def interactive_undo():
+def interactive_undo(assume_yes=False, non_interactive=False):
     """Interactive mode to select which operation to undo."""
     operations = get_operation_history(10)
     
@@ -835,6 +854,16 @@ def interactive_undo():
         timestamp = datetime.fromisoformat(op['timestamp']).strftime("%Y-%m-%d %H:%M:%S")
         print(f"{i:2d}. {timestamp} | {op['op_type'].upper()}")
         print(f"    {op['source']} → {op['dest']}")
+    
+    if non_interactive:
+        if assume_yes:
+            # In non-interactive mode with assume_yes, undo the most recent operation
+            print("\n🤖 Non-interactive mode: undoing most recent operation")
+            selected_op = list(reversed(operations))[0]
+            return undo_specific_operation(selected_op, 1)
+        else:
+            print("\n❌ Cannot run interactive undo in non-interactive mode without --yes")
+            return False
     
     print("\n0. Cancel")
     
@@ -1088,6 +1117,8 @@ Examples:
   %(prog)s copy file.txt dest/ --no-verify-checksum # Copy without checksum verification
   %(prog)s move file.txt dest/ --timeout 60         # Move with 60-second timeout
   %(prog)s undo --interactive                       # Interactively undo operations
+  %(prog)s undo --interactive --yes                # Undo most recent operation automatically
+  %(prog)s undo --non-interactive --yes            # Non-interactive undo (for automation)
   %(prog)s history 5                                # Show last 5 operations
   %(prog)s diagnose file.txt dest.txt               # Show detailed file diagnostics
 
@@ -1100,6 +1131,8 @@ Environment Variables:
   SAFE_MOVE_CHECKSUM_RETRY_DELAY     # Default: 0.2 - Initial delay between checksum retries (seconds)
   SAFE_MOVE_HISTORY                  # Location of operation history file
   SAFE_MOVE_TRASH                    # Location of backup/trash directory
+  SAFE_MOVE_ASSUME_YES               # Default: false - Assume yes to all prompts
+  SAFE_MOVE_NONINTERACTIVE           # Default: false - Run in non-interactive mode
 
 Enhanced Features:
   • Atomic operations with retry logic and exponential backoff
@@ -1109,6 +1142,8 @@ Enhanced Features:
   • Enhanced error reporting with recovery suggestions
   • Comprehensive operation verification and diagnostics
   • Race condition protection during checksum calculation with separate retry configuration
+  • Non-interactive mode support for CI/CD and automation
+  • Configuration via .pytoolsrc, environment variables, or command-line flags
         """
     )
     
@@ -1164,6 +1199,10 @@ Enhanced Features:
                            help='Interactive mode to select which operation to undo')
     parser_undo.add_argument('--operation', type=int, 
                            help='Undo specific operation number from history')
+    parser_undo.add_argument('--yes', '-y', action='store_true',
+                           help='Assume yes to prompts (for non-interactive mode)')
+    parser_undo.add_argument('--non-interactive', action='store_true',
+                           help='Run in non-interactive mode')
 
     # --- History command ---
     parser_history = subparsers.add_parser('history', help='Show recent operation history')
@@ -1182,6 +1221,11 @@ def main():
     parser = create_safe_move_parser()
     args = parser.parse_args()
 
+    # Load config if available
+    config = None
+    if HAS_CONFIG:
+        config = load_config()
+
     # Initialize mover for relevant commands
     if args.command in ['move', 'copy']:
         # Handle compile check flags
@@ -1194,6 +1238,13 @@ def main():
         if getattr(args, 'no_verify_checksum', False):
             verify_checksum = False
         
+        # Get non-interactive settings from config or environment
+        assume_yes = DEFAULT_ASSUME_YES
+        non_interactive = DEFAULT_NONINTERACTIVE
+        if HAS_CONFIG and config:
+            assume_yes = get_config_value('assume_yes', assume_yes, 'safe_move', config)
+            non_interactive = get_config_value('non_interactive', non_interactive, 'safe_move', config)
+        
         mover = SafeMover(
             dry_run=args.dry_run, 
             verbose=args.verbose,
@@ -1201,13 +1252,26 @@ def main():
             verify_checksum=verify_checksum,
             max_retries=getattr(args, 'max_retries', DEFAULT_MAX_RETRIES),
             retry_delay=getattr(args, 'retry_delay', DEFAULT_RETRY_DELAY),
-            operation_timeout=getattr(args, 'timeout', DEFAULT_OPERATION_TIMEOUT)
+            operation_timeout=getattr(args, 'timeout', DEFAULT_OPERATION_TIMEOUT),
+            assume_yes=assume_yes,
+            non_interactive=non_interactive
         )
     
     # Execute command
     if args.command == 'undo':
+        # Get non-interactive settings from args, config, or environment
+        assume_yes = getattr(args, 'yes', DEFAULT_ASSUME_YES)
+        non_interactive = getattr(args, 'non_interactive', DEFAULT_NONINTERACTIVE)
+        
+        if HAS_CONFIG and config:
+            # Override with config values if not specified on command line
+            if not hasattr(args, 'yes') or not args.yes:
+                assume_yes = get_config_value('assume_yes', assume_yes, 'safe_move', config)
+            if not hasattr(args, 'non_interactive') or not args.non_interactive:
+                non_interactive = get_config_value('non_interactive', non_interactive, 'safe_move', config)
+        
         if args.interactive:
-            return 0 if interactive_undo() else 1
+            return 0 if interactive_undo(assume_yes=assume_yes, non_interactive=non_interactive) else 1
         elif args.operation:
             return 0 if undo_operation_by_number(args.operation) else 1
         else:

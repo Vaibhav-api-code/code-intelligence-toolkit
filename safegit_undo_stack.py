@@ -305,8 +305,9 @@ class UndoStack:
             'command': 'git reflog --date=iso'
         }
     
-    def undo(self, levels: int = 1, interactive: bool = False) -> bool:
-        """Undo last N operations."""
+    def undo(self, levels: int = 1, interactive: bool = False, non_interactive: bool = False,
+             auto_yes: bool = False) -> bool:
+        """Undo last N operations with non-interactive support."""
         stack = self._load_stack()
         
         if not stack:
@@ -334,10 +335,19 @@ class UndoStack:
                     print(f"  {cmd}")
             
             # Confirm
-            response = input("\nExecute recovery? [Y/n]: ")
-            if response.lower() == 'n':
-                print("Undo cancelled.")
-                return False
+            if non_interactive:
+                if auto_yes:
+                    print("\n[AUTO-CONFIRM] Execute recovery? [Y/n]: Y")
+                    response = 'y'
+                else:
+                    print("\n❌ ERROR: Recovery confirmation required in non-interactive mode")
+                    print("   Use --yes flag or set SAFEGIT_ASSUME_YES=1")
+                    return False
+            else:
+                response = input("\nExecute recovery? [Y/n]: ")
+                if response.lower() == 'n':
+                    print("Undo cancelled.")
+                    return False
             
             # Execute recovery
             success = self._execute_recovery(entry)

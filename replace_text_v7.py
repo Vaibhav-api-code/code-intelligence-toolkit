@@ -1030,6 +1030,12 @@ def main():
     parser.add_argument('--backup', action='store_true', help='Create backup before modifying')
     parser.add_argument('--force', '-f', action='store_true', help='Skip confirmation prompt for large changes')
     
+    # Non-interactive options
+    parser.add_argument('--yes', '-y', action='store_true',
+                       help='Auto-confirm all operations (for automation)')
+    parser.add_argument('--non-interactive', action='store_true',
+                       help='Non-interactive mode - fail on any prompt')
+    
     # File locking and retry options
     parser.add_argument('--max-retries', type=int, default=3, metavar='N',
                        help='Maximum retries if file is locked during write (default: 3, set to 0 to disable)')
@@ -1098,6 +1104,12 @@ def main():
     
     # Apply configuration defaults
     apply_config_to_args('replace_text_v7', args, parser)
+    
+    # Handle non-interactive mode from environment
+    if os.getenv('REPLACE_TEXT_NONINTERACTIVE') == '1':
+        args.non_interactive = True
+    if os.getenv('REPLACE_TEXT_ASSUME_YES') == '1':
+        args.yes = True
     
     # V7 FEATURE: Handle JSON pipeline input
     target_matches = []
@@ -1283,7 +1295,21 @@ def main():
                 if len(files_to_modify) > 10:
                     print(f"  ... and {len(files_to_modify) - 10} more files")
                 
-                response = input("\nContinue? [y/N] ")
+                # Check for non-interactive mode
+                if args.non_interactive:
+                    if args.yes or args.force:
+                        print("\n[AUTO-CONFIRM] Continue? [y/N] y")
+                        response = 'y'
+                    else:
+                        print("\n❌ ERROR: Large change confirmation required in non-interactive mode")
+                        print("   Use --yes or --force to auto-confirm")
+                        return 1
+                elif args.yes:
+                    print("\n[AUTO-CONFIRM] Continue? [y/N] y")
+                    response = 'y'
+                else:
+                    response = input("\nContinue? [y/N] ")
+                
                 if response.lower() != 'y':
                     print("Operation cancelled.")
                     return 0

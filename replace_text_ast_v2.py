@@ -376,7 +376,8 @@ def enhanced_scope_aware_rename(file_path: str, old_name: str, new_name: str,
         raise
 
 def batch_symbol_rename(symbol_locations: List[Dict[str, Any]], old_name: str, 
-                       new_name: str, confirm_each: bool = True) -> Dict[str, Any]:
+                       new_name: str, confirm_each: bool = True,
+                       non_interactive: bool = False, auto_yes: bool = False) -> Dict[str, Any]:
     """
     Perform batch symbol renaming across multiple locations (NEW IN V2).
     
@@ -422,7 +423,13 @@ def batch_symbol_rename(symbol_locations: List[Dict[str, Any]], old_name: str,
                     print(f"      Context: {loc['ast_context']}")
             
             # Confirm if requested
-            if confirm_each:
+            if confirm_each and not auto_yes:
+                if non_interactive:
+                    print(f"\n❌ Cannot prompt for confirmation in non-interactive mode")
+                    print("💡 Use --yes or --no-confirm to skip prompts")
+                    print("Skipping file.")
+                    continue
+                    
                 try:
                     response = input(f"\nRename '{old_name}' to '{new_name}' in this file? [y/N/q] ")
                     if response.lower() == 'q':
@@ -1549,7 +1556,27 @@ def main():
     else:
         parser = argparse.ArgumentParser(
             description='Enhanced AST replacement tool (v2) with symbol discovery and batch operations',
-            formatter_class=argparse.RawDescriptionHelpFormatter
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog="""
+Examples:
+  %(prog)s oldFunc newFunc file.py             # Rename function in specific file
+  %(prog)s oldVar newVar --line 42 file.py     # Rename variable at specific line
+  %(prog)s --discover-symbol oldFunc newFunc    # Auto-discover and batch rename
+  %(prog)s --from-find-json results.json old new # Use JSON from find_text
+  %(prog)s old new --no-confirm file.py        # Skip confirmation prompts
+  %(prog)s old new --yes file.py               # Auto-confirm all prompts
+  %(prog)s old new --non-interactive --yes *.py # Fully automated batch rename
+
+Non-Interactive Mode:
+  • Use --non-interactive for CI/CD automation
+  • Combine with --yes to auto-confirm prompts
+  • Configure via REPLACE_TEXT_AST_ASSUME_YES environment variable
+  • Set defaults in .pytoolsrc under [replace_text_ast] section
+
+Environment Variables:
+  REPLACE_TEXT_AST_ASSUME_YES       # Default: false - Assume yes to all prompts
+  REPLACE_TEXT_AST_NONINTERACTIVE   # Default: false - Run in non-interactive mode
+            """
         )
     
     # Core AST rename arguments
@@ -1583,6 +1610,10 @@ def main():
                          help='Confirm each file individually in batch mode (default: enabled)')
     v2_group.add_argument('--no-confirm', action='store_true',
                          help='Skip confirmation prompts in batch mode')
+    v2_group.add_argument('--yes', '-y', action='store_true',
+                         help='Assume yes to all prompts (for non-interactive mode)')
+    v2_group.add_argument('--non-interactive', action='store_true',
+                         help='Run in non-interactive mode')
     v2_group.add_argument('--enhanced-context', action='store_true', default=True,
                          help='Show enhanced scope context with block information (NEW IN V2)')
     
@@ -1648,6 +1679,11 @@ def main():
     
     args = parser.parse_args()
     
+    # Load config if available
+    config = None
+    if HAS_CONFIG:
+        config = load_config()
+    
     # Handle compile check flags
     if args.no_check_compile:
         args.check_compile = False
@@ -1660,6 +1696,19 @@ def main():
     # Handle confirmation settings
     if args.no_confirm:
         args.confirm_each = False
+    
+    # Get non-interactive settings from config or environment
+    if not hasattr(args, 'yes'):
+        args.yes = DEFAULT_ASSUME_YES
+    if not hasattr(args, 'non_interactive'):
+        args.non_interactive = DEFAULT_NONINTERACTIVE
+    
+    if HAS_CONFIG and config:
+        # Override with config values if not specified on command line
+        if not args.yes:
+            args.yes = get_config_value('assume_yes', args.yes, 'replace_text_ast', config)
+        if not args.non_interactive:
+            args.non_interactive = get_config_value('non_interactive', args.non_interactive, 'replace_text_ast', config)
     
     # Allow retry configuration via environment variables
     if 'FILE_WRITE_MAX_RETRIES' in os.environ:
@@ -1695,7 +1744,9 @@ def main():
             print(f"📄 Loaded {len(locations)} symbol locations from find_text results")
             
             # Perform batch rename
-            results = batch_symbol_rename(locations, args.old_name, args.new_name, args.confirm_each)
+            results = batch_symbol_rename(locations, args.old_name, args.new_name, args.confirm_each,
+                                          non_interactive=getattr(args, 'non_interactive', False), 
+                                          auto_yes=getattr(args, 'yes', False))
             
             # Show results summary
             print(f"\n📊 Batch Rename Results:")
@@ -1749,7 +1800,9 @@ def main():
             try:
                 response = input(f"\nProceed with batch rename '{args.old_name}' → '{args.new_name}'? [y/N] ")
                 if response.lower() == 'y':
-                    results = batch_symbol_rename(locations, args.old_name, args.new_name, args.confirm_each)
+                    results = batch_symbol_rename(locations, args.old_name, args.new_name, args.confirm_each,
+                                                non_interactive=getattr(args, 'non_interactive', False),
+                                                auto_yes=getattr(args, 'yes', False))
                     
                     print(f"\n📊 Batch Rename Results:")
                     print(f"   Files processed: {results['successful_files']}/{results['total_files']}")

@@ -16,6 +16,8 @@ License: Mozilla Public License 2.0 (MPL-2.0)
 
 This guide explains how to configure the Code Intelligence Toolkit for non-interactive environments to avoid EOF errors and enable automation.
 
+> **📚 Note**: For comprehensive documentation including all tools, CI/CD examples, and best practices, see the [Comprehensive Non-Interactive Mode Guide](docs/NON_INTERACTIVE_MODE_GUIDE.md).
+
 ## 🚨 The Problem
 
 When running tools in non-interactive environments (CI/CD, automation, AI agents), you may encounter:
@@ -286,9 +288,62 @@ export SAFEGIT_ASSUME_YES=1
 
 | Tool | Environment Variable | Config Section | Command Flag |
 |------|---------------------|----------------|--------------|
-| safe_file_manager | `SFM_ASSUME_YES=1` | `[safe_file_manager]` | `--yes` |
-| SafeGIT | `SAFEGIT_ASSUME_YES=1` | `[safegit]` | `--yes` |
-| replace_text | - | `[replace_text]` | `--yes` |
+| safe_file_manager | `SFM_ASSUME_YES=1` | `[safe_file_manager]` | `--yes`, `-y` |
+| SafeGIT | `SAFEGIT_ASSUME_YES=1`<br>`SAFEGIT_NONINTERACTIVE=1` | `[safegit]` | `--yes`, `--force-yes`, `--non-interactive` |
+| safe_move | `SAFEMOVE_ASSUME_YES=1`<br>`SAFEMOVE_NONINTERACTIVE=1` | `[safe_move]` | `--yes`, `-y`, `--no-confirm` |
+| replace_text | - | `[replace_text]` | `--yes`, `-y` |
+| replace_text_ast | `REPLACE_TEXT_AST_ASSUME_YES=1` | `[replace_text_ast]` | `--yes`, `-y`, `--no-confirm` |
+| refactor_rename | `REFACTOR_ASSUME_YES=1` | `[refactor_rename]` | `--yes`, `-y`, `--no-confirm` |
 | All tools | `PYTOOLSRC_NON_INTERACTIVE=1` | `[defaults]` | varies |
+
+## 🔧 Advanced Configuration
+
+### Configuration Hierarchy
+
+Tools check for non-interactive settings in this order (first found wins):
+
+1. **Command-line flags** - Highest priority
+2. **Environment variables** - Override config files
+3. **Configuration file** (.pytoolsrc) - Project defaults
+4. **Tool defaults** - Interactive mode
+
+### Safety Levels
+
+1. **Low Risk** (auto-confirmed with assume_yes):
+   - Reading files, listing directories
+   - Dry-run operations, creating backups
+   - Git status, log, diff
+
+2. **Medium Risk** (requires assume_yes or --yes):
+   - Moving/copying files (with backup)
+   - Text replacements (with backup)
+   - Git add, commit, pull
+   - Creating directories
+
+3. **High Risk** (requires explicit force or --force-yes):
+   - Deleting files (even to trash)
+   - Overwriting without backup
+   - Git reset --hard, clean -fdx
+   - Git push --force, rebase operations
+
+### Testing Non-Interactive Mode
+
+```bash
+# Test with no stdin
+(exec < /dev/null && ./run_any_python_tool.sh safe_file_manager.py list .)
+
+# Test with explicit flags
+./run_any_python_tool.sh safe_file_manager.py move test1.txt test2.txt --dry-run --yes
+
+# Create test configuration
+cat > .pytoolsrc.test << EOF
+[defaults]
+non_interactive = true
+assume_yes = true
+dry_run = true
+EOF
+
+PYTOOLSRC=.pytoolsrc.test ./run_any_python_tool.sh safe_file_manager.py organize test_dir/
+```
 
 Remember: **Safety first!** Test thoroughly before enabling non-interactive mode in production.

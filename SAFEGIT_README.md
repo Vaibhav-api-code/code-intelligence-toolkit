@@ -76,6 +76,8 @@ safegit push --force      # Converts to --force-with-lease
 
 ### Non-Interactive Mode (NEW)
 
+> **📖 For comprehensive documentation**: See [SafeGIT Non-Interactive Complete Guide](docs/safegit/SAFEGIT_NONINTERACTIVE_COMPLETE.md) for detailed examples, best practices, and advanced configurations.
+
 #### Command-Line Flags
 
 ```bash

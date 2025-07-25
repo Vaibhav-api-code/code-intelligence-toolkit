@@ -294,7 +294,11 @@ export SAFE_FILE_CHUNK_SIZE=8192            # File read chunk size (default: 409
 export SAFE_FILE_AUTO_BACKUP=true           # Auto-backup before overwrite (default: true)
 export SAFE_FILE_GIT_AWARE=true             # Git status checking (default: true)
 
-# Non-interactive mode
+# Non-interactive mode (PRIMARY - use these)
+export SFM_ASSUME_YES=1                     # Auto-confirm all operations (RECOMMENDED)
+export SFM_PARANOID=0                       # Disable paranoid mode for CI speed
+
+# Non-interactive mode (LEGACY - still supported)
 export SAFE_FILE_NONINTERACTIVE=1           # Enable non-interactive mode
 export SAFE_FILE_ASSUME_YES=1               # Auto-confirm medium-risk operations
 export SAFE_FILE_FORCE=1                    # Auto-confirm high-risk operations
@@ -307,15 +311,28 @@ export SAFE_FILE_HISTORY=~/.sfm_history     # Custom history location
 export SAFE_FILE_LOG_LEVEL=DEBUG            # Log level (DEBUG, INFO, WARNING, ERROR)
 ```
 
-### Configuration File (.sfmrc)
+### Configuration File (.pytoolsrc)
 
-Create `~/.sfmrc` for persistent configuration:
+**Note**: Safe File Manager now uses the standard `.pytoolsrc` configuration file shared by all code-intelligence-toolkit tools.
+
+Create `.pytoolsrc` in your project root:
 ```ini
-[defaults]
-verify_checksum = true
-auto_backup = true
-concurrent_operations = 4
-git_aware = true
+[safe_file_manager]
+# Non-interactive settings
+non_interactive = true      # No prompts in automation
+assume_yes = true          # Auto-confirm operations
+
+# Operation settings
+verify_checksum = true     # Enable checksum verification
+auto_backup = true         # Backup before overwrite
+concurrent_operations = 4  # Parallel execution threads
+git_aware = true          # Check git status
+paranoid_mode = false     # Disable for CI/CD speed
+
+# Performance tuning
+max_retries = 3
+retry_delay = 0.5
+operation_timeout = 30
 
 [organize]
 default_method = extension
@@ -324,7 +341,23 @@ archive_after_days = 30
 [sync]
 verify_after_sync = true
 preserve_permissions = true
+
+[defaults]
+# Global settings for all tools
+non_interactive = false    # Interactive by default
+assume_yes = false        # Require confirmations
+verbose = false          # Normal output
+quiet = false           # Show all messages
 ```
+
+#### Loading Priority
+
+1. Command-line arguments (highest priority)
+2. Environment variables
+3. `.pytoolsrc` in current directory
+4. `.pytoolsrc` in parent directories (up to root)
+5. `~/.pytoolsrc` (user home)
+6. Tool defaults (lowest priority)
 
 ## Safety Levels and Confirmations
 
@@ -369,10 +402,87 @@ sfm --non-interactive --yes move file.txt backup/
 sfm --non-interactive --force delete temp/
 
 # Or use environment variables
-export SAFE_FILE_NONINTERACTIVE=1
-export SAFE_FILE_ASSUME_YES=1
+export SFM_ASSUME_YES=1                     # Auto-confirm all operations
+export SAFE_FILE_NONINTERACTIVE=1          # Strict non-interactive mode
+export SAFE_FILE_ASSUME_YES=1              # Alternative env var
 sfm move *.txt archive/
 ```
+
+#### Configuration via .pytoolsrc
+
+Create or modify `.pytoolsrc` in your project root:
+
+```ini
+[safe_file_manager]
+non_interactive = true    # No prompts, fail if input needed
+assume_yes = true        # Auto-confirm medium-risk operations  
+backup = true           # Always create backups
+paranoid_mode = false   # Disable checksums for CI speed
+verbose = false         # Minimize output in automation
+
+[defaults]
+# Global settings for all tools
+non_interactive = true
+assume_yes = true
+```
+
+#### Command-Line Flags
+
+```bash
+# Short form
+sfm -y move file.txt dest/      # Same as --yes
+
+# Long form  
+sfm --yes copy src/ dst/         # Auto-confirm
+sfm --force delete old/          # Force high-risk operations
+
+# Combined with other flags
+sfm --dry-run --yes organize ~/Downloads --by-ext
+sfm --quiet --yes sync src/ backup/
+```
+
+#### CI/CD Integration Examples
+
+**GitHub Actions:**
+```yaml
+env:
+  SFM_ASSUME_YES: 1
+  
+steps:
+  - name: Organize artifacts
+    run: |
+      ./safe_file_manager.py organize dist/ --by-ext
+      ./safe_file_manager.py sync dist/ s3://bucket/
+```
+
+**GitLab CI:**
+```yaml
+variables:
+  SFM_ASSUME_YES: "1"
+  
+script:
+  - python3 safe_file_manager.py trash *.tmp
+  - python3 safe_file_manager.py organize build/ --by-date
+```
+
+**Jenkins:**
+```groovy
+environment {
+    SFM_ASSUME_YES = '1'
+}
+steps {
+    sh 'python3 safe_file_manager.py move old_build/ archive/'
+}
+```
+
+#### Best Practices for Non-Interactive Mode
+
+1. **Always enable backups** when running non-interactively
+2. **Use --dry-run first** to verify operations
+3. **Set appropriate log levels** for debugging
+4. **Monitor operation history** for audit trails
+5. **Configure via .pytoolsrc** for consistency
+6. **Use environment variables** for temporary overrides
 
 ## Advanced Features
 

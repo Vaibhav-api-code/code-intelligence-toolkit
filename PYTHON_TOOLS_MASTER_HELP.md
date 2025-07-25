@@ -243,6 +243,194 @@ max_depth = 3               # Default depth for tree commands
 3. `.pytoolsrc` in project root
 4. Built-in defaults (lowest priority)
 
+## 🤖 Non-Interactive Mode Support
+
+### Overview
+
+All tools in the code-intelligence-toolkit support non-interactive operation for seamless CI/CD integration, automation scripts, and AI agent usage. Tools intelligently detect non-interactive environments and adjust their behavior accordingly.
+
+### Configuration Methods
+
+#### 1. Environment Variables (Per Tool)
+
+```bash
+# Safe File Manager
+export SFM_ASSUME_YES=1                     # Auto-confirm all operations
+
+# SafeGIT
+export SAFEGIT_NONINTERACTIVE=1            # Strict non-interactive mode
+export SAFEGIT_ASSUME_YES=1                # Auto-confirm safe operations
+
+# Replace Text AST
+export REPLACE_TEXT_AST_ASSUME_YES=1        # Auto-confirm replacements
+
+# Safe Move
+export SAFEMOVE_ASSUME_YES=1               # Auto-confirm moves/copies
+export SAFEMOVE_NONINTERACTIVE=1           # Fail on any prompt
+
+# Refactor Rename
+export REFACTOR_ASSUME_YES=1               # Auto-confirm renames
+```
+
+#### 2. Configuration File (.pytoolsrc)
+
+```ini
+# Global defaults for all tools
+[defaults]
+non_interactive = true      # No prompts, fail if input needed
+assume_yes = true          # Auto-confirm medium-risk operations
+quiet = true              # Minimize output for automation
+verbose = false           # Disable verbose logging
+
+# Tool-specific sections
+[safe_file_manager]
+assume_yes = true
+backup = true             # Always create backups
+paranoid_mode = false     # Disable checksums for CI speed
+
+[safegit]
+non_interactive = true
+assume_yes = true
+force_yes = false         # Never auto-confirm dangerous ops
+
+[replace_text_ast]
+assume_yes = true
+check_compile = false     # Skip compile checks in CI
+
+[safe_move]
+assume_yes = true
+create_manifest = true    # Track all operations
+```
+
+#### 3. Command-Line Flags
+
+```bash
+# Common flags across tools
+--yes, -y                 # Auto-confirm operations
+--force                   # Force dangerous operations
+--non-interactive         # Strict non-interactive mode
+--no-confirm             # Skip all confirmations
+
+# Examples
+./run_any_python_tool.sh safe_file_manager.py move file1 file2 --yes
+./run_any_python_tool.sh replace_text_ast.py oldVar newVar --file script.py -y
+./run_any_python_tool.sh safegit.py add . --yes
+./run_any_python_tool.sh safe_move.py copy src/ dst/ --no-confirm
+```
+
+### Tool-Specific Non-Interactive Support
+
+| Tool Category | Environment Variable | Config Section | Command Flags |
+|--------------|---------------------|----------------|---------------|
+| safe_file_manager | `SFM_ASSUME_YES=1` | `[safe_file_manager]` | `--yes`, `-y` |
+| safegit | `SAFEGIT_ASSUME_YES=1`<br>`SAFEGIT_NONINTERACTIVE=1` | `[safegit]` | `--yes`, `--force-yes`, `--non-interactive` |
+| replace_text_ast | `REPLACE_TEXT_AST_ASSUME_YES=1` | `[replace_text_ast]` | `--yes`, `-y`, `--no-confirm` |
+| replace_text | - | `[replace_text]` | `--yes`, `-y` |
+| safe_move | `SAFEMOVE_ASSUME_YES=1`<br>`SAFEMOVE_NONINTERACTIVE=1` | `[safe_move]` | `--yes`, `-y`, `--no-confirm` |
+| refactor_rename | `REFACTOR_ASSUME_YES=1` | `[refactor_rename]` | `--yes`, `-y`, `--no-confirm` |
+
+### CI/CD Integration Examples
+
+#### GitHub Actions
+```yaml
+name: Automated Refactoring
+on: [push, pull_request]
+
+env:
+  SFM_ASSUME_YES: 1
+  SAFEGIT_ASSUME_YES: 1
+  REPLACE_TEXT_AST_ASSUME_YES: 1
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      
+      - name: Install toolkit
+        run: |
+          pip install -r requirements.txt
+          chmod +x run_any_python_tool.sh
+      
+      - name: Run refactoring
+        run: |
+          ./run_any_python_tool.sh replace_text.py "old_api" "new_api" --scope src/
+          ./run_any_python_tool.sh safe_file_manager.py organize build/ --by-date
+          ./run_any_python_tool.sh safegit.py add .
+          ./run_any_python_tool.sh safegit.py commit -m "Automated refactoring"
+```
+
+#### Docker Container
+```dockerfile
+FROM python:3.9-slim
+
+# Install toolkit
+COPY . /toolkit
+WORKDIR /toolkit
+
+# Configure non-interactive environment
+ENV SFM_ASSUME_YES=1
+ENV SAFEGIT_NONINTERACTIVE=1
+ENV PYTOOLSRC_NON_INTERACTIVE=1
+
+# Create CI configuration
+RUN echo "[defaults]\nnon_interactive = true\nassume_yes = true" > .pytoolsrc
+
+# Run automated tasks
+RUN ./run_any_python_tool.sh safe_file_manager.py organize /data --by-ext
+```
+
+### Safety Levels in Non-Interactive Mode
+
+1. **Auto-Approved (with assume_yes)**:
+   - Reading files, listing directories
+   - Creating backups, dry-run operations
+   - Git status, log, diff commands
+
+2. **Requires --yes or assume_yes**:
+   - Moving/copying files (with backup)
+   - Text replacements (with backup)
+   - Git add, commit, pull operations
+   - Creating directories
+
+3. **Requires --force-yes explicitly**:
+   - Deleting files (even to trash)
+   - Git reset --hard, clean -fdx
+   - Git push --force operations
+   - Any operation marked as HIGH_RISK
+
+### Best Practices
+
+1. **Always test with --dry-run first** in production environments
+2. **Use environment variables** for CI/CD pipelines
+3. **Create separate .pytoolsrc** for different environments
+4. **Enable backups** even in non-interactive mode
+5. **Monitor operation logs** for audit trails
+6. **Never use force flags** in production without review
+
+### Troubleshooting Non-Interactive Mode
+
+```bash
+# Test if tool supports non-interactive mode
+./run_any_python_tool.sh [tool_name] --help | grep -E "(yes|interactive|confirm)"
+
+# Test with no stdin
+(exec < /dev/null && ./run_any_python_tool.sh safe_file_manager.py list .)
+
+# Debug environment detection
+env | grep -E "(CI|GITHUB|GITLAB|JENKINS)"
+
+# Check configuration loading
+./run_any_python_tool.sh common_config.py --show
+```
+
+For comprehensive non-interactive mode documentation, see [NON_INTERACTIVE_GUIDE.md](NON_INTERACTIVE_GUIDE.md).
+
 ## 🛡️ Security and Error Handling
 
 ### Enterprise Security Features

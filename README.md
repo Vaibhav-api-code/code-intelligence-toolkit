@@ -259,6 +259,7 @@ find_text.py --extract-method-alllines  # 0.2 seconds
 - **Environment isolation** - Separate configs for dev/prod
 - **Progressive disclosure** - Start safe, enable features explicitly
 - **Rollback capability** - Undo automated changes
+- **Non-interactive mode** - Full CI/CD and AI agent support
 
 ## 🏗️ Architecture
 
@@ -443,6 +444,92 @@ SafeGIT adapts its behavior based on your environment and workflow:
 ```
 
 These settings persist across sessions and provide an extra layer of protection based on your current workflow needs.
+
+## 🤖 Non-Interactive Mode Support
+
+### Complete CI/CD & Automation Support
+
+Every tool in the toolkit supports non-interactive operation for seamless integration with:
+- **CI/CD Pipelines** - GitHub Actions, GitLab CI, Jenkins, CircleCI
+- **AI Agents** - Claude, GPT, Copilot, and other coding assistants
+- **Automation Scripts** - Bash, Python, or any scripting language
+- **Docker Containers** - Fully automated environments
+
+### Configuration Methods
+
+#### 1. Environment Variables (Recommended for CI/CD)
+```bash
+# Safe File Manager
+export SFM_ASSUME_YES=1              # Auto-confirm all file operations
+
+# SafeGIT
+export SAFEGIT_NONINTERACTIVE=1      # Strict non-interactive mode
+export SAFEGIT_ASSUME_YES=1          # Auto-confirm safe git operations
+
+# Global settings
+export PYTOOLSRC_NON_INTERACTIVE=1   # Apply to all tools
+```
+
+#### 2. Configuration File (.pytoolsrc)
+```ini
+[defaults]
+non_interactive = true    # No prompts, fail if input needed
+assume_yes = true        # Auto-confirm medium-risk operations
+
+[safe_file_manager]
+assume_yes = true
+backup = true           # Always create backups in automation
+
+[safegit]
+non_interactive = true
+assume_yes = true
+force_yes = false       # Never auto-confirm dangerous operations
+```
+
+#### 3. Command-Line Flags
+```bash
+# Use --yes flag for individual commands
+./run_any_python_tool.sh safe_file_manager.py move file1 file2 --yes
+./run_any_python_tool.sh safegit.py add . --yes
+./run_any_python_tool.sh replace_text_ast.py oldVar newVar --file script.py --yes
+```
+
+### Safety Levels in Non-Interactive Mode
+
+1. **Auto-Approved** (with assume_yes):
+   - Reading files, listing directories
+   - Creating backups, dry-run operations
+   - Git status, log, diff
+
+2. **Requires --yes or assume_yes**:
+   - Moving/copying files
+   - Text replacements
+   - Git add, commit, pull
+
+3. **Requires --force-yes explicitly**:
+   - Deleting files (even to trash)
+   - Git reset --hard
+   - Git push --force
+   - Any destructive operation
+
+### Example CI/CD Integrations
+
+#### GitHub Actions
+```yaml
+env:
+  SFM_ASSUME_YES: 1
+  SAFEGIT_ASSUME_YES: 1
+
+steps:
+  - name: Refactor code
+    run: |
+      ./run_any_python_tool.sh replace_text.py "old_api" "new_api" --scope src/
+      ./run_any_python_tool.sh safe_file_manager.py organize build/ --by-date
+      ./run_any_python_tool.sh safegit.py add .
+      ./run_any_python_tool.sh safegit.py commit -m "Automated refactoring"
+```
+
+For complete non-interactive mode documentation, see [NON_INTERACTIVE_GUIDE.md](NON_INTERACTIVE_GUIDE.md).
 
 ## 🤝 Working with AI Assistants
 

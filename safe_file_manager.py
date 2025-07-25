@@ -16,6 +16,12 @@ License: Mozilla Public License 2.0 (MPL-2.0)
 """
 
 import os
+
+# Import for config loading
+try:
+    from common_config import apply_config_to_args
+except ImportError:
+    apply_config_to_args = None
 import sys
 import json
 import shutil
@@ -2801,6 +2807,10 @@ def main():
     """Main entry point."""
     parser = create_parser()
     args = parser.parse_args()
+    
+    # Apply config file settings first (command-line args override)
+    if apply_config_to_args is not None:
+        apply_config_to_args('safe_file_manager', args, parser)
     
     # Handle environment variables
     if os.getenv('SAFE_FILE_NONINTERACTIVE') == '1':
