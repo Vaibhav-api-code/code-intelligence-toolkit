@@ -2122,6 +2122,23 @@ class SafeFileManager(SecureFileHandler):
         
         Returns:
             OperationResult indicating success/failure
+        
+        Examples:
+            # Simple single-line content
+            manager.create('file.txt', content='Hello, World!')
+            
+            # Multi-line content with --from-stdin (RECOMMENDED for complex content)
+            cat << 'EOF' | ./safe_file_manager.py create script.py --from-stdin
+            #!/usr/bin/env python3
+            '''Complex multi-line Python code'''
+            if condition:
+                pass
+            elif other_condition:
+                pass
+            EOF
+            
+            # Avoid shell parsing issues with complex content by using --from-stdin
+            # instead of --content with shell-special characters like elif, done, etc.
         """
         file_path = _to_path(file_path)
         file_path = self._assert_safe_path(file_path)
@@ -2281,26 +2298,126 @@ class SafeFileManager(SecureFileHandler):
         
         return results
     
+    def _parse_symbolic_mode(self, mode_str: str, current_mode: int) -> int:
+        """Parse symbolic chmod mode string (e.g., +x, u+rwx, go-w).
+        
+        Args:
+            mode_str: Symbolic mode string
+            current_mode: Current file permissions as integer
+            
+        Returns:
+            New permissions as integer
+            
+        Examples:
+            +x -> add execute for all
+            u+rwx -> add read/write/execute for user
+            go-w -> remove write for group and other
+            a+r -> add read for all (user, group, other)
+        """
+        # Start with current permissions
+        new_mode = current_mode
+        
+        # Define permission bits
+        perms = {
+            'r': 4,  # read
+            'w': 2,  # write
+            'x': 1   # execute
+        }
+        
+        # Define who bits
+        who_masks = {
+            'u': 0o700,  # user
+            'g': 0o070,  # group
+            'o': 0o007,  # other
+            'a': 0o777   # all
+        }
+        
+        # Parse symbolic mode parts (can have multiple like "u+x,go-w")
+        for part in mode_str.split(','):
+            part = part.strip()
+            if not part:
+                continue
+                
+            # Find the operator
+            op = None
+            op_idx = -1
+            for i, char in enumerate(part):
+                if char in '+-=':
+                    op = char
+                    op_idx = i
+                    break
+                    
+            if op is None:
+                raise ValueError(f"Invalid symbolic mode: {part} (missing operator +/-/=)")
+                
+            # Extract who and permissions
+            who_part = part[:op_idx] if op_idx > 0 else 'a'  # default to 'all' if no who specified
+            perm_part = part[op_idx + 1:]
+            
+            # Parse who
+            who_mask = 0
+            if who_part == '':  # e.g., "+x" means all
+                who_mask = 0o777
+            else:
+                for who_char in who_part:
+                    if who_char not in who_masks:
+                        raise ValueError(f"Invalid 'who' character: {who_char}")
+                    who_mask |= who_masks[who_char]
+            
+            # Parse permissions
+            perm_value = 0
+            for perm_char in perm_part:
+                if perm_char not in perms:
+                    raise ValueError(f"Invalid permission character: {perm_char}")
+                perm_value |= perms[perm_char]
+                
+            # Apply the permission value to the appropriate positions
+            if who_mask & 0o700:  # user
+                perm_value_user = perm_value << 6
+            else:
+                perm_value_user = 0
+                
+            if who_mask & 0o070:  # group
+                perm_value_group = perm_value << 3
+            else:
+                perm_value_group = 0
+                
+            if who_mask & 0o007:  # other
+                perm_value_other = perm_value
+            else:
+                perm_value_other = 0
+                
+            combined_perm = perm_value_user | perm_value_group | perm_value_other
+            
+            # Apply the operation
+            if op == '+':
+                new_mode |= combined_perm
+            elif op == '-':
+                new_mode &= ~combined_perm
+            elif op == '=':
+                # For '=', we clear the affected bits first, then set new ones
+                new_mode &= ~who_mask
+                new_mode |= combined_perm
+                
+        return new_mode
+
     def chmod(self, files: List[Path], mode: str, recursive: bool = False) -> List[OperationResult]:
-        """Change file permissions safely."""
+        """Change file permissions safely.
+        
+        Supports both octal (755, 644) and symbolic (+x, u+rwx, go-w) modes.
+        
+        Note: When running in non-interactive environments (CI/CD, scripts),
+        use --yes flag to auto-confirm or set SFM_ASSUME_YES=1 to avoid
+        EOF errors when the tool waits for confirmation.
+        """
         # Convert to Path objects and validate
         files = _to_paths(files)
         files = [self._assert_safe_path(f) for f in files]
         
         results = []
         
-        # Parse mode (support both octal and symbolic)
-        try:
-            if mode.startswith('0') or mode.isdigit():
-                # Octal mode
-                mode_int = int(mode, 8)
-            else:
-                # Symbolic mode - simplified parser
-                # This is a basic implementation - full symbolic mode parsing is complex
-                raise NotImplementedError("Symbolic mode not yet implemented. Please use octal mode (e.g., 755, 644)")
-        except ValueError:
-            self._print(f"Invalid mode: {mode}", 'error')
-            return results
+        # Check if mode is octal or symbolic
+        is_octal = mode.startswith('0') or (mode.isdigit() and len(mode) <= 4)
         
         # Process files
         def process_path(path: Path) -> OperationResult:
@@ -2310,31 +2427,42 @@ class SafeFileManager(SecureFileHandler):
                 
                 old_mode = path.stat().st_mode & 0o777
                 
+                # Parse mode for this specific file
+                try:
+                    if is_octal:
+                        # Octal mode
+                        new_mode = int(mode, 8)
+                    else:
+                        # Symbolic mode - use our parser
+                        new_mode = self._parse_symbolic_mode(mode, old_mode)
+                except ValueError as e:
+                    raise FileOperationError(f"Invalid mode '{mode}': {e}")
+                
                 if self.dry_run:
                     self._print(
-                        f"[DRY RUN] Would change permissions of {path} from {oct(old_mode)} to {oct(mode_int)}",
+                        f"[DRY RUN] Would change permissions of {path} from {oct(old_mode)} to {oct(new_mode)}",
                         'info'
                     )
                     return OperationResult(
                         success=True,
                         operation=OperationType.PERMISSION,
                         source=path,
-                        metadata={'dry_run': True, 'old_mode': oct(old_mode), 'new_mode': oct(mode_int)}
+                        metadata={'dry_run': True, 'old_mode': oct(old_mode), 'new_mode': oct(new_mode)}
                     )
                 
                 # Change permissions within transaction
-                with self.transaction(OperationType.PERMISSION, [path], {'old_mode': oct(old_mode), 'new_mode': oct(mode_int)}):
-                    os.chmod(path, mode_int)
+                with self.transaction(OperationType.PERMISSION, [path], {'old_mode': oct(old_mode), 'new_mode': oct(new_mode)}):
+                    os.chmod(path, new_mode)
                 
                 # Log operation
                 result = OperationResult(
                     success=True,
                     operation=OperationType.PERMISSION,
                     source=path,
-                    metadata={'old_mode': oct(old_mode), 'new_mode': oct(mode_int)}
+                    metadata={'old_mode': oct(old_mode), 'new_mode': oct(new_mode)}
                 )
                 self.history.add_operation(OperationType.PERMISSION, path, result=result)
-                self._print(f"Changed permissions of {path} to {oct(mode_int)}", 'success')
+                self._print(f"Changed permissions of {path} to {oct(new_mode)}", 'success')
                 return result
                 
             except Exception as e:
@@ -2347,7 +2475,7 @@ class SafeFileManager(SecureFileHandler):
                 )
         
         # Get confirmation for permission changes
-        prompt = f"Change permissions of {len(files)} item(s) to {oct(mode_int)}?"
+        prompt = f"Change permissions of {len(files)} item(s) to {mode}?"
         if not self._get_confirmation(prompt, RiskLevel.MEDIUM):
             return results
         
@@ -2660,6 +2788,19 @@ Examples:
   # Copy with checksum verification
   %(prog)s copy --verify-checksum src/* dest/
   
+  # Create file with simple content
+  %(prog)s create config.txt --content "key=value"
+  
+  # Create file with multi-line content (RECOMMENDED for complex content)
+  cat << 'EOF' | %(prog)s create script.py --from-stdin
+  #!/usr/bin/env python3
+  '''Multi-line Python script'''
+  if condition:
+      pass
+  elif other_condition:
+      pass
+  EOF
+  
   # Organize files by type
   %(prog)s organize ~/Downloads --by extension
   
@@ -2668,6 +2809,10 @@ Examples:
   
   # Restore from trash
   %(prog)s restore "important"
+
+Shell Parsing Note:
+  When using --content with complex strings containing shell keywords (elif, done, fi, etc.),
+  the shell may fail to parse the command. Use --from-stdin with here-docs for complex content.
         """
     )
     
@@ -2772,7 +2917,7 @@ Examples:
     
     # Chmod command
     p_chmod = subparsers.add_parser('chmod', help='Change file permissions')
-    p_chmod.add_argument('mode', help='Permissions (octal, e.g., 755)')
+    p_chmod.add_argument('mode', help='Permissions (octal: 755, 644 or symbolic: +x, u+rwx, go-w)')
     p_chmod.add_argument('files', nargs='+', type=Path, help='Files to modify')
     p_chmod.add_argument('-R', '--recursive', action='store_true', help='Apply recursively')
     

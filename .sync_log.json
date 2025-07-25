@@ -4,22 +4,28 @@
       "timestamp": "2025-07-25T01:26:27.602313",
       "files_synced": 14,
       "total_files": 14
+    },
+    {
+      "timestamp": "2025-07-25T02:04:43.342855",
+      "files_synced": 4,
+      "total_files": 4
     }
   ],
   "file_hashes": {
     "replace_text_ast.py": "2c90259503882063faf8f17bfbb23711",
-    "safe_file_manager.py": "da9fa038682d1f1ef2216ed2fab77897",
+    "safe_file_manager.py": "9903a4978a7fa3310ea1cd7b24a84177",
     "replace_text_v7.py": "23385648a7bc71e2bcec97db98e66c88",
     "safegit_undo_stack.py": "aab7b185e461c29957a5964994300fb5",
     "safe_move.py": "e18f2944b9bdb5d588c7a0b6750c6087",
     "replace_text_ast_v2.py": "2c90259503882063faf8f17bfbb23711",
     "replace_text.py": "23385648a7bc71e2bcec97db98e66c88",
     "SYNC_TOOLS_GUIDE.md": "6d354223a0012b4813692f93020d9c5d",
-    "NON_INTERACTIVE_GUIDE.md": "c3bd82115ea40c9418d89d9603da9731",
-    "SAFE_FILE_MANAGER_GUIDE.md": "06113778b47217fc880a937edc7ae57b",
+    "NON_INTERACTIVE_GUIDE.md": "8761965546b435babe44b2f052a3ada2",
+    "SAFE_FILE_MANAGER_GUIDE.md": "339089e926312c1ce248312ed02f0dc9",
     "README.md": "e1368265b96071dc2c0fb4a2af34dc2f",
     "TEXT_TOOLS_GUIDE.md": "748fdf6eb12cda3f5d1b86e5d0ff67ac",
     "PYTHON_TOOLS_MASTER_HELP.md": "b969854a1e64b43ae541f816664475d7",
-    "SAFEGIT_README.md": "bfc96ef3750f426f30c877e7e40031c3"
+    "SAFEGIT_README.md": "bfc96ef3750f426f30c877e7e40031c3",
+    "run_any_python_tool.sh": "66d5be85772cd02fa489c8953d989a83"
   }
 }

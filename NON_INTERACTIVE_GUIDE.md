@@ -73,6 +73,7 @@ Most tools support these flags:
 ```bash
 # Safe file operations
 ./run_any_python_tool.sh safe_file_manager.py move file1 file2 --yes
+./run_any_python_tool.sh safe_file_manager.py chmod +x script.sh --yes
 
 # Text replacement
 ./run_any_python_tool.sh replace_text.py "old" "new" file.txt --yes

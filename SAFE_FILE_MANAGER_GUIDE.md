@@ -251,6 +251,25 @@ sfm --force create existing.txt --content "New content"
 sfm --dry-run create test.txt --content "Test content"
 ```
 
+**⚠️ Shell Parsing Note**: When using `--content` with complex strings containing shell keywords (`elif`, `done`, `fi`, etc.), the shell may fail to parse the command. Use `--from-stdin` with here-docs for complex content:
+```bash
+# ✅ CORRECT for complex content
+cat << 'EOF' | sfm create script.py --from-stdin
+#!/usr/bin/env python3
+if condition:
+    pass
+elif other_condition:
+    pass
+EOF
+
+# ❌ AVOID - May cause parse errors
+sfm create script.py --content '#!/usr/bin/env python3
+if condition:
+    pass
+elif other_condition:
+    pass'
+```
+
 #### Touch
 ```bash
 # Create empty file or update timestamp
@@ -273,6 +292,66 @@ sfm mkdir -p path/to/deep/directory
 
 # Create with specific permissions
 sfm mkdir -m 755 scripts/
+```
+
+#### Chmod
+```bash
+# Change permissions using octal mode
+sfm chmod 755 script.sh
+sfm chmod 644 document.txt
+
+# Change permissions using symbolic mode (NEW)
+sfm chmod +x script.sh                # Add execute for all
+sfm chmod u+rwx,go-w sensitive.dat   # User: all, Group/Other: remove write
+sfm chmod a+r public.txt             # All: add read
+sfm chmod go-x private/              # Group/Other: remove execute
+
+# Recursive permission changes
+sfm chmod -R 755 project/
+sfm chmod -R go-w data/
+
+# Non-interactive mode (for scripts/automation)
+sfm --yes chmod 755 *.sh
+export SFM_ASSUME_YES=1 && sfm chmod +x script.sh
+```
+
+#### Chown
+```bash
+# Change ownership
+sfm chown user file.txt
+sfm chown user:group file.txt
+
+# Recursive ownership change
+sfm chown -R webuser:webgroup /var/www/
+
+# Non-interactive mode
+sfm --yes chown user:group *.conf
+```
+
+#### Ln (Symbolic/Hard Links)
+```bash
+# Create symbolic link (default)
+sfm ln -s /path/to/target linkname
+sfm ln -s ../config.yml config-link.yml
+
+# Create hard link
+sfm ln --hard file.txt hardlink.txt
+
+# Force overwrite existing link
+sfm ln -sf /new/target existing-link
+
+# Non-interactive mode
+sfm --yes ln -sf /path/to/target linkname
+```
+
+#### Rmdir
+```bash
+# Remove empty directories
+sfm rmdir empty-dir/
+sfm rmdir dir1/ dir2/ dir3/
+
+# Note: For non-empty directories, use trash command
+sfm trash non-empty-dir/
 ```
 
 ## Configuration
@@ -601,6 +680,15 @@ sfm trash $(sfm list --format json | jq -r '.files[] | select(.mtime < "2023-01-
 - Platform-specific issue
 - Disable with retry: `--max-retries 0`
 - Check antivirus/backup software
+
+**EOF when reading a line**
+- Occurs when tool waits for confirmation but can't read input
+- Common in scripts, CI/CD, or non-TTY environments
+- Solutions:
+  - Use `--yes` flag: `sfm --yes chmod 755 file.txt`
+  - Set environment: `export SFM_ASSUME_YES=1`
+  - Use `--non-interactive` for strict automation
+  - Add to `.pytoolsrc`: `assume_yes = true`
 
 ### Debug Mode
 
