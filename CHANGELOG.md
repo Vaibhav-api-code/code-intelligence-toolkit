@@ -19,6 +19,25 @@ All notable changes to the Code Intelligence Toolkit will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-07-27
+
+### Added
+- **data_flow_tracker_v2.py**: Enhanced data flow analysis with three major V2 capabilities
+  - **Impact Analysis**: Shows where data escapes scope and causes observable effects (returns, side effects, state changes)
+  - **Calculation Path Analysis**: Extracts minimal critical path showing exactly how values are calculated
+  - **Type and State Tracking**: Monitors how variable types and states evolve through code execution
+  - **Full Java Parity**: Complete Java implementation matching all Python V2 features
+  - **Enhanced Visualization**: Risk assessment, type evolution tracking, and comprehensive reporting
+
+### Fixed
+- **Java AST Compatibility**: Fixed javalang tree node naming (ArrayAccess→ArraySelector, ExpressionStatement→StatementExpression)
+- **ForStatement Parsing**: Corrected Java for-loop structure parsing using control.init instead of direct init access
+- **Import Handling**: Added proper javalang import with fallback error handling
+
+### Documentation
+- **DATA_FLOW_TRACKER_GUIDE.md**: Updated with comprehensive V2 examples and use cases
+- **Test Examples**: Added test_java_v2_features.java for demonstrating all V2 capabilities
+
 ## [1.2.0] - 2025-07-26
 
 ### Added

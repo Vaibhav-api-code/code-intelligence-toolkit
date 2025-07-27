@@ -260,34 +260,38 @@ Built for safety at every level:
 - **Atomic operations** - No partial states
 - **Comprehensive logging** - Full audit trail
 
-## 🆕 What's New (v1.2.0)
+## 🆕 What's New (v1.2.1)
 
-### 🎯 Data Flow Tracker - Track Variable Dependencies Through Code
-- **NEW: data_flow_tracker.py** - Revolutionary tool for understanding how data flows through your codebase
+### 🎯 Data Flow Tracker V2 - Advanced Code Intelligence
+- **NEW: data_flow_tracker_v2.py** - Next-generation data flow analysis with three breakthrough capabilities:
+
+#### 🔍 V2 Enhanced Features
   ```bash
-  # Track what variable 'x' affects (forward tracking)
-  ./run_any_python_tool.sh data_flow_tracker.py --var x --file calc.py
+  # V2: Impact Analysis - See where changes will have effects
+  ./run_any_python_tool.sh data_flow_tracker_v2.py --var config --show-impact --file app.py
   
-  # Track what affects 'result' (backward tracking)
-  ./run_any_python_tool.sh data_flow_tracker.py --var result --direction backward --file module.py
+  # V2: Calculation Path - Understand complex algorithms
+  ./run_any_python_tool.sh data_flow_tracker_v2.py --var total --show-calculation-path --file calc.py
   
-  # Generate visual dependency graph
-  ./run_any_python_tool.sh data_flow_tracker.py --var data --format graph --file app.py > flow.dot
-  dot -Tpng flow.dot -o flow.png  # Visualize with GraphViz
+  # V2: Type Tracking - Monitor type evolution and catch bugs
+  ./run_any_python_tool.sh data_flow_tracker_v2.py --var data --track-state --file process.py
+  
+  # V1: Classic dependency tracking still available
+  ./run_any_python_tool.sh data_flow_tracker.py --var x --direction backward --file module.py
   ```
 
-- **Key Features**:
-  - **Bidirectional Analysis**: Track forward (what X affects) or backward (what affects Y)
-  - **Inter-procedural Tracking**: Follows data across function boundaries with parameter mapping
-  - **Multi-language Support**: Full support for Python and Java
-  - **Complex Expressions**: Handles ternary operators, comprehensions, method chains, tuple unpacking
-  - **Multiple Output Formats**: Human-readable text, JSON for tooling, GraphViz for visualization
+- **🚀 V2 Breakthrough Capabilities**:
+  - **Impact Analysis**: Shows where data escapes scope (returns, side effects, state changes) with risk assessment
+  - **Calculation Path Analysis**: Extracts minimal "critical path" for understanding complex calculations
+  - **Type & State Tracking**: Monitors type evolution, nullable states, and warns about potential issues
+  - **Full Java Parity**: Complete Java implementation matching all Python V2 features
+  - **Enhanced Visualization**: Risk levels, type evolution charts, and comprehensive reporting
 
-- **Use Cases**:
-  - Debug incorrect calculations by tracing backward from wrong values
-  - Understand impact before refactoring by seeing what a variable affects
-  - Document data flow for complex algorithms
-  - Validate that sensitive data doesn't leak to logs or outputs
+- **🎯 Both Safety AND Intelligence**:
+  - **Safety**: Know what will break before making changes (impact analysis)
+  - **Intelligence**: Understand complex algorithms (calculation paths, type tracking)
+  - **Multi-language**: Python and Java with identical feature sets
+  - **Production Ready**: Handles massive codebases with enterprise-grade performance
 
 ### Enhanced Documentation
 - **Improved EOF handling**: Added warnings to prevent 'EOF < /dev/null' issues in heredocs

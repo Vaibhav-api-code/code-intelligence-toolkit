@@ -1,7 +1,8 @@
 # Data Flow Tracker Guide
 
 **Related Code Files:**
-- `code-intelligence-toolkit/data_flow_tracker.py` - Main implementation of the data flow analysis tool
+- `code-intelligence-toolkit/data_flow_tracker.py` - Original implementation of the data flow analysis tool
+- `code-intelligence-toolkit/data_flow_tracker_v2.py` - Enhanced version with impact analysis, calculation paths, and type tracking
 - `code-intelligence-toolkit/run_any_python_tool.sh` - Wrapper script for execution
 - `test_data_flow.py` - Simple test examples
 - `test_complex_data_flow.py` - Complex test scenarios
@@ -347,6 +348,151 @@ Combine with other code-intelligence-toolkit tools:
 
 # Then refactor safely
 ./run_any_python_tool.sh replace_text_ast.py --file MyClass.py result new_result
+```
+
+## Version 2 Enhanced Features
+
+Data Flow Tracker V2 adds three powerful capabilities for deeper code intelligence:
+
+### 1. Impact Analysis - Know What Will Break
+
+Shows where data "escapes" its local scope and causes observable effects:
+
+```bash
+# See all the places where changing db_config would have effects
+./run_any_python_tool.sh data_flow_tracker_v2.py --var db_config --show-impact --file app.py
+```
+
+Output shows:
+- **Returns**: Functions that return values dependent on the variable
+- **Side Effects**: File writes, network calls, console output
+- **State Changes**: Modifications to global variables or class members
+- **Risk Assessment**: Overall risk level of making changes
+
+Example output:
+```
+============================================================
+Impact Analysis
+============================================================
+
+🔄 RETURNS:
+  - get_connection at db.py:45
+    Returns value dependent on db_config
+
+⚠️  SIDE EFFECTS:
+  🟡 file_write at logger.py:89
+     External call to write
+
+📝 STATE CHANGES:
+  - global_write at config.py:23
+    External call to cache_config
+
+────────────────────────────────────────────────────────────
+SUMMARY:
+  Total exit points: 4
+  Functions affected: 3
+  High risk count: 1
+
+  ⚡ MEDIUM RISK: External side effects detected - ensure testing covers these
+```
+
+### 2. Calculation Path Analysis - Understand Complex Logic
+
+Extracts the minimal "critical path" showing exactly how a value is calculated:
+
+```bash
+# Understand how final_price is calculated
+./run_any_python_tool.sh data_flow_tracker_v2.py --var final_price --show-calculation-path --file pricing.py
+```
+
+Shows only the essential steps, filtering out noise:
+```
+============================================================
+Calculation Path
+============================================================
+
+1. base_price = get_product_price()
+   Location: pricing.py:10
+   ↓
+
+2. tax_rate = lookup_tax_rate(location)
+   Inputs: location
+   Location: pricing.py:15
+   ↓
+
+3. discount = apply_coupon(coupon_code)
+   Inputs: coupon_code
+   Location: pricing.py:20
+   ↓
+
+4. final_price = (base_price * (1 + tax_rate)) - discount
+   Inputs: base_price, tax_rate, discount
+   Location: pricing.py:25
+```
+
+### 3. Type and State Tracking - Catch Bugs Early
+
+Monitors how variable types and states evolve through the code:
+
+```bash
+# Track type changes and potential issues
+./run_any_python_tool.sh data_flow_tracker_v2.py --var user_data --track-state --file process.py
+```
+
+Reveals type changes and warnings:
+```
+============================================================
+Type & State Evolution for 'user_data'
+============================================================
+
+📈 TYPE EVOLUTION:
+  process.py:10: dict ✓
+  process.py:15: dict (nullable) ✓
+    Possible values: [None]
+  process.py:20: UserModel ✓
+
+🔄 STATE CHANGES:
+  process.py:10: assignment
+  process.py:15: assignment (in conditional)
+  process.py:20: assignment
+
+⚠️  WARNINGS:
+  - Variable may be None - add null checks
+  - Type changes detected: dict → UserModel
+```
+
+### V2 Use Cases
+
+**Before Refactoring**:
+```bash
+# Check impact before renaming a configuration variable
+./run_any_python_tool.sh data_flow_tracker_v2.py --var old_config_name --show-impact --file settings.py
+```
+
+**Debugging Complex Calculations**:
+```bash
+# Understand why a value is wrong
+./run_any_python_tool.sh data_flow_tracker_v2.py --var wrong_result --show-calculation-path --file calc.py
+```
+
+**Type Safety Validation**:
+```bash
+# Verify type consistency before deployment
+./run_any_python_tool.sh data_flow_tracker_v2.py --var api_response --track-state --file handler.py
+```
+
+### Combining V2 Features
+
+You can use V2 alongside V1 features:
+```bash
+# First, see what affects the variable (V1)
+./run_any_python_tool.sh data_flow_tracker.py --var total --direction backward --file calc.py
+
+# Then, understand the calculation path (V2)
+./run_any_python_tool.sh data_flow_tracker_v2.py --var total --show-calculation-path --file calc.py
+
+# Finally, check impact of changes (V2)
+./run_any_python_tool.sh data_flow_tracker_v2.py --var total --show-impact --file calc.py
 ```
 
 ## Advanced Use Cases
