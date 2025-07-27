@@ -117,11 +117,16 @@ except ImportError:
 # Load common configuration system
 try:
     from common_config import load_config, apply_config_to_args
+    HAS_CONFIG = True
 except ImportError:
+    HAS_CONFIG = False
     def load_config():
         return None
     def apply_config_to_args(tool_name, args, parser, config=None):
         pass
+    
+    def get_config_value(key, default, section, config):
+        return default
 
 # Try to import javalang for Java AST support
 try:
@@ -1486,6 +1491,59 @@ def get_string_patterns(language: str = None) -> Dict[str, List[str]]:
     }
     return patterns.get(language, patterns['default'])
 
+def interpret_escape_sequences(text):
+    """
+    Interpret common escape sequences in the text.
+    Supports: \\n (newline), \\t (tab), \\r (carriage return), \\\\ (backslash),
+              \\b (backspace), \\f (form feed), \\v (vertical tab), \\0 (null),
+              \\xHH (hex), \\uHHHH (unicode), \\UHHHHHHHH (unicode)
+    """
+    if not isinstance(text, str):
+        return text
+    
+    try:
+        # First handle the double backslash to avoid conflicts
+        text = text.replace('\\\\', '\x00')  # Temporary placeholder
+        
+        # Replace simple escape sequences
+        replacements = {
+            '\\n': '\n',
+            '\\t': '\t', 
+            '\\r': '\r',
+            '\\b': '\b',
+            '\\f': '\f',
+            '\\v': '\v',
+            '\\0': '\0',
+            '\\"': '"',
+            "\\'": "'"
+        }
+        
+        result = text
+        for escaped, actual in replacements.items():
+            result = result.replace(escaped, actual)
+        
+        # Handle hex sequences (\xHH)
+        hex_pattern = r'\\x([0-9a-fA-F]{2})'
+        result = re.sub(hex_pattern, lambda m: chr(int(m.group(1), 16)), result)
+        
+        # Handle unicode sequences (\uHHHH)
+        unicode_pattern = r'\\u([0-9a-fA-F]{4})'
+        result = re.sub(unicode_pattern, lambda m: chr(int(m.group(1), 16)), result)
+        
+        # Handle long unicode sequences (\UHHHHHHHH)
+        long_unicode_pattern = r'\\U([0-9a-fA-F]{8})'
+        result = re.sub(long_unicode_pattern, lambda m: chr(int(m.group(1), 16)), result)
+        
+        # Restore double backslash
+        result = result.replace('\x00', '\\')
+        
+        return result
+        
+    except Exception as e:
+        # If any error occurs, log it and return original text
+        LOG.warning(f"Error interpreting escape sequences: {e}")
+        return text
+
 def replace_in_comments(content: str, old_text: str, new_text: str, language: str = None) -> Tuple[str, int]:
     """Replace text only within comments (from V7 compatibility)."""
     if not content:
@@ -1587,7 +1645,7 @@ Environment Variables:
         
         parser.add_argument('--file', type=str, required=True,
                            help='File to perform refactoring on')
-        parser.add_argument('--line', '-l', type=int, required=True,
+        parser.add_argument('--line', '-l', type=int,
                            help='Line number where the variable is declared for scope analysis')
         parser.add_argument('--language', '--lang', choices=['python', 'java', 'auto'],
                            default='auto', help='Programming language (default: auto-detect)')
@@ -1595,7 +1653,7 @@ Environment Variables:
         # Enhanced parser provides target and file arguments automatically
         parser.add_argument("old_name", help="The original variable or method name to be replaced")
         parser.add_argument("new_name", help="The new variable or method name")
-        parser.add_argument('--line', '-l', type=int, required=True,
+        parser.add_argument('--line', '-l', type=int,
                            help='Line number where the variable is declared for scope analysis')
     
     # V2 NEW FEATURES
@@ -1626,6 +1684,8 @@ Environment Variables:
                                 help='Apply AST operations only within comments (language-aware)')
     v7_compat_group.add_argument('--strings-only', action='store_true',
                                 help='Apply AST operations only within string literals (language-aware)')
+    v7_compat_group.add_argument('--interpret-escapes', action='store_true',
+                                help='Interpret escape sequences (\\n, \\t, etc.) in old_name and new_name')
     v7_compat_group.add_argument('--git-only', action='store_true',
                                 help='Only process files tracked by Git')
     v7_compat_group.add_argument('--staged-only', action='store_true',
@@ -1703,12 +1763,13 @@ Environment Variables:
     if not hasattr(args, 'non_interactive'):
         args.non_interactive = DEFAULT_NONINTERACTIVE
     
-    if HAS_CONFIG and config:
-        # Override with config values if not specified on command line
-        if not args.yes:
-            args.yes = get_config_value('assume_yes', args.yes, 'replace_text_ast', config)
-        if not args.non_interactive:
-            args.non_interactive = get_config_value('non_interactive', args.non_interactive, 'replace_text_ast', config)
+    # Config handling disabled for now - needs proper implementation
+    # if HAS_CONFIG and config:
+    #     # Override with config values if not specified on command line
+    #     if not args.yes:
+    #         args.yes = get_config_value('assume_yes', args.yes, 'replace_text_ast', config)
+    #     if not args.non_interactive:
+    #         args.non_interactive = get_config_value('non_interactive', args.non_interactive, 'replace_text_ast', config)
     
     # Allow retry configuration via environment variables
     if 'FILE_WRITE_MAX_RETRIES' in os.environ:
@@ -1729,8 +1790,8 @@ Environment Variables:
     if not args.old_name or not args.new_name:
         parser.error("Please specify both old_name and new_name")
     
-    if not args.line and not args.from_find_json:
-        parser.error("--line is required for AST-based renaming (unless using --from-find-json)")
+    if not args.line and not args.from_find_json and not args.comments_only and not args.strings_only:
+        parser.error("--line is required for AST-based renaming (unless using --from-find-json, --comments-only, or --strings-only)")
     
     # V2 FEATURE: Handle JSON pipeline input
     if args.from_find_json:
@@ -1836,7 +1897,10 @@ Environment Variables:
         # V7 COMPATIBILITY: Handle comments-only or strings-only modes
         if args.comments_only:
             print(f"🔍 Applying AST operations only within comments...")
-            modified_content, replacements = replace_in_comments(original_content, args.old_name, args.new_name, args.language)
+            # Apply escape sequence interpretation if requested
+            old_text = interpret_escape_sequences(args.old_name) if args.interpret_escapes else args.old_name
+            new_text = interpret_escape_sequences(args.new_name) if args.interpret_escapes else args.new_name
+            modified_content, replacements = replace_in_comments(original_content, old_text, new_text, args.language)
             if replacements > 0:
                 print(f"Made {replacements} replacements in comments")
                 
@@ -1857,7 +1921,10 @@ Environment Variables:
             sys.exit(0)
         elif args.strings_only:
             print(f"🔍 Applying AST operations only within string literals...")
-            modified_content, replacements = replace_in_strings(original_content, args.old_name, args.new_name, args.language)
+            # Apply escape sequence interpretation if requested
+            old_text = interpret_escape_sequences(args.old_name) if args.interpret_escapes else args.old_name
+            new_text = interpret_escape_sequences(args.new_name) if args.interpret_escapes else args.new_name
+            modified_content, replacements = replace_in_strings(original_content, old_text, new_text, args.language)
             if replacements > 0:
                 print(f"Made {replacements} replacements in strings")
                 
