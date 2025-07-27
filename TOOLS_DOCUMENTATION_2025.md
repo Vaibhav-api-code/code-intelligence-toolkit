@@ -65,7 +65,7 @@ class EnhancedArgumentParser(ArgumentParser):
 ### 3. Tool Categories and Capabilities
 
 #### 🔍 Search and Analysis (Enhanced)
-- **find_text.py V6**: Enhanced with context lines, ± syntax, auto file-finding, block extraction, and **standalone wholefile mode**
+- **find_text_v7.py V6**: Enhanced with context lines, ± syntax, auto file-finding, block extraction, and **standalone wholefile mode**
 - **find_references_rg.py**: Multi-threaded with `--threads` support
 - **cross_file_analysis_ast.py**: Full AST-based dependency graphs
 
@@ -79,8 +79,8 @@ class EnhancedArgumentParser(ArgumentParser):
 - **safe_move.py**: Interactive undo mode with atomic operations and retry logic
 - **organize_files.py**: Manifest-based operations with full reversibility and atomic writes
 - **refactor_rename.py**: Automation support with `--yes` flag and atomic file/symbol renaming
-- **replace_text.py**: Atomic text replacement with intelligent retry mechanisms
-- **replace_text_ast.py**: AST-based atomic replacements with rollback protection
+- **replace_text_v8.py**: Atomic text replacement with intelligent retry mechanisms
+- **replace_text_ast_v2.py**: AST-based atomic replacements with rollback protection
 - **unified_refactor.py**: Universal refactoring interface with multiple backends (python_ast, rope, java_scope, text_based)
 
 #### 🛠️ Infrastructure (Enterprise Grade)
@@ -123,8 +123,8 @@ All tools inherit from secure base classes providing:
 - **Process Safety**: Protected against interruption and concurrent access
 
 **6 Enhanced Tools with Atomic Operations:**
-- `replace_text.py` - Atomic text replacement with retry logic
-- `replace_text_ast.py` - AST-based atomic replacements
+- `replace_text_v8.py` - Atomic text replacement with retry logic
+- `replace_text_ast_v2.py` - AST-based atomic replacements
 - `unified_refactor.py` - Universal refactoring interface with multiple backends (replaces ast_refactor.py, ast_refactor_enhanced.py, java_scope_refactor.py)
 - `refactor_rename.py` - Atomic file/symbol renaming across files
 - `safe_move.py` - Enhanced atomic file moves
@@ -176,32 +176,32 @@ class AtomicFileOperation:
 
 #### Enhanced Tools with Atomic Operations
 
-##### replace_text.py - Atomic Text Replacement
+##### replace_text_v8.py - Atomic Text Replacement
 ```bash
 # Basic atomic replacement
-./run_any_python_tool.sh replace_text.py "oldText" "newText" file.java --atomic
+./run_any_python_tool.sh replace_text_v8.py "oldText" "newText" file.java --atomic
 
 # With custom retry settings
-./run_any_python_tool.sh replace_text.py "old" "new" src/ --atomic --retry-attempts 5 --retry-delay 2.0
+./run_any_python_tool.sh replace_text_v8.py "old" "new" src/ --atomic --retry-attempts 5 --retry-delay 2.0
 
 # Environment variable configuration
 export REPLACE_TEXT_RETRY_ATTEMPTS=3
 export REPLACE_TEXT_RETRY_DELAY=1.5
 export REPLACE_TEXT_ATOMIC_TIMEOUT=60
-./run_any_python_tool.sh replace_text.py "pattern" "replacement" files/ --atomic
+./run_any_python_tool.sh replace_text_v8.py "pattern" "replacement" files/ --atomic
 ```
 
-##### replace_text_ast.py - AST-Based Atomic Replacement
+##### replace_text_ast_v2.py - AST-Based Atomic Replacement
 ```bash
 # Atomic AST-based replacement with scope awareness
-./run_any_python_tool.sh replace_text_ast.py --file MyClass.java --line 42 oldVar newVar --atomic
+./run_any_python_tool.sh replace_text_ast_v2.py --file MyClass.java --line 42 oldVar newVar --atomic
 
 # With compilation verification
-./run_any_python_tool.sh replace_text_ast.py --file MyClass.java oldMethod newMethod --atomic --check-compile
+./run_any_python_tool.sh replace_text_ast_v2.py --file MyClass.java oldMethod newMethod --atomic --check-compile
 
 # Custom retry configuration
 export REPLACE_TEXT_AST_RETRY_ATTEMPTS=5
-./run_any_python_tool.sh replace_text_ast.py --file Complex.java complex_var simple_var --atomic
+./run_any_python_tool.sh replace_text_ast_v2.py --file Complex.java complex_var simple_var --atomic
 ```
 
 ##### refactor_rename.py - Atomic Symbol Renaming
@@ -294,12 +294,12 @@ export ATOMIC_OPERATION_LOG="~/.pytoolserrors/atomic/"  # Atomic operation log d
 
 ##### Tool-Specific Overrides
 ```bash
-# replace_text.py specific settings
+# replace_text_v8.py specific settings
 export REPLACE_TEXT_RETRY_ATTEMPTS=5
 export REPLACE_TEXT_RETRY_DELAY=1.5
 export REPLACE_TEXT_ATOMIC_TIMEOUT=60
 
-# replace_text_ast.py specific settings  
+# replace_text_ast_v2.py specific settings  
 export REPLACE_TEXT_AST_RETRY_ATTEMPTS=3
 export REPLACE_TEXT_AST_RETRY_DELAY=2.0
 export REPLACE_TEXT_AST_ATOMIC_TIMEOUT=45
@@ -400,41 +400,41 @@ max_items = 50            # Default --max value
 ### Enhanced Search with Context and Auto-Finding
 ```bash
 # V5 features: Context line display with ± syntax
-./run_any_python_tool.sh find_text.py "TODO" ±10                    # 10 lines before/after
-./run_any_python_tool.sh find_text.py "error" --file MyClass.java ±5  # With specific file
+./run_any_python_tool.sh find_text_v7.py "TODO" ±10                    # 10 lines before/after
+./run_any_python_tool.sh find_text_v7.py "error" --file MyClass.java ±5  # With specific file
 
 # Auto file finding (v5)
-./run_any_python_tool.sh find_text.py "processData" --file DataManager.java  # Finds file automatically
-./run_any_python_tool.sh find_text.py "calculate" --file Calculator.java --auto-find
+./run_any_python_tool.sh find_text_v7.py "processData" --file DataManager.java  # Finds file automatically
+./run_any_python_tool.sh find_text_v7.py "calculate" --file Calculator.java --auto-find
 
 # Extract line ranges for piping
-./run_any_python_tool.sh find_text.py "TODO" --extract-ranges       # Output: file.java:100±5
-./run_any_python_tool.sh find_text.py "TODO" --extract-ranges --merge-ranges  # Merges overlapping
+./run_any_python_tool.sh find_text_v7.py "TODO" --extract-ranges       # Output: file.java:100±5
+./run_any_python_tool.sh find_text_v7.py "TODO" --extract-ranges --merge-ranges  # Merges overlapping
 
 # Traditional context options still work
-./run_any_python_tool.sh find_text.py "pattern" -C 5                # 5 lines of context
-./run_any_python_tool.sh find_text.py "pattern" -A 3 -B 2           # 3 after, 2 before
+./run_any_python_tool.sh find_text_v7.py "pattern" -C 5                # 5 lines of context
+./run_any_python_tool.sh find_text_v7.py "pattern" -A 3 -B 2           # 3 after, 2 before
 
 # Extract methods containing patterns (v4 features retained)
-./run_any_python_tool.sh find_text.py "TODO" --extract-method
-./run_any_python_tool.sh find_text.py "deprecated" --extract-method-alllines
+./run_any_python_tool.sh find_text_v7.py "TODO" --extract-method
+./run_any_python_tool.sh find_text_v7.py "deprecated" --extract-method-alllines
 
 # Search with AST context (shows class → method hierarchy)
-./run_any_python_tool.sh find_text.py "calculateValue" --file DataBook.java
+./run_any_python_tool.sh find_text_v7.py "calculateValue" --file DataBook.java
 # Output: DataBook.java:234: calculateValue(item);
 #         AST context: [OrderBook → processData → calculateValue]
 
 # V6: Structural block extraction
-./run_any_python_tool.sh find_text.py "error" --file Handler.java --extract-block
-./run_any_python_tool.sh find_text.py "validate" --file Process.py --extract-block
+./run_any_python_tool.sh find_text_v7.py "error" --file Handler.java --extract-block
+./run_any_python_tool.sh find_text_v7.py "validate" --file Process.py --extract-block
 
 # V6: Standalone wholefile mode - display entire files without searching
-./run_any_python_tool.sh find_text.py --wholefile --file config.py                 # Single file
-./run_any_python_tool.sh find_text.py --wholefile --file file1.txt file2.txt      # Multiple files
-./run_any_python_tool.sh find_text.py --wholefile --file *.log --json             # JSON output
+./run_any_python_tool.sh find_text_v7.py --wholefile --file config.py                 # Single file
+./run_any_python_tool.sh find_text_v7.py --wholefile --file file1.txt file2.txt      # Multiple files
+./run_any_python_tool.sh find_text_v7.py --wholefile --file *.log --json             # JSON output
 
 # V6: Wholefile with pattern - show full files containing matches
-./run_any_python_tool.sh find_text.py "TODO" --file src/*.java --wholefile        # Full files with TODOs
+./run_any_python_tool.sh find_text_v7.py "TODO" --file src/*.java --wholefile        # Full files with TODOs
 ```
 
 ### AST-Based Navigation and Analysis
@@ -452,10 +452,10 @@ max_items = 50            # Default --max value
 ### Bulletproof File Operations with Atomic Safety
 ```bash
 # Atomic text replacement with retry logic
-./run_any_python_tool.sh replace_text.py "oldMethod" "newMethod" src/ --atomic --retry-attempts 5
+./run_any_python_tool.sh replace_text_v8.py "oldMethod" "newMethod" src/ --atomic --retry-attempts 5
 
 # AST-based atomic replacement with rollback protection
-./run_any_python_tool.sh replace_text_ast.py --file MyClass.java --line 42 oldVar newVar --atomic
+./run_any_python_tool.sh replace_text_ast_v2.py --file MyClass.java --line 42 oldVar newVar --atomic
 
 # Safe move with atomic operations and compile checking
 ./run_any_python_tool.sh safe_move.py move old.java new.java --check-compile --atomic
@@ -563,7 +563,7 @@ class SecureToolBase:
 ### Error Monitoring Dashboard
 ```bash
 # View errors by tool
-./run_any_python_tool.sh analyze_errors.py --tool find_text.py
+./run_any_python_tool.sh analyze_errors.py --tool find_text_v7.py
 
 # Find patterns across all tools
 ./run_any_python_tool.sh analyze_errors.py --patterns
@@ -598,7 +598,7 @@ export ATOMIC_RETRY_ATTEMPTS=5
 export ATOMIC_RETRY_DELAY=1.5
 
 # Use JSON for automation with atomic safety
-./run_any_python_tool.sh find_text.py "pattern" --json --atomic | jq '.results'
+./run_any_python_tool.sh find_text_v7.py "pattern" --json --atomic | jq '.results'
 ```
 
 ### 3. Atomic Operations Best Practices
@@ -606,7 +606,7 @@ export ATOMIC_RETRY_DELAY=1.5
 #### Production Environments
 ```bash
 # Always use atomic operations for production changes
-./run_any_python_tool.sh replace_text.py "old" "new" src/ --atomic --retry-attempts 5
+./run_any_python_tool.sh replace_text_v8.py "old" "new" src/ --atomic --retry-attempts 5
 
 # Enable comprehensive logging
 ./run_any_python_tool.sh refactor_rename.py --replace oldVar newVar --in "**/*.java" --atomic --log-level debug
@@ -631,7 +631,7 @@ export ATOMIC_OPERATION_TIMEOUT=120
 export ATOMIC_OPERATION_TIMEOUT=300
 
 # Use progress monitoring
-./run_any_python_tool.sh replace_text_ast.py --file LargeFile.java oldVar newVar --atomic --progress
+./run_any_python_tool.sh replace_text_ast_v2.py --file LargeFile.java oldVar newVar --atomic --progress
 
 # Enable batch processing
 ./run_any_python_tool.sh organize_files.py large_directory/ --atomic --batch-size 100

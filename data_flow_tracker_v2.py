@@ -1,6 +1,18 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 """
 Data Flow Tracker V2 - Advanced code intelligence and algorithm analysis tool
+
+Author: Vaibhav-api-code
+Co-Author: Claude Code (https://claude.ai/code)
+Created: 2025-07-26
+Updated: 2025-07-27
+License: Mozilla Public License 2.0 (MPL-2.0)
 
 Enhanced version with five major capabilities:
 1. Impact Analysis - Shows where data escapes scope and causes effects
@@ -36,6 +48,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
 import traceback
+import re
 
 # Optional Java support
 try:
@@ -44,6 +57,16 @@ try:
 except ImportError:
     javalang = None
     JAVA_SUPPORT = False
+
+# Optional Jinja2 template support
+try:
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
+    JINJA2_SUPPORT = True
+except ImportError:
+    Environment = None
+    FileSystemLoader = None
+    select_autoescape = None
+    JINJA2_SUPPORT = False
 
 # Type definitions
 class ExitPointType(Enum):
@@ -109,9 +132,11 @@ class DataFlowAnalyzerV2:
         self.dependencies = defaultdict(set)
         self.definitions = {}
         self.assignments = defaultdict(list)
-        self.function_calls = defaultdict(list)
+        # Function/method calls and inter-procedural data
+        self.function_calls: Dict[str, List[Dict[str, Any]]] = defaultdict(list)  # var -> list(call info)
         self.function_returns = defaultdict(list)
-        self.parameter_mappings = defaultdict(list)
+        self.parameter_mappings: Dict[str, List[Dict[str, Any]]] = defaultdict(list)  # func -> list of mappings
+        self.function_params: Dict[str, List[str]] = {}  # func -> parameter names
         
         # V2 additions
         self.exit_points = defaultdict(list)
@@ -380,10 +405,55 @@ class DataFlowAnalyzerV2:
         else:
             return self._generate_standard_html(result, var_name, explanation)
     
+    def _build_function_mappings(self) -> Dict[str, Dict[str, Any]]:
+        """Build a mapping of function names to return values and dependencies."""
+        mappings: Dict[str, Dict[str, Any]] = {}
+        
+        # Look through all exit points to find what functions return
+        for var, exit_points in self.exit_points.items():
+            for exit_point in exit_points:
+                if exit_point.type == ExitPointType.RETURN:
+                    func_name = exit_point.function
+                    if func_name not in mappings:
+                        mappings[func_name] = {
+                            "returns": [],
+                            "dependencies": [],
+                            "location": exit_point.location,
+                            "line": exit_point.line
+                        }
+                    if var not in mappings[func_name]["returns"]:
+                        mappings[func_name]["returns"].append(var)
+        
+        # Look through function calls to get dependencies observed at call sites
+        for var, calls in self.function_calls.items():
+            for call_info in calls:
+                func_name = call_info.get("function", "")
+                if func_name in mappings:
+                    if var not in mappings[func_name]["dependencies"]:
+                        mappings[func_name]["dependencies"].append(var)
+
+        # Incorporate explicit parameter mappings captured at call sites
+        for func_name, mapping_list in self.parameter_mappings.items():
+            if func_name not in mappings:
+                mappings[func_name] = {
+                    "returns": [],
+                    "dependencies": [],
+                    "location": "unknown",
+                    "line": 0
+                }
+            for m in mapping_list:
+                for args in m.get("mapping", {}).values():
+                    for v in args:
+                        if v not in mappings[func_name]["dependencies"]:
+                            mappings[func_name]["dependencies"].append(v)
+        
+        return mappings
+    
     def _extract_calculation_path(self, target_var: str) -> List[Dict[str, Any]]:
-        """Extract the minimal calculation path for a variable"""
+        """Extract the minimal calculation path for a variable with deep function call tracing"""
         path = []
         visited = set()
+        function_mappings = self._build_function_mappings()
         
         def trace_calculation(var: str, depth: int = 0):
             if var in visited or depth > 50:  # Prevent infinite recursion
@@ -408,9 +478,33 @@ class DataFlowAnalyzerV2:
                 if self._is_essential_calculation(step, target_var):
                     path.append(step)
                     
-                    # Trace inputs
+                    # Trace inputs - enhanced to follow function calls
                     for input_var in step["inputs"]:
-                        trace_calculation(input_var, depth + 1)
+                        # If input_var is a function name, trace what that function returns
+                        if input_var in function_mappings:
+                            # Add a step for the function call itself
+                            func_step = {
+                                "variable": input_var,
+                                "operation": "function_call",
+                                "inputs": function_mappings[input_var].get("dependencies", []),
+                                "output": input_var,
+                                "location": function_mappings[input_var].get("location", "unknown"),
+                                "line": function_mappings[input_var].get("line", 0),
+                                "essential": True,
+                                "depth": depth + 1
+                            }
+                            path.append(func_step)
+                            
+                            # Trace what the function returns
+                            for returned_var in function_mappings[input_var].get("returns", []):
+                                trace_calculation(returned_var, depth + 2)
+                            
+                            # Trace function parameters
+                            for param_var in function_mappings[input_var].get("dependencies", []):
+                                trace_calculation(param_var, depth + 2)
+                        else:
+                            # Regular variable dependency
+                            trace_calculation(input_var, depth + 1)
         
         trace_calculation(target_var)
         
@@ -509,10 +603,77 @@ class DataFlowAnalyzerV2:
         return warnings
     
     def _is_essential_calculation(self, step: Dict[str, Any], target: str) -> bool:
-        """Determine if a calculation step is essential for the target value"""
-        # For now, consider all steps essential
-        # Future: implement branch pruning logic
-        return True
+        """Determine if a calculation step is essential for the target value
+        
+        A calculation is considered essential if:
+        1. It directly produces the target variable
+        2. It modifies a variable that eventually affects the target
+        3. It's part of a control flow that determines the target's value
+        """
+        # Direct assignment to target is always essential
+        if step.get('variable') == target:
+            return True
+        
+        # Check if this step's output affects the target
+        outputs = step.get('outputs', [])
+        if target in outputs:
+            return True
+        
+        # Check operation type
+        operation = step.get('operation', 'assignment')
+        
+        # Control flow operations are usually essential
+        if operation in ['condition', 'loop', 'branch']:
+            # Check if the condition uses variables that affect target
+            inputs = step.get('inputs', [])
+            if any(self._variable_affects_target(var, target) for var in inputs):
+                return True
+        
+        # Function calls that might have side effects
+        if operation == 'function_call':
+            func_name = step.get('function', '')
+            # Essential if it's a known state-modifying function
+            if any(pattern in func_name.lower() for pattern in ['set', 'update', 'modify', 'write', 'save']):
+                return True
+        
+        # Intermediate calculations - check if they contribute to target
+        if operation in ['assignment', 'calculation']:
+            # This step is essential if its output is used by another essential step
+            step_var = step.get('variable')
+            if step_var and self._variable_affects_target(step_var, target):
+                return True
+        
+        # Default: consider non-essential for pruning
+        return False
+    
+    def _variable_affects_target(self, var: str, target: str, visited: Optional[Set[str]] = None, depth: int = 0) -> bool:
+        """Check if a variable eventually affects the target variable"""
+        # Initialize visited set on first call
+        if visited is None:
+            visited = set()
+        
+        # Prevent infinite recursion with depth limit
+        if depth > 100:
+            return False
+        
+        # Prevent cycles
+        if var in visited:
+            return False
+        
+        # Quick check: if var is the target itself
+        if var == target:
+            return True
+        
+        # Mark as visited
+        visited.add(var)
+        
+        # Check in our tracked dependencies
+        if var in self.dependencies:
+            for dep_var in self.dependencies[var]:
+                if dep_var == target or self._variable_affects_target(dep_var, target, visited, depth + 1):
+                    return True
+        
+        return False
     
     def _get_risk_recommendation(self, risk_level: str) -> str:
         """Get recommendation based on risk level"""
@@ -668,9 +829,9 @@ class DataFlowAnalyzerV2:
             explanation += f"This variable influences {len(affects)} other variables in your codebase. "
             
             if len(affects) <= 3:
-                explanation += f"Specifically, it affects: {', '.join([a.get('name', 'unknown') for a in affects])}"
+                explanation += f"Specifically, it affects: {', '.join([a.get('variable', a.get('name', 'unknown')) for a in affects])}"
             else:
-                explanation += f"The main affected variables are: {', '.join([a.get('name', 'unknown') for a in affects[:3]])}, and {len(affects) - 3} others"
+                explanation += f"The main affected variables are: {', '.join([a.get('variable', a.get('name', 'unknown')) for a in affects[:3]])}, and {len(affects) - 3} others"
             
             explanation += f".\n\n💡 **Impact**: Changes to '{var_name}' will propagate through this dependency chain. Test all affected variables when modifying this one."
             
@@ -684,9 +845,9 @@ class DataFlowAnalyzerV2:
             explanation += f"This variable depends on {len(depends_on)} other variables. "
             
             if len(depends_on) <= 3:
-                explanation += f"It's calculated from: {', '.join([d.get('name', 'unknown') for d in depends_on])}"
+                explanation += f"It's calculated from: {', '.join([d.get('variable', d.get('name', 'unknown')) for d in depends_on])}"
             else:
-                explanation += f"Key dependencies include: {', '.join([d.get('name', 'unknown') for d in depends_on[:3]])}, and {len(depends_on) - 3} others"
+                explanation += f"Key dependencies include: {', '.join([d.get('variable', d.get('name', 'unknown')) for d in depends_on[:3]])}, and {len(depends_on) - 3} others"
             
             explanation += f".\n\n💡 **Debugging**: To troubleshoot issues with '{var_name}', check these dependencies first. Any problems likely originate from these source variables."
         
@@ -724,7 +885,7 @@ class DataFlowAnalyzerV2:
             color = {"file_write": "#FF6B6B", "console": "#4ECDC4", "network": "#45B7D1", "database": "#96CEB4"}.get(effect_type, "#FFA07A")
             nodes.append({
                 "id": node_id,
-                "label": f"Side Effect: {effect.get('effect', 'unknown')}",
+                "label": f"Side Effect: {effect.get('type', 'unknown')}",
                 "group": "side_effect",
                 "level": 1,
                 "details": f"Type: {effect_type}\nLocation: {effect.get('location', 'unknown')}"
@@ -847,10 +1008,10 @@ class DataFlowAnalyzerV2:
                 node_id = f"affects_{i}"
                 nodes.append({
                     "id": node_id,
-                    "label": affected.get("name", "unknown"),
+                    "label": affected.get("variable", affected.get("name", "unknown")),
                     "group": "affected",
                     "level": 1,
-                    "details": f"Variable: {affected.get('name', 'unknown')}\nLocation: {affected.get('location', 'unknown')}"
+                    "details": f"Variable: {affected.get('variable', affected.get('name', 'unknown'))}\nLocation: {affected.get('location', 'unknown')}"
                 })
                 edges.append({"from": var_name, "to": node_id, "arrows": "to", "color": {"color": "#3498DB"}})
         
@@ -861,14 +1022,31 @@ class DataFlowAnalyzerV2:
                 node_id = f"depends_{i}"
                 nodes.append({
                     "id": node_id,
-                    "label": dependency.get("name", "unknown"),
+                    "label": dependency.get("variable", dependency.get("name", "unknown")),
                     "group": "dependency",
                     "level": -1,
-                    "details": f"Variable: {dependency.get('name', 'unknown')}\nLocation: {dependency.get('location', 'unknown')}"
+                    "details": f"Variable: {dependency.get('variable', dependency.get('name', 'unknown'))}\nLocation: {dependency.get('location', 'unknown')}"
                 })
                 edges.append({"from": node_id, "to": var_name, "arrows": "to", "color": {"color": "#E74C3C"}})
         
         return self._create_html_template("Dependency Analysis", var_name, explanation, nodes, edges, "INFO")
+    
+    def _get_template_environment(self) -> Optional[Environment]:
+        """Get Jinja2 environment if available"""
+        if not JINJA2_SUPPORT:
+            return None
+        
+        # Find template directory relative to this script
+        script_dir = Path(__file__).parent
+        template_dir = script_dir / "templates"
+        
+        if not template_dir.exists():
+            return None
+            
+        return Environment(
+            loader=FileSystemLoader(template_dir),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
     
     def _create_html_template(self, title: str, var_name: str, explanation: str, nodes: List[Dict], edges: List[Dict], risk_level: str) -> str:
         """Create the base HTML template with vis.js visualization"""
@@ -889,6 +1067,33 @@ class DataFlowAnalyzerV2:
             "INFO": "ℹ️ Information - Analysis complete",
             "NONE": "➖ No Data - Limited analysis available"
         }
+        
+        # Try to use Jinja2 template if available
+        env = self._get_template_environment()
+        if env:
+            try:
+                template = env.get_template('data_flow/visualization.html')
+                return template.render(
+                    title=title,
+                    var_name=var_name,
+                    explanation=explanation,
+                    nodes=nodes,
+                    edges=edges,
+                    risk_level=risk_level,
+                    risk_color=risk_colors.get(risk_level, '#3498DB'),
+                    risk_message=risk_messages.get(risk_level, ''),
+                    metadata={
+                        'analysis_type': title,
+                        'total_nodes': len(nodes),
+                        'total_edges': len(edges)
+                    }
+                )
+            except Exception as e:
+                print(f"Warning: Failed to use Jinja2 template: {e}", file=sys.stderr)
+                # Fall through to built-in template
+        
+        # Fallback to built-in template (keeping existing code for compatibility)
+        # Risk level colors and messages are already defined above
         
         return f"""<!DOCTYPE html>
 <html lang="en">
@@ -1372,15 +1577,20 @@ class PythonDataFlowAnalyzerV2(ast.NodeVisitor):
         self.conditional_depth = 0
         
     def visit_FunctionDef(self, node):
-        """Handle function definitions with return tracking"""
+        """Handle function definitions with return tracking and param capture."""
         old_function = self.current_function
         self.current_function = node.name
-        self.current_scope.append(node.name)
-        
+
+        # Record parameter names for inter-procedural mapping
+        try:
+            params = [arg.arg for arg in getattr(node, "args", {}).args]
+        except Exception:
+            params = []
+        self.analyzer.function_params[node.name] = params
+
         # Process function body
         self.generic_visit(node)
-        
-        self.current_scope.pop()
+
         self.current_function = old_function
         
     def visit_ClassDef(self, node):
@@ -1461,7 +1671,7 @@ class PythonDataFlowAnalyzerV2(ast.NodeVisitor):
         self.generic_visit(node)
     
     def visit_Call(self, node):
-        """Enhanced call tracking with external effect detection"""
+        """Enhanced call tracking with external effect detection and dependency recording"""
         # Get function name
         func_name = self._get_call_name(node.func)
         
@@ -1470,6 +1680,36 @@ class PythonDataFlowAnalyzerV2(ast.NodeVisitor):
             arg_vars = []
             for arg in node.args:
                 arg_vars.extend(self._extract_dependencies(arg))
+            
+            # Record function call dependencies for calculation path analysis
+            for var in arg_vars:
+                call_info = {
+                    "function": func_name,
+                    "location": self.analyzer.filename,
+                    "line": node.lineno,
+                    "arguments": list(arg_vars),
+                    "in_function": self.current_function or "module"
+                }
+                self.analyzer.function_calls[var].append(call_info)
+
+            # Also record parameter->argument mapping when function parameters are known
+            if func_name in self.analyzer.function_params:
+                formals = self.analyzer.function_params[func_name]
+                mapping: Dict[str, List[str]] = {}
+                # Positional
+                for i, formal in enumerate(formals):
+                    if i < len(node.args):
+                        mapping[formal] = sorted(self._extract_dependencies(node.args[i]))
+                # Keywords
+                for kw in getattr(node, "keywords", []) or []:
+                    if kw.arg:
+                        mapping[kw.arg] = sorted(self._extract_dependencies(kw.value))
+                self.analyzer.parameter_mappings[func_name].append({
+                    "location": self.analyzer.filename,
+                    "line": node.lineno,
+                    "in_function": self.current_function or "module",
+                    "mapping": mapping
+                })
             
             # Check if this is an external effect
             if self._is_external_effect(func_name):
@@ -1481,8 +1721,9 @@ class PythonDataFlowAnalyzerV2(ast.NodeVisitor):
                         line=node.lineno,
                         function=self.current_function or "module",
                         description=f"External call to {func_name}",
-                        severity="high" if effect_type in [ExitPointType.FILE_WRITE, 
-                                                          ExitPointType.DATABASE] else "medium"
+                        severity="high" if effect_type in (ExitPointType.FILE_WRITE,
+                                                           ExitPointType.DATABASE,
+                                                           ExitPointType.NETWORK) else "medium"
                     )
                     self.analyzer.exit_points[var].append(exit_point)
                     self.analyzer.external_effects[var].append(
@@ -1537,9 +1778,11 @@ class PythonDataFlowAnalyzerV2(ast.NodeVisitor):
                 if node.value.id == "self":
                     deps.add(f"self.{node.attr}")
                 else:
-                    deps.add(node.value.id)
+                    # Track full attribute to avoid losing specificity
+                    deps.add(f"{node.value.id}.{node.attr}")
+                    deps.add(node.value.id)  # also track base for broader impact
             else:
-                deps.update(self._extract_dependencies(node.value))
+                deps |= self._extract_dependencies(node.value)
         elif isinstance(node, ast.BinOp):
             deps.update(self._extract_dependencies(node.left))
             deps.update(self._extract_dependencies(node.right))
@@ -1578,7 +1821,7 @@ class PythonDataFlowAnalyzerV2(ast.NodeVisitor):
             deps.update(self._extract_dependencies(node.value))
             for gen in node.generators:
                 deps.update(self._extract_dependencies(gen.iter))
-        
+
         return deps
     
     def _infer_type(self, node) -> TypeInfo:
@@ -1656,7 +1899,11 @@ class PythonDataFlowAnalyzerV2(ast.NodeVisitor):
 
 
 class JavaDataFlowAnalyzerV2:
-    """Enhanced Java analyzer with V2 features - Full parity with Python"""
+    """Java analyzer reaching feature parity with Python analyzer.
+    Two-pass:
+      1) Collect method/constructor parameter lists into function_params
+      2) Analyze statements for assignments, calls, returns, control flow, and exit points
+    """
     
     def __init__(self, analyzer: DataFlowAnalyzerV2):
         self.analyzer = analyzer
@@ -1690,11 +1937,86 @@ class JavaDataFlowAnalyzerV2:
             print("Error: javalang not installed. Run: pip install javalang", file=sys.stderr)
             return
             
-        # First pass: collect all declarations
-        self._collect_declarations(tree)
+        # Pass 1: collect parameter lists
+        for path, node in tree:
+            if isinstance(node, javalang.tree.ClassDeclaration):
+                self.current_class = node.name
+                for m in node.methods or []:
+                    self._record_method_params(m, node.name)
+                for c in node.constructors or []:
+                    self._record_constructor_params(c, node.name)
+                self.current_class = None
+
+        # Pass 2: full analysis
+        for path, node in tree:
+            if isinstance(node, javalang.tree.ClassDeclaration):
+                self._analyze_class(node)
+    
+    def _record_method_params(self, method, class_name: str):
+        formals = [p.name for p in (method.parameters or [])]
+        simple = method.name
+        qualified = f"{class_name}.{method.name}"
+        self.analyzer.function_params[simple] = formals
+        self.analyzer.function_params[qualified] = formals
+
+    def _record_constructor_params(self, ctor, class_name: str):
+        formals = [p.name for p in (ctor.parameters or [])]
+        qualified = f"{class_name}.<init>"
+        self.analyzer.function_params[qualified] = formals
+
+    def _analyze_class(self, node):
+        """Analyze class with full analysis including declarations, assignments, calls, returns"""
+        try:
+            import javalang
+        except ImportError:
+            return
+            
+        self.current_class = node.name
+        self.current_scope.append(node.name)
         
-        # Second pass: analyze data flow
-        self._analyze_data_flow(tree)
+        # Process fields
+        for field in node.fields or []:
+            for declarator in field.declarators:
+                var_name = f"{self.current_class}.{declarator.name}"
+                location = f"{self.analyzer.filename}:{self._get_line_number(node)}"
+                self.analyzer.definitions[var_name] = location
+        
+        # Process methods
+        for method in node.methods or []:
+            self._analyze_method(method)
+            
+        # Process constructors  
+        for constructor in node.constructors or []:
+            self._analyze_constructor(constructor)
+        
+        self.current_scope.pop()
+        self.current_class = None
+
+    def _analyze_method(self, method):
+        """Analyze method with comprehensive data flow tracking"""
+        self._analyze_callable(method.name, method.body, add_to_scope=True)
+
+    def _analyze_constructor(self, constructor):
+        """Analyze constructor with comprehensive data flow tracking"""
+        self._analyze_callable("<init>", constructor.body, add_to_scope=True)
+    
+    def _analyze_callable(self, callable_name, body, add_to_scope=True):
+        """Common logic for analyzing callable bodies (methods/constructors)"""
+        old_method = self.current_method
+        self.current_method = callable_name
+        
+        if add_to_scope:
+            self.current_scope.append(callable_name)
+        
+        # Analyze body
+        if body:
+            for stmt in body:
+                self._analyze_java_statement(stmt)
+        
+        if add_to_scope:
+            self.current_scope.pop()
+            
+        self.current_method = old_method
     
     def _collect_declarations(self, tree):
         """First pass: collect class and method declarations"""
@@ -1724,17 +2046,24 @@ class JavaDataFlowAnalyzerV2:
                 self._analyze_method(node)
     
     def _analyze_class(self, class_node):
-        """Analyze Java class with V2 features"""
+        """Analyze Java class with V2 features (fields + methods + constructors)."""
         old_class = self.current_class
         self.current_class = class_node.name
         self.current_scope.append(class_node.name)
         
+        # Record fields as definitions (class scope)
+        for field in getattr(class_node, "fields", []) or []:
+            for declarator in getattr(field, "declarators", []) or []:
+                var_name = f"{self.current_class}.{declarator.name}"
+                location = f"{self.analyzer.filename}:{self._get_line_number(class_node)}"
+                self.analyzer.definitions[var_name] = location
+        
         # Analyze methods
-        for method in class_node.methods or []:
+        for method in getattr(class_node, "methods", []) or []:
             self._analyze_method(method)
         
         # Analyze constructors
-        for constructor in class_node.constructors or []:
+        for constructor in getattr(class_node, "constructors", []) or []:
             self._analyze_constructor(constructor)
         
         self.current_scope.pop()
@@ -1742,45 +2071,41 @@ class JavaDataFlowAnalyzerV2:
     
     def _analyze_method(self, method):
         """Analyze Java method with comprehensive V2 features"""
+        self._analyze_callable_body(method, method.name, method.parameters, method.body, include_scope=True)
+    
+    def _analyze_constructor(self, constructor):
+        """Analyze Java constructor"""
+        self._analyze_callable_body(constructor, "<init>", constructor.parameters, constructor.body, include_scope=False)
+    
+    def _analyze_callable_body(self, node, callable_name, parameters, body, include_scope=True):
+        """Common logic for analyzing methods and constructors"""
         old_method = self.current_method
-        self.current_method = method.name
-        self.current_scope.append(method.name)
+        self.current_method = callable_name
+        
+        # Add to scope if it's a method (not constructor)
+        if include_scope:
+            self.current_scope.append(callable_name)
         
         # Analyze parameters
-        for param in method.parameters or []:
+        for param in parameters or []:
             var_name = param.name
             location = f"{self.analyzer.filename}:{self._get_line_number(param)}"
             self.analyzer.definitions[var_name] = location
             
-            # V2: Add type information for parameters
-            if param.type:
+            # V2: Add type information for parameters (only for methods, not constructors in current impl)
+            if include_scope and param.type:
                 type_info = self._infer_java_type(param.type)
                 type_key = f"{var_name}_{self._get_line_number(param)}"
                 self.analyzer.type_info[type_key] = type_info
         
-        # Analyze method body
-        if method.body:
-            for stmt in method.body:
+        # Analyze body
+        if body:
+            for stmt in body:
                 self._analyze_statement(stmt)
         
-        self.current_scope.pop()
-        self.current_method = old_method
-    
-    def _analyze_constructor(self, constructor):
-        """Analyze Java constructor"""
-        old_method = self.current_method
-        self.current_method = f"<init>"
-        
-        # Analyze parameters
-        for param in constructor.parameters or []:
-            var_name = param.name
-            location = f"{self.analyzer.filename}:{self._get_line_number(param)}"
-            self.analyzer.definitions[var_name] = location
-        
-        # Analyze constructor body
-        if constructor.body:
-            for stmt in constructor.body:
-                self._analyze_statement(stmt)
+        # Clean up scope if it was added
+        if include_scope:
+            self.current_scope.pop()
         
         self.current_method = old_method
     
@@ -1942,8 +2267,9 @@ class JavaDataFlowAnalyzerV2:
                     line=self.line_number,
                     function=self.current_method or "main",
                     description=f"Java method call to {method_name}",
-                    severity="high" if effect_type in [ExitPointType.FILE_WRITE, 
-                                                      ExitPointType.DATABASE] else "medium"
+                    severity="high" if effect_type in (ExitPointType.FILE_WRITE,
+                                                      ExitPointType.DATABASE,
+                                                      ExitPointType.NETWORK) else "medium"
                 )
                 self.analyzer.exit_points[var].append(exit_point)
                 self.analyzer.external_effects[var].append(
@@ -2234,7 +2560,7 @@ Examples:
         """
     )
     
-    parser.add_argument("--var", required=True, help="Variable name to track")
+    parser.add_argument("--var", required=False, help="Variable name to track")
     parser.add_argument("--file", required=True, help="Source file to analyze")
     parser.add_argument("--direction", choices=["forward", "backward"], 
                        help="Tracking direction (default: forward)")
@@ -2258,8 +2584,17 @@ Examples:
                        help="Provide natural language explanations of analysis results")
     parser.add_argument("--output-html", action="store_true",
                        help="Generate interactive HTML visualization report")
+    parser.add_argument("--html-out", help="Write HTML report to this path; if a directory, files are written inside")
+    parser.add_argument("--var-all", action="store_true", help="Generate reports for all variables (batch mode)")
     
     args = parser.parse_args()
+    
+    # Validate arguments
+    if not getattr(args, 'var', None) and not getattr(args, 'var_all', False):
+        parser.error("--var is required unless --var-all is specified.")
+    if getattr(args, 'html_out', None):
+        # Ensure HTML is emitted when explicit output path is provided
+        args.output_html = True
     
     # Read source file
     try:
@@ -2287,6 +2622,33 @@ Examples:
         print(f"Error analyzing code: {e}", file=sys.stderr)
         traceback.print_exc()
         sys.exit(1)
+    
+    # Batch mode: generate per-variable reports
+    if args.var_all and args.output_html:
+        # Batch per-variable HTML
+        all_vars = set(analyzer.definitions.keys()) | set(analyzer.dependencies.keys()) | set(analyzer.assignments.keys())
+        out = args.html_out or os.getcwd()
+        out_dir = out if not out.lower().endswith(".html") else os.path.dirname(out) or os.getcwd()
+        os.makedirs(out_dir, exist_ok=True)
+        def _san(s): return re.sub(r"[^A-Za-z0-9_.-]+", "_", s or "var")
+        base = os.path.basename(args.file).replace('.', '_')
+        cnt = 0
+        for v in sorted(all_vars):
+            if args.show_impact:
+                res, a_type = analyzer.show_impact(v), "impact"
+            elif args.show_calculation_path:
+                res, a_type = analyzer.show_calculation_path(v), "calculation_path"
+            elif args.track_state:
+                res, a_type = analyzer.track_state(v), "state_tracking"
+            else:
+                res = analyzer.track_backward(v, args.max_depth) if args.direction == "backward" else analyzer.track_forward(v, args.max_depth)
+                a_type = "standard"
+            html = analyzer.generate_html_report(res, a_type, v)
+            with open(os.path.join(out_dir, f"data_flow_{a_type}_{_san(v)}_{base}.html"), "w", encoding="utf-8") as f:
+                f.write(html)
+            cnt += 1
+        print(f"📦 Batch HTML reports generated for {cnt} variables in: {out_dir}")
+        return
     
     # Perform requested analysis
     if args.show_impact:
@@ -2338,12 +2700,23 @@ Examples:
         html_output = analyzer.generate_html_report(result, analysis_type, args.var)
         
         # Save to file
-        import os
-        filename = f"data_flow_{analysis_type}_{args.var}_{os.path.basename(args.file).replace('.', '_')}.html"
-        with open(filename, 'w', encoding='utf-8') as f:
+        safe_var = re.sub(r'[^A-Za-z0-9_.-]+', '_', args.var or 'var')
+        base_file = os.path.basename(args.file).replace('.', '_')
+        default_name = f"data_flow_{analysis_type}_{safe_var}_{base_file}.html"
+        if args.html_out:
+            out = args.html_out
+            # If endswith .html, use exactly; else treat as directory
+            if out.lower().endswith('.html'):
+                out_path = out
+            else:
+                os.makedirs(out, exist_ok=True)
+                out_path = os.path.join(out, default_name)
+        else:
+            out_path = default_name
+        with open(out_path, 'w', encoding='utf-8') as f:
             f.write(html_output)
         
-        print(f"📊 Interactive HTML report generated: {filename}")
+        print(f"📊 Interactive HTML report generated: {out_path}")
         print(f"🌐 Open in browser to explore the visualization")
         
         # Also show explanation if requested

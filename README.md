@@ -55,7 +55,7 @@ cd code-intelligence-toolkit
 chmod +x run_any_python_tool.sh
 
 # Use lightning-fast, safe tools immediately
-./run_any_python_tool.sh find_text.py "TODO" --multiline    # 10-100x faster search
+./run_any_python_tool.sh find_text_v7.py "TODO" --multiline    # 10-100x faster search
 ./run_any_python_tool.sh safegit.py status                  # Git with safety net
 ./run_any_python_tool.sh safe_file_manager.py move old new  # Reversible file ops
 ```
@@ -105,11 +105,11 @@ Recent incidents like [Replit's AI wiping production databases](https://fortune.
 ./run_any_python_tool.sh safe_file_manager.py undo --interactive  # Recover anything
 ```
 
-### Data Flow Tracker - Understand Your Code (NEW in v1.2.0)
+### Data Flow Tracker - Understand Your Code (Enhanced in v1.3.0)
 ```bash
 # Track how data flows through your code:
-./run_any_python_tool.sh data_flow_tracker.py --var user_input --file app.py
-./run_any_python_tool.sh data_flow_tracker.py --var result --direction backward
+./run_any_python_tool.sh data_flow_tracker_v2.py --var user_input --file app.py
+./run_any_python_tool.sh data_flow_tracker_v2.py --var result --direction backward
 ```
 
 
@@ -191,7 +191,7 @@ The Code Intelligence Toolkit provides 100+ command-line tools for developers wh
 ```bash
 # Search 1M+ line codebase
 grep "pattern" -r .                    # 45 seconds
-find_text.py "pattern"                 # 0.8 seconds (56x faster!)
+find_text_v7.py "pattern"                 # 0.8 seconds (56x faster!)
 
 # Edit 15,000 line file
 AI IDE tools                           # ❌ Timeout/crash/truncate
@@ -203,18 +203,18 @@ replace_text_ast.py oldVar newVar      # 3 seconds + automatic backup
 
 # Extract all methods from large file
 Manual copy/paste                       # 10+ minutes
-find_text.py --extract-method-alllines  # 0.2 seconds
+find_text_v7.py --extract-method-alllines  # 0.2 seconds
 ```
 
 ### 📊 Performance Comparison
 
 | Task | Traditional Method | Our Tools | Speedup |
 |------|-------------------|-----------|----------|
-| Search 1M lines | `grep -r`: 45s | `find_text.py`: 0.8s | **56x faster** |
+| Search 1M lines | `grep -r`: 45s | `find_text_v7.py`: 0.8s | **56x faster** |
 | Edit 15k line file | AI IDE: crash/timeout | `replace_text_v8.py`: 0.3s | **✅ Works** |
 | Find symbol usage | IDE indexing: 30s+ | `navigate_ast.py`: 0.1s | **300x faster** |
-| Rename across project | IDE refactor: 2-3 min | `replace_text_ast.py`: 3s | **40x faster** |
-| Extract all methods | Manual: 10+ min | `find_text.py`: 0.2s | **3000x faster** |
+| Rename across project | IDE refactor: 2-3 min | `replace_text_ast_v2.py`: 3s | **40x faster** |
+| Extract all methods | Manual: 10+ min | `find_text_v7.py`: 0.2s | **3000x faster** |
 | Safe file move | `mv` + manual backup | `safe_file_manager.py`: instant | **✓ Reversible** |
 | Git reset recovery | Often impossible | `safegit.py`: automatic | **✓ Always safe** |
 
@@ -262,10 +262,59 @@ Built for safety at every level:
 - **Atomic operations** - No partial states
 - **Comprehensive logging** - Full audit trail
 
-## 🆕 What's New (v1.2.2+)
+## 🆕 What's New (v1.3.0) - Intelligence Layer & Documentation Revolution
 
-### 📚 Automated Documentation Generation - Turn Analysis into Docs  
-- **NEW: doc_generator.py** - Revolutionary documentation generator that leverages intelligence layer analysis to automatically create professional documentation in multiple styles and formats.
+**Released: July 2025** - This major release introduces revolutionary code intelligence and automated documentation generation capabilities.
+
+### 🧠 **NEW: data_flow_tracker_v2.py - Intelligence Layer Revolution**
+**Complete rewrite with breakthrough intelligence capabilities:**
+- **Natural Language Explanations** - Complex analysis explained in plain English
+- **Interactive HTML Visualizations** - Self-contained reports with vis.js network graphs
+- **Risk Assessment** - Smart analysis of code change impact with confidence scoring
+- **Calculation Path Tracking** - Step-by-step breakdown of how values are computed
+- **Type & State Evolution** - Monitor how variables change through code execution
+- **Zero Dependencies** - Works with any codebase, no setup required
+
+```bash
+# Revolutionary intelligence in action
+./run_any_python_tool.sh data_flow_tracker_v2.py --var total --show-impact --explain --output-html --file calc.py
+```
+
+### 📚 **NEW: doc_generator.py - Automated Documentation Generation**
+**Brand new tool that transforms code analysis into professional documentation:**
+- **Multiple Styles** - API docs, user guides, technical analysis, quick reference, tutorials
+- **Multiple Formats** - Markdown, HTML, reStructuredText, docstring injection
+- **Intelligence Integration** - Leverages data flow analysis for smart content generation
+- **Auto-Examples** - Contextually appropriate code samples and usage patterns
+- **Depth Control** - Surface, medium, or deep analysis levels
+
+```bash
+# Professional docs in seconds
+./run_any_python_tool.sh doc_generator.py --function calculatePrice --file pricing.py --style api-docs --output html
+./run_any_python_tool.sh doc_generator.py --class UserManager --file auth.py --style user-guide --depth deep
+```
+
+### 🗂️ **Major Tool Organization & Cleanup**
+- **Latest tools only** - Main directory contains only current, stable versions
+- **Safe archival** - All older versions preserved in organized `archive/` structure
+- **Clear hierarchy** - Easy to identify which tools to use (highest version number)
+
+**Current Active Tools:**
+- `data_flow_tracker_v2.py` (with intelligence layer) ← **NEW MAJOR FEATURE**
+- `doc_generator.py` (automated documentation) ← **NEW MAJOR FEATURE**
+- `find_text_v7.py` (with multiline search) ← Latest
+- `replace_text_v8.py` (with escape sequences) ← Latest  
+- `replace_text_ast_v2.py` (enhanced AST refactoring) ← Latest
+
+### 🐛 **Critical Reliability Fixes**
+- **Fixed infinite recursion** in data flow tracking - No more crashes with cyclic dependencies
+- **Enhanced Java method detection** - Better regex patterns for complex signatures
+- **Template system reliability** - Jinja2 templates with robust fallback mechanisms
+
+### 📚 **Complete Documentation Overhaul**
+- **Updated ALL documentation** - Every reference now points to correct tool versions
+- **Performance benchmarks** - Updated with latest capabilities and tool names
+- **Working examples** - All commands tested and verified
 
 #### 🎯 Documentation Generation Features
   ```bash
@@ -375,6 +424,22 @@ Transform code analysis into professional documentation:
 - Git
 - ripgrep (`rg`)
 
+### Dependencies
+
+The toolkit uses a modular dependency system:
+
+**Core Dependencies** (Required for basic functionality):
+- `javalang>=0.13.0` - Java AST parsing support
+- Basic Python standard library modules
+
+**Optional Dependencies** (For enhanced features):
+- `markdown>=3.3.0` - Enhanced HTML conversion in doc_generator.py (falls back to built-in converter if not installed)
+- `jinja2>=3.0.0` - Template engine for clean separation of HTML presentation from logic (falls back to built-in templates if not installed)
+- `rope>=1.0.0` - Advanced Python refactoring capabilities
+- `numpy`, `pandas`, `scikit-learn` - Advanced semantic diff features
+- `astroid>=2.0.0` - Enhanced Python AST analysis
+- See `requirements-optional.txt` for complete list
+
 ### Quick Start
 
 1. Clone the repository:
@@ -385,7 +450,11 @@ cd code-intelligence-toolkit
 
 2. Install dependencies:
 ```bash
-pip install -r requirements.txt
+# Core dependencies only (minimal installation)
+pip install -r requirements-core.txt
+
+# Or install everything including optional features
+pip install -r requirements.txt  # Installs both core and optional
 ```
 
 3. Run safety setup:
@@ -404,15 +473,15 @@ pip install -r requirements.txt
 ### ⚡ Lightning-Fast Code Search
 ```bash
 # Search entire codebase in milliseconds
-./run_any_python_tool.sh find_text.py "calculatePrice" --scope src/
+./run_any_python_tool.sh find_text_v7.py "calculatePrice" --scope src/
 # Result: 0.3 seconds for 1M+ lines (vs 45 seconds with grep)
 
 # Extract complete methods containing pattern
-./run_any_python_tool.sh find_text.py "TODO.*security" --extract-method --ast-context
+./run_any_python_tool.sh find_text_v7.py "TODO.*security" --extract-method --ast-context
 # Shows: Full method bodies + class hierarchy
 
 # Find and extract specific code blocks
-./run_any_python_tool.sh find_text.py "catch.*Exception" --extract-block
+./run_any_python_tool.sh find_text_v7.py "catch.*Exception" --extract-block
 # Extracts: Complete try-catch blocks, properly formatted
 ```
 
@@ -453,12 +522,12 @@ pip install -r requirements.txt
 # Analyzes diff, generates: "feat: add caching to price calculation"
 
 # Find and fix deprecated API usage
-./run_any_python_tool.sh find_text.py "@Deprecated" --extract-method | \
+./run_any_python_tool.sh find_text_v7.py "@Deprecated" --extract-method | \
 ./run_any_python_tool.sh suggest_refactoring.py --from-stdin
 
 # Batch symbol discovery and rename
-./run_any_python_tool.sh replace_text_ast.py --discover-symbols oldAPI src/ | \
-./run_any_python_tool.sh replace_text_ast.py --batch-rename oldAPI newAPI --confirm
+./run_any_python_tool.sh replace_text_ast_v2.py --discover-symbols oldAPI src/ | \
+./run_any_python_tool.sh replace_text_ast_v2.py --batch-rename oldAPI newAPI --confirm
 ```
 
 ### 📦 Safe File & Git Operations
@@ -622,7 +691,7 @@ env:
 steps:
   - name: Refactor code
     run: |
-      ./run_any_python_tool.sh replace_text.py "old_api" "new_api" --scope src/
+      ./run_any_python_tool.sh replace_text_v8.py "old_api" "new_api" --scope src/
       ./run_any_python_tool.sh safe_file_manager.py organize build/ --by-date
       ./run_any_python_tool.sh safegit.py add .
       ./run_any_python_tool.sh safegit.py commit -m "Automated refactoring"
@@ -686,10 +755,10 @@ export SAFEGIT_FORCE_YES=1  # This would bypass critical safety!
 | Category | Tool | Version | Key Feature |
 |----------|------|---------|-------------|
 | **Documentation** | doc_generator.py | NEW | Automated intelligent documentation generation |
-| **Data Flow** | data_flow_tracker.py | v2 | Intelligence layer with explanations & HTML |
-| **Search** | find_text.py | v7 | Multiline search with `--multiline` flag |
-| **Replace** | replace_text.py | v8 | Escape sequences with `--interpret-escapes` |
-| **AST Replace** | replace_text_ast.py | v2 | Escape sequences in comments/strings |
+| **Data Flow** | data_flow_tracker_v2.py | v2 | Intelligence layer with explanations & HTML |
+| **Search** | find_text_v7.py | v7 | Multiline search with `--multiline` flag |
+| **Replace** | replace_text_v8.py | v8 | Escape sequences with `--interpret-escapes` |
+| **AST Replace** | replace_text_ast_v2.py | v2 | Escape sequences in comments/strings |
 | **Git Safety** | safegit.py | v2.0 | Complete protection, non-interactive mode |
 | **File Safety** | safe_file_manager.py | Latest | Atomic operations, complete undo |
 | **Release** | release_workflow.sh | Latest | `--yes` flag for automation |
@@ -704,7 +773,7 @@ export SAFEGIT_FORCE_YES=1  # This would bypass critical safety!
 ./run_any_python_tool.sh data_flow_tracker_v2.py --var input_data --show-impact --explain --file app.py
 
 # Search
-./run_any_python_tool.sh find_text.py "pattern" --multiline --type regex
+./run_any_python_tool.sh find_text_v7.py "pattern" --multiline --type regex
 
 # Replace with newlines
 ./run_any_python_tool.sh replace_text_v8.py "old" "new\nline" --interpret-escapes

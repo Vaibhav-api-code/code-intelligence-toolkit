@@ -19,6 +19,43 @@ All notable changes to the Code Intelligence Toolkit will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-07-27
+
+### 🌟 Major New Features
+- **NEW: data_flow_tracker_v2.py** - Complete rewrite with intelligence layer
+  - Natural language explanations of complex analysis
+  - Interactive HTML visualizations with vis.js network graphs
+  - Risk assessment with confidence scoring
+  - Calculation path tracking and step-by-step breakdowns
+  - Type and state evolution monitoring
+- **NEW: doc_generator.py** - Automated documentation generation
+  - Multiple styles: API docs, user guides, technical analysis, quick reference, tutorials
+  - Multiple formats: Markdown, HTML, reStructuredText, docstring injection
+  - Intelligence integration with data flow analysis
+  - Auto-generated examples and usage patterns
+
+### 🗂️ Tool Organization & Archival
+- **Archived older tool versions** to organized `archive/` directory structure
+- **Main directory cleanup** - Only latest, stable tool versions remain
+- **Version hierarchy** - Clear identification of which tools to use
+- **Safe archival process** - All versions preserved with complete git history
+
+### 🐛 Critical Bug Fixes
+- **Fixed infinite recursion** in data_flow_tracker_v2.py when tracking cyclic dependencies
+- **Enhanced Java method detection** with improved regex patterns for complex signatures
+- **Template system reliability** with robust Jinja2 fallback mechanisms
+
+### 📚 Documentation Updates
+- **Complete documentation overhaul** - All references updated to latest tool versions
+- **Updated performance benchmarks** with current tool names and capabilities
+- **Verified examples** - All command examples tested and working
+- **Enhanced guides** - README.md, CLAUDE.md, and comprehensive tool documentation
+
+### 🔧 Enhanced Reliability
+- **Improved error handling** with better error messages and graceful degradation
+- **Template system** with Jinja2 templates and built-in fallbacks
+- **Cross-platform compatibility** improvements
+
 ## [1.2.3] - 2025-07-27
 
 ### Added - Complete Intelligence Platform

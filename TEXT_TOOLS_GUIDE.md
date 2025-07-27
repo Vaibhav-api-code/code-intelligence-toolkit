@@ -30,7 +30,7 @@ The code-intelligence-toolkit provides several specialized text tools, each opti
 
 ```
 Need to search for text?
-├─ YES → Use find_text.py v5
+├─ YES → Use find_text_v7.py v5
 │   ├─ Need context lines? → Use ±N syntax
 │   ├─ File location unknown? → Use --auto-find
 │   └─ Need method extraction? → Use --extract-method
@@ -71,19 +71,19 @@ Need to search for text?
 **Examples:**
 ```bash
 # Search with context
-./run_any_python_tool.sh find_text.py "TODO" ±10  # 10 lines before/after
+./run_any_python_tool.sh find_text_v7.py "TODO" ±10  # 10 lines before/after
 
 # Auto-find file
-./run_any_python_tool.sh find_text.py "calculate" --file Calculator.java  # Finds file automatically
+./run_any_python_tool.sh find_text_v7.py "calculate" --file Calculator.java  # Finds file automatically
 
 # Extract methods containing pattern
-./run_any_python_tool.sh find_text.py "deprecated" --extract-method
+./run_any_python_tool.sh find_text_v7.py "deprecated" --extract-method
 
 # Traditional context flags
-./run_any_python_tool.sh find_text.py "error" -C 5  # 5 lines of context
+./run_any_python_tool.sh find_text_v7.py "error" -C 5  # 5 lines of context
 
 # Extract line ranges for piping
-./run_any_python_tool.sh find_text.py "TODO" --extract-ranges | xargs multiline_reader.py
+./run_any_python_tool.sh find_text_v7.py "TODO" --extract-ranges | xargs multiline_reader.py
 ```
 
 ### multiline_reader.py - Line Range Extractor
@@ -112,7 +112,7 @@ Need to search for text?
 ./run_any_python_tool.sh multiline_reader.py file.java 10-20,30-40,50±5
 
 # Pipe from find_text
-./run_any_python_tool.sh find_text.py "TODO" --extract-ranges | xargs multiline_reader.py
+./run_any_python_tool.sh find_text_v7.py "TODO" --extract-ranges | xargs multiline_reader.py
 ```
 
 ### extract_methods_v2.py - Method Extractor
@@ -173,33 +173,33 @@ Need to search for text?
 
 ```bash
 # Step 1: Find all TODOs with context
-./run_any_python_tool.sh find_text.py "TODO" ±5
+./run_any_python_tool.sh find_text_v7.py "TODO" ±5
 
 # Step 2: Extract methods containing TODOs
-./run_any_python_tool.sh find_text.py "TODO" --extract-method
+./run_any_python_tool.sh find_text_v7.py "TODO" --extract-method
 
 # Step 3: Get specific line ranges
-./run_any_python_tool.sh find_text.py "TODO" --extract-ranges | xargs multiline_reader.py
+./run_any_python_tool.sh find_text_v7.py "TODO" --extract-ranges | xargs multiline_reader.py
 ```
 
 ### Analyzing Error Handling
 
 ```bash
 # Find all error handling with context
-./run_any_python_tool.sh find_text.py "catch|error|exception" --type regex ±10
+./run_any_python_tool.sh find_text_v7.py "catch|error|exception" --type regex ±10
 
 # Extract all try-catch blocks
 ./run_any_python_tool.sh extract_block.py ErrorHandler.java --type try --all
 
 # Find and extract error handling methods
-./run_any_python_tool.sh find_text.py "handleError" --extract-method
+./run_any_python_tool.sh find_text_v7.py "handleError" --extract-method
 ```
 
 ### Code Review Workflow
 
 ```bash
 # Find changes in specific area
-./run_any_python_tool.sh find_text.py "calculateValue" --file PriceCalculator.java ±20
+./run_any_python_tool.sh find_text_v7.py "calculateValue" --file PriceCalculator.java ±20
 
 # Extract the full method
 ./run_any_python_tool.sh extract_methods_v2.py PriceCalculator.java calculateValue
@@ -229,7 +229,7 @@ Need to search for text?
 
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
-alias findtext='./run_any_python_tool.sh find_text.py'
+alias findtext='./run_any_python_tool.sh find_text_v7.py'
 alias readlines='./run_any_python_tool.sh multiline_reader.py'
 alias getmethod='./run_any_python_tool.sh extract_methods_v2.py'
 ```

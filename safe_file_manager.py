@@ -1351,6 +1351,43 @@ class SafeFileManager(SecureFileHandler):
         
         return p
     
+    def _clean_heredoc_artifacts(self, content: str) -> str:
+        """Clean up common heredoc and shell artifacts from stdin content."""
+        if not content:
+            return content
+            
+        lines = content.splitlines(keepends=True)
+        if not lines:
+            return content
+            
+        # Check if the last line looks like a heredoc delimiter or shell artifact
+        last_line = lines[-1].strip()
+        
+        # Common patterns to remove
+        heredoc_patterns = [
+            # Exact EOF patterns
+            'EOF', 'EOF < /dev/null', 'EOF<', 'EOF <',
+            # Common heredoc delimiters
+            'EOL', 'END', 'DONE', 'DELIMITER',
+            # With variations
+            'EOF\n', 'EOF\r\n', 'EOF ',
+        ]
+        
+        # Check if last line matches any heredoc pattern
+        for pattern in heredoc_patterns:
+            if last_line == pattern or last_line.startswith(pattern + ' '):
+                # Remove the last line
+                lines = lines[:-1]
+                break
+        
+        # Also check for shell redirection artifacts on the last line
+        if lines and lines[-1].strip().endswith('< /dev/null'):
+            lines[-1] = lines[-1].replace('< /dev/null', '').rstrip() + '\n'
+            if not lines[-1].strip():
+                lines = lines[:-1]
+        
+        return ''.join(lines)
+    
     def _write_journal(self, record: Dict[str, Any]) -> None:
         """Write journal entry atomically with fsync and locking."""
         path = self.journal_dir / f"{record['id']}.json"
@@ -2152,6 +2189,9 @@ class SafeFileManager(SecureFileHandler):
             # Read from stdin
             import sys
             content = sys.stdin.read()
+            
+            # Clean up common heredoc artifacts
+            content = self._clean_heredoc_artifacts(content)
         elif content is None:
             # No content provided
             content = ""
