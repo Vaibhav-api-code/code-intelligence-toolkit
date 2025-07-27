@@ -8,7 +8,7 @@ Code Intelligence Toolkit
 Author: Vaibhav-api-code
 Co-Author: Claude Code (https://claude.ai/code)
 Created: 2025-07-23
-Updated: 2025-07-24
+Updated: 2025-01-26
 License: Mozilla Public License 2.0 (MPL-2.0)
 -->
 
@@ -147,7 +147,7 @@ The Code Intelligence Toolkit provides 100+ command-line tools for developers wh
 
 ### 🎯 Professional Refactoring Suite
 
-#### Text-Based Operations (replace_text_v7.py)
+#### Text-Based Operations (replace_text_v8.py)
 - **Surgical precision** - Replace text with regex, whole-word, or fixed-string modes
 - **Multi-file operations** - Refactor across entire projects in seconds
 - **Git-aware** - Target only staged files or specific commits
@@ -169,7 +169,7 @@ The Code Intelligence Toolkit provides 100+ command-line tools for developers wh
 
 ### 🔍 Advanced Code Analysis
 
-#### find_text_v6.py - The Ultimate Search Tool
+#### find_text_v7.py - The Ultimate Search Tool with Multiline Support
 - **Every search mode** - Regex, fixed-string, whole-word, case-sensitive
 - **Context control** - Show N lines before/after matches (-A/-B/-C)
 - **Block extraction** - Extract entire functions/classes containing matches
@@ -269,6 +269,38 @@ Built for safety at every level:
 - **Atomic operations** - No partial states
 - **Comprehensive logging** - Full audit trail
 
+## 🆕 What's New (v1.1.1)
+
+### Enhanced Text Replacement
+- **Escape Sequence Support**: Both `replace_text_v8.py` and `replace_text_ast_v2.py` now support `--interpret-escapes` flag
+  ```bash
+  # Multi-line replacements are now easy!
+  ./run_any_python_tool.sh replace_text_v8.py "TODO" "TODO:\n- Implement\n- Test\n- Deploy" --interpret-escapes file.py
+  
+  # Works in AST tool for comments and strings
+  ./run_any_python_tool.sh replace_text_ast_v2.py _ "error" "Error:\n  Code: E001\n  Details: Failed" --strings-only --interpret-escapes --lang python --file app.py
+  ```
+
+### Multiline Search Capability
+- **find_text_v7.py**: Added `--multiline` (`-U`) flag for patterns spanning multiple lines
+  ```bash
+  # Find entire classes
+  ./run_any_python_tool.sh find_text.py "class MyClass.*?^}" --type regex --multiline script.py
+  
+  # Search multiline docstrings
+  ./run_any_python_tool.sh find_text.py '""".*?"""' --type regex --multiline -g "*.py"
+  ```
+
+### Release Workflow Automation
+- **Non-interactive release workflow**: Added `--yes` flag for CI/CD automation
+- **Automated version tagging**: Supports patch/minor/major releases
+- **GitHub release creation**: Automatic release notes generation
+
+### Bug Fixes
+- Fixed stdin processing in replace_text_v8.py
+- Fixed configuration handling in replace_text_ast_v2.py
+- Made `--line` optional for `--comments-only` and `--strings-only` modes in AST tool
+
 ## 📦 Installation
 
 ### Prerequisites
@@ -320,15 +352,15 @@ pip install -r requirements.txt
 ### 🎯 Professional Refactoring
 ```bash
 # Rename variable across entire project (with AST accuracy)
-./run_any_python_tool.sh replace_text_ast.py oldVariableName newVariableName --scope src/
+./run_any_python_tool.sh replace_text_ast_v2.py oldVariableName newVariableName --scope src/
 # Changes only actual variable usage, not strings or comments
 
 # Multi-file regex replacement with preview
-./run_any_python_tool.sh replace_text.py 'getInstance\(\)(\.)' 'instance()$1' -g "*.java" --dry-run
+./run_any_python_tool.sh replace_text_v8.py 'getInstance\(\)(\.)' 'instance()$1' -g "*.java" --dry-run
 # Then run without --dry-run to apply
 
 # Target only specific contexts
-./run_any_python_tool.sh replace_text.py "logger" "LOG" src/ --block-mode within --git-only
+./run_any_python_tool.sh replace_text_v8.py "logger" "LOG" src/ --block-mode within --git-only
 # Changes only in git-tracked files, within code blocks
 ```
 
@@ -556,10 +588,12 @@ export SAFEGIT_FORCE_YES=1  # This would bypass critical safety!
 
 ## 📚 Documentation
 
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
 - **[SAFEGIT_COMPREHENSIVE.md](docs/safegit/SAFEGIT_COMPREHENSIVE.md)** - Complete SafeGIT documentation
 - **[SAFE_FILE_MANAGER_GUIDE.md](SAFE_FILE_MANAGER_GUIDE.md)** - Safe file operations guide
 - **[NON_INTERACTIVE_GUIDE.md](NON_INTERACTIVE_GUIDE.md)** - Automation safety guide
 - **[CONFIG_GUIDE.md](CONFIG_GUIDE.md)** - Configuration for safety
+- **[docs/](docs/)** - Comprehensive documentation directory
 
 ## 🛡️ Safety Guarantees
 
@@ -576,6 +610,38 @@ export SAFEGIT_FORCE_YES=1  # This would bypass critical safety!
 - **Regular Backups** - Tools create backups, but have your own too
 - **Test First** - Use `--dry-run` before automation
 - **Read the Warnings** - They're there for a reason
+
+## 📝 Quick Tool Reference
+
+### Latest Tool Versions
+
+| Category | Tool | Version | Key Feature |
+|----------|------|---------|-------------|
+| **Search** | find_text.py | v7 | Multiline search with `--multiline` flag |
+| **Replace** | replace_text.py | v8 | Escape sequences with `--interpret-escapes` |
+| **AST Replace** | replace_text_ast.py | v2 | Escape sequences in comments/strings |
+| **Git Safety** | safegit.py | v2.0 | Complete protection, non-interactive mode |
+| **File Safety** | safe_file_manager.py | Latest | Atomic operations, complete undo |
+| **Release** | release_workflow.sh | Latest | `--yes` flag for automation |
+
+### Most Used Commands
+
+```bash
+# Search
+./run_any_python_tool.sh find_text.py "pattern" --multiline --type regex
+
+# Replace with newlines
+./run_any_python_tool.sh replace_text_v8.py "old" "new\nline" --interpret-escapes
+
+# AST refactoring
+./run_any_python_tool.sh replace_text_ast_v2.py old new --file script.py --line 42
+
+# Safe file operations
+./run_any_python_tool.sh safe_file_manager.py move old.txt new.txt
+
+# Safe git
+./run_any_python_tool.sh safegit.py status
+```
 
 ## 🤝 Contributing
 

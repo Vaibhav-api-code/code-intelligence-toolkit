@@ -624,7 +624,7 @@ case "$TOOL_NAME" in
         TOOL_NAME="extract_methods_v2.py"
         ;;
     "find_text.py")
-        TOOL_NAME="find_text_v6.py"
+        TOOL_NAME="find_text_v7.py"
         
         ;;
     "method_analyzer_ast.py")
