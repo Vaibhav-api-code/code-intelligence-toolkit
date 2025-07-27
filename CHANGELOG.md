@@ -37,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **safe_file_manager.py**: Added warnings about EOF heredoc issues
 - **SAFE_FILE_MANAGER_GUIDE.md**: Enhanced with EOF troubleshooting
 - **run_any_python_tool.sh**: Added data_flow_tracker.py and EOF warnings
-- **CLAUDE.md**: Added data flow tracker references and EOF guidance
 - **TOOLS_DOCUMENTATION_2025.md**: Added data flow analysis category
 
 ### Fixed
