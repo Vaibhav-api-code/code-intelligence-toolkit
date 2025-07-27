@@ -2137,6 +2137,10 @@ class SafeFileManager(SecureFileHandler):
                 pass
             EOF
             
+            # ⚠️ IMPORTANT: The 'EOF' marker must be on its own line
+            # Do NOT indent the EOF line or include it in your content
+            # If you see 'EOF < /dev/null' in created files, you've copied the delimiter
+            
             # Avoid shell parsing issues with complex content by using --from-stdin
             # instead of --content with shell-special characters like elif, done, etc.
         """
@@ -2800,6 +2804,7 @@ Examples:
   elif other_condition:
       pass
   EOF
+  # NOTE: 'EOF' must be alone on its line - it's the delimiter, not file content!
   
   # Organize files by type
   %(prog)s organize ~/Downloads --by extension

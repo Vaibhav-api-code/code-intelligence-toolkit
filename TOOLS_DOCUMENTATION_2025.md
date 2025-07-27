@@ -18,10 +18,10 @@ License: Mozilla Public License 2.0 (MPL-2.0)
 **Major Achievement**: Complete standardization of all production tools with enhanced argument parsing and enterprise-grade atomic file operations
 
 **Related Code Files:**
-- `python_tools/enhanced_argument_parser.py` - Standardized argument parsing framework
-- `python_tools/secure_tools_base.py` - Enterprise security base classes
-- `python_tools/common_config.py` - Unified configuration management
-- `python_tools/error_logger.py` - Comprehensive error logging system
+- `enhanced_standard_arg_parser.py` - Standardized argument parsing framework
+- `common_utils.py` - Common utilities and secure base classes
+- `common_config.py` - Unified configuration management
+- `error_logger.py` - Comprehensive error logging system
 - `run_any_python_tool.sh` - Universal wrapper with approval system
 
 ---
@@ -240,7 +240,7 @@ echo '[{"file":"script.py","old":"oldMethod","new":"newMethod","line":42}]' | \
 ./run_any_python_tool.sh unified_refactor.py rename old_var new_var --backend rope --file code.py --line 15
 
 # Find all references to a symbol with JSON output
-./run_any_python_tool.sh unified_refactor.py find calculateValue --scope src/main/java --json
+./run_any_python_tool.sh unified_refactor.py find calculateValue --scope src/ --json
 
 # Analyze code structure with professional formatting
 ./run_any_python_tool.sh unified_refactor.py analyze --file MyClass.java --json

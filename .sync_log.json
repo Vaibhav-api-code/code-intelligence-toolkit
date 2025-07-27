@@ -24,11 +24,16 @@
       "timestamp": "2025-07-26T17:37:00.298065",
       "files_synced": 4,
       "total_files": 4
+    },
+    {
+      "timestamp": "2025-07-26T18:55:05.657966",
+      "files_synced": 8,
+      "total_files": 8
     }
   ],
   "file_hashes": {
     "replace_text_ast.py": "99c6534d7c13b2cbcd92a87134075a12",
-    "safe_file_manager.py": "9903a4978a7fa3310ea1cd7b24a84177",
+    "safe_file_manager.py": "48ff85c9eafd9b27f0d716527157bbb4",
     "replace_text_v7.py": "23385648a7bc71e2bcec97db98e66c88",
     "safegit_undo_stack.py": "aab7b185e461c29957a5964994300fb5",
     "safe_move.py": "e18f2944b9bdb5d588c7a0b6750c6087",
@@ -36,14 +41,18 @@
     "replace_text.py": "23385648a7bc71e2bcec97db98e66c88",
     "SYNC_TOOLS_GUIDE.md": "6d354223a0012b4813692f93020d9c5d",
     "NON_INTERACTIVE_GUIDE.md": "8761965546b435babe44b2f052a3ada2",
-    "SAFE_FILE_MANAGER_GUIDE.md": "339089e926312c1ce248312ed02f0dc9",
+    "SAFE_FILE_MANAGER_GUIDE.md": "6c1d05be80d18a7caebf273ff4d03ce8",
     "README.md": "d46a8c9c6aac67ab1f8bdb002a46ff51",
     "TEXT_TOOLS_GUIDE.md": "748fdf6eb12cda3f5d1b86e5d0ff67ac",
     "PYTHON_TOOLS_MASTER_HELP.md": "b969854a1e64b43ae541f816664475d7",
     "SAFEGIT_README.md": "bfc96ef3750f426f30c877e7e40031c3",
-    "run_any_python_tool.sh": "bca69056509d229d52f94b525c525253",
+    "run_any_python_tool.sh": "24fe44b15df737051fdeccd9224e6a68",
     "replace_text_v8.py": "e3b0c23d70e133b1d99f291148c7d796",
     "find_text_v7.py": "fc9bcb5162822a514e8c034ff6d79c34",
-    "CHANGELOG.md": "5b8d43602f2b812188b0069d3358b26e"
+    "CHANGELOG.md": "6ab3c234cc6d59612cd4509c684b5d73",
+    "data_flow_tracker.py": "9eb83883141d6856ad4171e2b20a0ed7",
+    "TOOLS_DOCUMENTATION_2025.md": "1cf68449a59de2b8576f254fea8ea6ac",
+    "DATA_FLOW_TRACKER_GUIDE.md": "02d281531c78418c00a8b3c0d3d94213",
+    "DATA_FLOW_TRACKER_ADVANCED_EXAMPLES.md": "667b8f0eccd5412777c73c83e4afcb90"
   }
 }

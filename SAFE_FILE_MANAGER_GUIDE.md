@@ -235,11 +235,13 @@ echo "Content from command" | sfm create output.txt --from-stdin
 cat template.txt | sfm create newfile.txt --from-stdin
 
 # Multi-line content from stdin
-cat << EOF | sfm create config.yml --from-stdin
+cat << 'EOF' | sfm create config.yml --from-stdin
 server:
   host: localhost
   port: 8080
 EOF
+# ⚠️ IMPORTANT: 'EOF' is the delimiter, not part of your content!
+# Keep it on its own line with no spaces or indentation
 
 # Create with specific encoding
 sfm create unicode.txt --content "Unicode: 你好" --encoding utf-8
@@ -261,6 +263,10 @@ if condition:
 elif other_condition:
     pass
 EOF
+
+# ⚠️ CRITICAL: Common mistake that adds 'EOF < /dev/null' to files:
+# WRONG: Copying the EOF line as part of content
+# RIGHT: EOF must be alone on its line - it terminates the here-doc
 
 # ❌ AVOID - May cause parse errors
 sfm create script.py --content '#!/usr/bin/env python3

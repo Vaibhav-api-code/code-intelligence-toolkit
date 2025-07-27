@@ -19,6 +19,50 @@ All notable changes to the Code Intelligence Toolkit will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-07-26
+
+### Added
+- **data_flow_tracker.py**: New tool for tracking variable dependencies and data flow through code
+  - Bidirectional tracking (forward: what X affects, backward: what affects Y)
+  - Inter-procedural analysis across function boundaries
+  - Support for Python and Java with full AST parsing
+  - Complex expression handling (ternary, comprehensions, method chains)
+  - Multiple output formats (text, JSON, GraphViz)
+- **DATA_FLOW_TRACKER_GUIDE.md**: Comprehensive user guide with examples
+- **DATA_FLOW_TRACKER_ADVANCED_EXAMPLES.md**: Real-world use cases
+- **Test examples**: Organized test suite in test-examples/data-flow-tracker/
+- **EOF heredoc warnings**: Added to documentation to prevent 'EOF < /dev/null' issues
+
+### Changed
+- **safe_file_manager.py**: Added warnings about EOF heredoc issues
+- **SAFE_FILE_MANAGER_GUIDE.md**: Enhanced with EOF troubleshooting
+- **run_any_python_tool.sh**: Added data_flow_tracker.py and EOF warnings
+- **CLAUDE.md**: Added data flow tracker references and EOF guidance
+- **TOOLS_DOCUMENTATION_2025.md**: Added data flow analysis category
+
+### Fixed
+- Cleaned up nested code-intelligence-toolkit/code-intelligence-toolkit/ directory
+- Organized test files into proper directory structure
+
+## [1.1.2] - 2025-01-26
+
+### Added
+- **find_text_v7.py**: Multiline search capability with `--multiline` flag
+- **CHANGELOG.md**: Comprehensive version history documentation
+- **VERSION file**: Simple version reference
+- **Quick Tool Reference**: Added to main README for easy tool lookup
+
+### Changed
+- Updated all documentation to reflect latest tool versions
+- Updated wrapper script to use find_text_v7.py
+- Enhanced README files with "What's New" sections
+
+### Documentation
+- Created comprehensive CHANGELOG.md
+- Updated main README.md with v1.1.1 features
+- Updated docs/README.md with recent updates section
+- Updated SEARCH_TOOLS_HELP.md with multiline examples
+
 ## [1.1.1] - 2025-01-26
 
 ### Added
