@@ -495,6 +495,185 @@ You can use V2 alongside V1 features:
 ./run_any_python_tool.sh data_flow_tracker_v2.py --var total --show-impact --file calc.py
 ```
 
+## Intelligence Layer - Transform Analysis into Insights
+
+The Intelligence Layer represents a breakthrough enhancement that transforms complex technical analysis into intuitive, actionable insights through natural language explanations and interactive visualizations.
+
+### 🧠 Natural Language Explanations (`--explain`)
+
+Convert technical analysis into plain English explanations that anyone can understand:
+
+#### Impact Analysis Explanations
+```bash
+./run_any_python_tool.sh data_flow_tracker_v2.py --var database_config --show-impact --explain --file app.py
+```
+
+Example output:
+```
+📊 **Impact Analysis for 'database_config'**:
+
+🚨 **High Risk Change**: Modifying 'database_config' affects 8 different places across 4 functions. 
+It affects 3 return values, causes 2 external side effects (like file writes or console output), 
+and modifies 3 global or class variables.
+
+💡 **Recommendation**: Break this change into smaller steps and test each affected function thoroughly.
+```
+
+#### Calculation Path Explanations
+```bash
+./run_any_python_tool.sh data_flow_tracker_v2.py --var final_price --show-calculation-path --explain --file pricing.py
+```
+
+Example output:
+```
+🔍 **How 'final_price' is Calculated**:
+
+This value is calculated through 6 steps, showing the complete algorithm flow.
+
+**The Critical Path**:
+1. **Variable Created**: 'base_price' is first declared (depends on: product_id)
+2. **Calculation Step**: 'tax_rate' is computed from location (depends on: location)
+3. **Calculation Step**: 'discount' is computed from coupon_code (depends on: coupon_code)
+4. **Calculation Step**: 'final_price' is computed from base_price, tax_rate, discount
+
+💡 **Understanding**: To debug issues with 'final_price', trace through these 6 steps. 
+Each step shows exactly where the value comes from and what influences it.
+```
+
+#### State Tracking Explanations
+```bash
+./run_any_python_tool.sh data_flow_tracker_v2.py --var user_data --track-state --explain --file process.py
+```
+
+Example output:
+```
+🔄 **State Evolution Analysis for 'user_data'**:
+
+**Type Changes Detected**: 'user_data' changes types: dict → UserModel. 
+This could indicate potential bugs or intentional polymorphic behavior.
+
+**State Modifications**: 'user_data' is modified 4 times, including 2 changes inside loops.
+
+⚠️ **Potential Issues Detected**:
+• Variable may be None - add null checks
+• Type changes detected: dict → UserModel
+
+💡 **Analysis Summary**: Consider type annotations or validation to handle type changes safely. 
+Track the 4 state modifications to understand variable behavior.
+```
+
+### 🌐 Interactive HTML Visualization (`--output-html`)
+
+Generate professional, self-contained HTML reports with interactive network visualizations:
+
+#### Basic HTML Generation
+```bash
+./run_any_python_tool.sh data_flow_tracker_v2.py --var config --show-impact --output-html --file app.py
+```
+
+Output: `data_flow_impact_config_app_py.html`
+
+#### Combined Intelligence
+```bash
+./run_any_python_tool.sh data_flow_tracker_v2.py --var total --show-calculation-path --explain --output-html --file calc.py
+```
+
+This generates both:
+- Interactive HTML visualization file
+- Console explanation of the analysis
+
+#### HTML Report Features
+
+**🎨 Professional Styling:**
+- Risk-based color coding (Red for high risk, Yellow for medium, Green for low)
+- Modern, responsive design that works on all devices
+- Professional typography and layout
+
+**🔍 Interactive Exploration:**
+- **Click nodes** to see detailed information about variables and operations
+- **Drag and zoom** to explore complex dependency networks
+- **Toggle physics** to freeze or animate the network layout
+- **Center view** to reset the visualization focus
+
+**📊 Rich Visualizations:**
+- **Impact Analysis**: Shows source variable connected to all affected areas
+- **Calculation Path**: Step-by-step flow with input dependencies clearly marked
+- **State Tracking**: Timeline of type evolution and state changes
+- **Standard Analysis**: Forward/backward dependency networks
+
+**💾 Export Capabilities:**
+- **PNG Export**: Save visualizations as high-quality images
+- **Self-Contained**: No external dependencies - works offline
+- **Shareable**: Email or share HTML files with team members
+
+#### Visualization Types
+
+**Impact Analysis Visualization:**
+```bash
+./run_any_python_tool.sh data_flow_tracker_v2.py --var sensitive_data --show-impact --output-html --file security.py
+```
+- Central node: The variable being analyzed
+- Connected nodes: Return values (green), side effects (red), state changes (orange)
+- Risk-based header colors and indicators
+
+**Calculation Path Visualization:**
+```bash
+./run_any_python_tool.sh data_flow_tracker_v2.py --var algorithm_result --show-calculation-path --output-html --file compute.py
+```
+- Linear flow showing calculation steps
+- Input variables feeding into each step
+- Clear progression from inputs to final result
+
+**State Tracking Visualization:**
+```bash
+./run_any_python_tool.sh data_flow_tracker_v2.py --var dynamic_var --track-state --output-html --file evolving.py
+```
+- Timeline of type evolution
+- State change annotations with context (loop/conditional)
+- Warning indicators for potential issues
+
+### Intelligence Layer Use Cases
+
+#### 🎯 **Code Review Intelligence**
+```bash
+# Before approving a PR, understand the full impact
+./run_any_python_tool.sh data_flow_tracker_v2.py --var modified_variable --show-impact --explain --output-html --file changed_file.py
+```
+
+**Benefit**: Reviewers get both intuitive explanations and visual exploration tools
+
+#### 🐛 **Debugging with Intelligence**
+```bash
+# When a bug is reported, trace the calculation path with explanations
+./run_any_python_tool.sh data_flow_tracker_v2.py --var incorrect_result --show-calculation-path --explain --file buggy_module.py
+```
+
+**Benefit**: Clear English explanation of how the value is computed + visual trace
+
+#### 🔄 **Refactoring Safety**
+```bash
+# Before refactoring, get risk assessment and visual impact map
+./run_any_python_tool.sh data_flow_tracker_v2.py --var legacy_function --show-impact --explain --output-html --file old_code.py
+```
+
+**Benefit**: Risk level assessment + actionable testing recommendations + shareable impact visualization
+
+#### 📚 **Code Documentation**
+```bash
+# Generate visual documentation of complex algorithms
+./run_any_python_tool.sh data_flow_tracker_v2.py --var complex_calculation --show-calculation-path --output-html --file algorithm.py
+```
+
+**Benefit**: Self-documenting code with interactive exploration for new team members
+
+#### 🎓 **Learning and Onboarding**
+```bash
+# Help new developers understand codebase dependencies
+./run_any_python_tool.sh data_flow_tracker_v2.py --var core_component --show-impact --explain --output-html --file main.py
+```
+
+**Benefit**: Intuitive explanations make complex codebases approachable
+
 ## Advanced Use Cases
 
 ### Debugging Incorrect Calculations

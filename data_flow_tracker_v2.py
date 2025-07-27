@@ -2,18 +2,23 @@
 """
 Data Flow Tracker V2 - Advanced code intelligence and algorithm analysis tool
 
-Enhanced version with three major capabilities:
+Enhanced version with five major capabilities:
 1. Impact Analysis - Shows where data escapes scope and causes effects
 2. Calculation Path Analysis - Extracts minimal critical path for values
 3. Type and State Tracking - Monitors type evolution and state changes
+4. Natural Language Explanations - Intuitive explanations of complex analysis
+5. Interactive HTML Visualization - Self-contained reports with vis.js network graphs
 
 This tool provides both safety (know what changes affect) and intelligence
 (understand complex algorithms) for confident refactoring and debugging.
 
 New Features in V2:
-- Impact analysis with exit point detection
+- Impact analysis with exit point detection and risk assessment
 - Critical path extraction with branch pruning
 - Static type inference and state tracking
+- Natural language explanations with --explain flag
+- Interactive HTML reports with --output-html flag
+- Self-contained visualizations using vis.js (no external dependencies)
 - Enhanced visualization and reporting
 - Performance optimizations for large codebases
 
@@ -351,6 +356,30 @@ class DataFlowAnalyzerV2:
             "warnings": self._generate_state_warnings(var_name)
         }
     
+    def generate_explanation(self, result: Dict[str, Any], analysis_type: str, var_name: str) -> str:
+        """Generate natural language explanations of analysis results"""
+        if analysis_type == "impact":
+            return self._explain_impact_analysis(result, var_name)
+        elif analysis_type == "calculation_path":
+            return self._explain_calculation_path(result, var_name)
+        elif analysis_type == "state_tracking":
+            return self._explain_state_tracking(result, var_name)
+        else:
+            return self._explain_standard_analysis(result, var_name)
+    
+    def generate_html_report(self, result: Dict[str, Any], analysis_type: str, var_name: str) -> str:
+        """Generate interactive HTML visualization report"""
+        explanation = self.generate_explanation(result, analysis_type, var_name)
+        
+        if analysis_type == "impact":
+            return self._generate_impact_html(result, var_name, explanation)
+        elif analysis_type == "calculation_path":
+            return self._generate_calculation_path_html(result, var_name, explanation)
+        elif analysis_type == "state_tracking":
+            return self._generate_state_tracking_html(result, var_name, explanation)
+        else:
+            return self._generate_standard_html(result, var_name, explanation)
+    
     def _extract_calculation_path(self, target_var: str) -> List[Dict[str, Any]]:
         """Extract the minimal calculation path for a variable"""
         path = []
@@ -493,6 +522,664 @@ class DataFlowAnalyzerV2:
             "LOW": "Normal testing procedures sufficient"
         }
         return recommendations.get(risk_level, "Assess based on specific changes")
+    
+    def _explain_impact_analysis(self, result: Dict[str, Any], var_name: str) -> str:
+        """Generate natural language explanation for impact analysis"""
+        returns = result.get("returns", [])
+        side_effects = result.get("side_effects", [])
+        state_changes = result.get("state_changes", [])
+        
+        total_effects = len(returns) + len(side_effects) + len(state_changes)
+        functions_affected = len(set(ep.get("function", "unknown") for ep in returns + side_effects + state_changes))
+        
+        risk_level = result.get("risk_assessment", {}).get("risk_level", "LOW")
+        
+        if total_effects == 0:
+            return f"✅ **Perfect Safety**: Changing '{var_name}' has no external effects. This variable stays within its local scope and is completely safe to modify without any risk of breaking other parts of the code."
+        
+        explanation = f"📊 **Impact Analysis for '{var_name}'**:\n\n"
+        
+        if risk_level == "HIGH":
+            explanation += f"🚨 **High Risk Change**: Modifying '{var_name}' affects {total_effects} different places across {functions_affected} functions. "
+        elif risk_level == "MEDIUM":
+            explanation += f"⚠️ **Medium Risk Change**: Modifying '{var_name}' affects {total_effects} places in your code. "
+        else:
+            explanation += f"✅ **Low Risk Change**: Modifying '{var_name}' has minimal impact with {total_effects} effects. "
+        
+        if returns:
+            explanation += f"It affects {len(returns)} return values, "
+        if side_effects:
+            explanation += f"causes {len(side_effects)} external side effects (like file writes or console output), "
+        if state_changes:
+            explanation += f"and modifies {len(state_changes)} global or class variables. "
+        
+        explanation = explanation.rstrip(", ") + ".\n\n"
+        
+        if risk_level == "HIGH":
+            explanation += "💡 **Recommendation**: Break this change into smaller steps and test each affected function thoroughly."
+        elif risk_level == "MEDIUM":
+            explanation += "💡 **Recommendation**: Focus testing on the affected areas and verify all return values and side effects."
+        else:
+            explanation += "💡 **Recommendation**: Standard testing procedures should be sufficient for this change."
+        
+        return explanation
+    
+    def _explain_calculation_path(self, result: List[Dict[str, Any]], var_name: str) -> str:
+        """Generate natural language explanation for calculation path analysis"""
+        if not result:
+            return f"❓ **No Calculation Path**: Variable '{var_name}' appears to be assigned directly or not found in the code."
+        
+        explanation = f"🔍 **How '{var_name}' is Calculated**:\n\n"
+        
+        if len(result) == 1:
+            explanation += f"This is a simple assignment with {len(result[0].get('inputs', []))} input variables."
+        else:
+            explanation += f"This value is calculated through {len(result)} steps, showing the complete algorithm flow."
+        
+        explanation += f"\n\n**The Critical Path**:\n"
+        
+        for i, step in enumerate(result, 1):
+            inputs = step.get("inputs", [])
+            operation = step.get("operation", "assignment")
+            
+            if operation == "declaration":
+                explanation += f"{i}. **Variable Created**: '{step['variable']}' is first declared"
+            elif operation == "assignment":
+                if inputs:
+                    explanation += f"{i}. **Calculation Step**: '{step['variable']}' is computed from {', '.join(inputs)}"
+                else:
+                    explanation += f"{i}. **Direct Assignment**: '{step['variable']}' is assigned a direct value"
+            else:
+                explanation += f"{i}. **{operation.title()}**: '{step['variable']}' undergoes {operation}"
+            
+            if inputs:
+                explanation += f" (depends on: {', '.join(inputs)})"
+            explanation += "\n"
+        
+        explanation += f"\n💡 **Understanding**: To debug issues with '{var_name}', trace through these {len(result)} steps. "
+        explanation += "Each step shows exactly where the value comes from and what influences it."
+        
+        return explanation
+    
+    def _explain_state_tracking(self, result: Dict[str, Any], var_name: str) -> str:
+        """Generate natural language explanation for state tracking analysis"""
+        type_evolution = result.get("type_evolution", [])
+        state_changes = result.get("state_changes", [])
+        warnings = result.get("warnings", [])
+        
+        explanation = f"🔄 **State Evolution Analysis for '{var_name}'**:\n\n"
+        
+        if not type_evolution and not state_changes:
+            explanation += f"No type or state changes detected for '{var_name}'. This variable maintains consistent behavior throughout the code."
+            return explanation
+        
+        # Type evolution summary
+        if type_evolution:
+            types_seen = [te.get("type", "unknown") for te in type_evolution]
+            unique_types = list(dict.fromkeys(types_seen))  # Preserve order, remove duplicates
+            
+            if len(unique_types) == 1:
+                explanation += f"**Type Consistency**: '{var_name}' maintains the type '{unique_types[0]}' throughout its lifecycle. ✅\n\n"
+            else:
+                explanation += f"**Type Changes Detected**: '{var_name}' changes types: {' → '.join(unique_types)}. "
+                explanation += "This could indicate potential bugs or intentional polymorphic behavior.\n\n"
+        
+        # State changes summary
+        if state_changes:
+            change_types = [sc.get("change_type", "unknown") for sc in state_changes]
+            loop_changes = sum(1 for sc in state_changes if sc.get("context", {}).get("in_loop", False))
+            conditional_changes = sum(1 for sc in state_changes if sc.get("context", {}).get("in_conditional", False))
+            
+            explanation += f"**State Modifications**: '{var_name}' is modified {len(state_changes)} times"
+            if loop_changes > 0:
+                explanation += f", including {loop_changes} changes inside loops"
+            if conditional_changes > 0:
+                explanation += f", and {conditional_changes} conditional modifications"
+            explanation += ".\n\n"
+        
+        # Warnings summary
+        if warnings:
+            explanation += f"⚠️ **Potential Issues Detected**:\n"
+            for warning in warnings:
+                explanation += f"• {warning}\n"
+            explanation += "\n"
+        
+        explanation += "💡 **Analysis Summary**: "
+        if warnings:
+            explanation += "Review the warnings above to prevent potential runtime errors. "
+        if len(unique_types if type_evolution else []) > 1:
+            explanation += "Consider type annotations or validation to handle type changes safely. "
+        if state_changes:
+            explanation += f"Track the {len(state_changes)} state modifications to understand variable behavior."
+        else:
+            explanation += "Variable behavior is stable and predictable."
+        
+        return explanation
+    
+    def _explain_standard_analysis(self, result: Dict[str, Any], var_name: str) -> str:
+        """Generate natural language explanation for standard forward/backward analysis"""
+        if "affects" in result:
+            # Forward analysis
+            affects = result.get("affects", [])
+            if not affects:
+                return f"🔍 **Forward Analysis**: Variable '{var_name}' doesn't affect any other variables. It's a terminal value in your code flow."
+            
+            explanation = f"🔍 **Forward Analysis for '{var_name}'**:\n\n"
+            explanation += f"This variable influences {len(affects)} other variables in your codebase. "
+            
+            if len(affects) <= 3:
+                explanation += f"Specifically, it affects: {', '.join([a.get('name', 'unknown') for a in affects])}"
+            else:
+                explanation += f"The main affected variables are: {', '.join([a.get('name', 'unknown') for a in affects[:3]])}, and {len(affects) - 3} others"
+            
+            explanation += f".\n\n💡 **Impact**: Changes to '{var_name}' will propagate through this dependency chain. Test all affected variables when modifying this one."
+            
+        elif "depends_on" in result:
+            # Backward analysis
+            depends_on = result.get("depends_on", [])
+            if not depends_on:
+                return f"🔍 **Backward Analysis**: Variable '{var_name}' has no dependencies. It's either a constant, user input, or source value."
+            
+            explanation = f"🔍 **Backward Analysis for '{var_name}'**:\n\n"
+            explanation += f"This variable depends on {len(depends_on)} other variables. "
+            
+            if len(depends_on) <= 3:
+                explanation += f"It's calculated from: {', '.join([d.get('name', 'unknown') for d in depends_on])}"
+            else:
+                explanation += f"Key dependencies include: {', '.join([d.get('name', 'unknown') for d in depends_on[:3]])}, and {len(depends_on) - 3} others"
+            
+            explanation += f".\n\n💡 **Debugging**: To troubleshoot issues with '{var_name}', check these dependencies first. Any problems likely originate from these source variables."
+        
+        else:
+            explanation = f"🔍 **Analysis Results**: Completed analysis for variable '{var_name}'. See detailed results above for specific dependency information."
+        
+        return explanation
+    
+    def _generate_impact_html(self, result: Dict[str, Any], var_name: str, explanation: str) -> str:
+        """Generate interactive HTML for impact analysis"""
+        returns = result.get("returns", [])
+        side_effects = result.get("side_effects", [])
+        state_changes = result.get("state_changes", [])
+        risk_level = result.get("risk_assessment", {}).get("risk_level", "LOW")
+        
+        # Create node data for visualization
+        nodes = [{"id": var_name, "label": var_name, "group": "source", "level": 0}]
+        edges = []
+        
+        # Add affected nodes
+        for i, ret in enumerate(returns):
+            node_id = f"return_{i}"
+            nodes.append({
+                "id": node_id,
+                "label": f"Return: {ret.get('function', 'unknown')}",
+                "group": "return",
+                "level": 1,
+                "details": f"Function: {ret.get('function', 'unknown')}\nLocation: {ret.get('location', 'unknown')}"
+            })
+            edges.append({"from": var_name, "to": node_id, "arrows": "to", "color": {"color": "#2B7CE9"}})
+        
+        for i, effect in enumerate(side_effects):
+            node_id = f"effect_{i}"
+            effect_type = effect.get("type", "unknown")
+            color = {"file_write": "#FF6B6B", "console": "#4ECDC4", "network": "#45B7D1", "database": "#96CEB4"}.get(effect_type, "#FFA07A")
+            nodes.append({
+                "id": node_id,
+                "label": f"Side Effect: {effect.get('effect', 'unknown')}",
+                "group": "side_effect",
+                "level": 1,
+                "details": f"Type: {effect_type}\nLocation: {effect.get('location', 'unknown')}"
+            })
+            edges.append({"from": var_name, "to": node_id, "arrows": "to", "color": {"color": color}})
+        
+        for i, change in enumerate(state_changes):
+            node_id = f"state_{i}"
+            nodes.append({
+                "id": node_id,
+                "label": f"State Change: {change.get('effect', 'unknown')}",
+                "group": "state_change",
+                "level": 1,
+                "details": f"Location: {change.get('location', 'unknown')}"
+            })
+            edges.append({"from": var_name, "to": node_id, "arrows": "to", "color": {"color": "#F39C12"}})
+        
+        return self._create_html_template("Impact Analysis", var_name, explanation, nodes, edges, risk_level)
+    
+    def _generate_calculation_path_html(self, result: List[Dict[str, Any]], var_name: str, explanation: str) -> str:
+        """Generate interactive HTML for calculation path analysis"""
+        nodes = []
+        edges = []
+        
+        if not result:
+            nodes.append({"id": var_name, "label": var_name, "group": "target", "level": 0})
+            return self._create_html_template("Calculation Path", var_name, explanation, nodes, edges, "NONE")
+        
+        # Create a path visualization
+        for i, step in enumerate(result):
+            node_id = f"step_{i}"
+            inputs = step.get("inputs", [])
+            
+            nodes.append({
+                "id": node_id,
+                "label": f"{step.get('variable', 'unknown')}",
+                "group": "calculation",
+                "level": i,
+                "details": f"Operation: {step.get('operation', 'unknown')}\nLocation: {step.get('location', 'unknown')}\nInputs: {', '.join(inputs) if inputs else 'none'}"
+            })
+            
+            # Add input nodes and edges
+            for input_var in inputs:
+                input_id = f"input_{input_var}_{i}"
+                if not any(n["id"] == input_id for n in nodes):
+                    nodes.append({
+                        "id": input_id,
+                        "label": input_var,
+                        "group": "input",
+                        "level": i - 0.5
+                    })
+                edges.append({"from": input_id, "to": node_id, "arrows": "to", "color": {"color": "#27AE60"}})
+            
+            # Connect calculation steps
+            if i > 0:
+                edges.append({"from": f"step_{i-1}", "to": node_id, "arrows": "to", "color": {"color": "#E74C3C"}, "width": 3})
+        
+        return self._create_html_template("Calculation Path", var_name, explanation, nodes, edges, "INFO")
+    
+    def _generate_state_tracking_html(self, result: Dict[str, Any], var_name: str, explanation: str) -> str:
+        """Generate interactive HTML for state tracking analysis"""
+        type_evolution = result.get("type_evolution", [])
+        state_changes = result.get("state_changes", [])
+        
+        nodes = [{"id": var_name, "label": f"{var_name} (start)", "group": "source", "level": 0}]
+        edges = []
+        
+        # Add type evolution nodes
+        for i, type_info in enumerate(type_evolution):
+            node_id = f"type_{i}"
+            type_name = type_info.get("type", "unknown")
+            confidence = type_info.get("confidence", 0.0)
+            
+            nodes.append({
+                "id": node_id,
+                "label": f"{type_name} ({confidence:.1f})",
+                "group": "type",
+                "level": i + 1,
+                "details": f"Type: {type_name}\nConfidence: {confidence:.2f}\nLocation: {type_info.get('location', 'unknown')}"
+            })
+            
+            if i == 0:
+                edges.append({"from": var_name, "to": node_id, "arrows": "to", "color": {"color": "#9B59B6"}})
+            else:
+                edges.append({"from": f"type_{i-1}", "to": node_id, "arrows": "to", "color": {"color": "#9B59B6"}})
+        
+        # Add state change nodes
+        for i, change in enumerate(state_changes):
+            node_id = f"change_{i}"
+            change_type = change.get("change_type", "unknown")
+            
+            nodes.append({
+                "id": node_id,
+                "label": f"{change_type}",
+                "group": "state_change",
+                "level": len(type_evolution) + i + 1,
+                "details": f"Change: {change_type}\nLocation: {change.get('location', 'unknown')}\nContext: Loop={change.get('context', {}).get('in_loop', False)}, Conditional={change.get('context', {}).get('in_conditional', False)}"
+            })
+            
+            # Connect to appropriate previous node
+            if type_evolution:
+                edges.append({"from": f"type_{len(type_evolution)-1}", "to": node_id, "arrows": "to", "color": {"color": "#E67E22"}})
+            else:
+                edges.append({"from": var_name, "to": node_id, "arrows": "to", "color": {"color": "#E67E22"}})
+        
+        warnings = result.get("warnings", [])
+        risk_level = "HIGH" if len(warnings) > 2 else "MEDIUM" if warnings else "LOW"
+        
+        return self._create_html_template("State Tracking", var_name, explanation, nodes, edges, risk_level)
+    
+    def _generate_standard_html(self, result: Dict[str, Any], var_name: str, explanation: str) -> str:
+        """Generate interactive HTML for standard dependency analysis"""
+        nodes = [{"id": var_name, "label": var_name, "group": "source", "level": 0}]
+        edges = []
+        
+        if "affects" in result:
+            # Forward analysis
+            affects = result.get("affects", [])
+            for i, affected in enumerate(affects):
+                node_id = f"affects_{i}"
+                nodes.append({
+                    "id": node_id,
+                    "label": affected.get("name", "unknown"),
+                    "group": "affected",
+                    "level": 1,
+                    "details": f"Variable: {affected.get('name', 'unknown')}\nLocation: {affected.get('location', 'unknown')}"
+                })
+                edges.append({"from": var_name, "to": node_id, "arrows": "to", "color": {"color": "#3498DB"}})
+        
+        elif "depends_on" in result:
+            # Backward analysis  
+            depends_on = result.get("depends_on", [])
+            for i, dependency in enumerate(depends_on):
+                node_id = f"depends_{i}"
+                nodes.append({
+                    "id": node_id,
+                    "label": dependency.get("name", "unknown"),
+                    "group": "dependency",
+                    "level": -1,
+                    "details": f"Variable: {dependency.get('name', 'unknown')}\nLocation: {dependency.get('location', 'unknown')}"
+                })
+                edges.append({"from": node_id, "to": var_name, "arrows": "to", "color": {"color": "#E74C3C"}})
+        
+        return self._create_html_template("Dependency Analysis", var_name, explanation, nodes, edges, "INFO")
+    
+    def _create_html_template(self, title: str, var_name: str, explanation: str, nodes: List[Dict], edges: List[Dict], risk_level: str) -> str:
+        """Create the base HTML template with vis.js visualization"""
+        
+        # Risk level colors and messages
+        risk_colors = {
+            "HIGH": "#E74C3C",
+            "MEDIUM": "#F39C12", 
+            "LOW": "#27AE60",
+            "INFO": "#3498DB",
+            "NONE": "#95A5A6"
+        }
+        
+        risk_messages = {
+            "HIGH": "🚨 High Risk - Comprehensive testing required",
+            "MEDIUM": "⚠️ Medium Risk - Standard testing recommended", 
+            "LOW": "✅ Low Risk - Normal testing sufficient",
+            "INFO": "ℹ️ Information - Analysis complete",
+            "NONE": "➖ No Data - Limited analysis available"
+        }
+        
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - {var_name}</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }}
+        
+        .container {{
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }}
+        
+        .header {{
+            background: {risk_colors.get(risk_level, '#3498DB')};
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }}
+        
+        .header h1 {{
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }}
+        
+        .header .subtitle {{
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }}
+        
+        .risk-indicator {{
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 15px;
+            font-weight: 500;
+        }}
+        
+        .content {{
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 0;
+            min-height: 600px;
+        }}
+        
+        .explanation {{
+            padding: 30px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+        }}
+        
+        .explanation h2 {{
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 2px solid {risk_colors.get(risk_level, '#3498DB')};
+            padding-bottom: 10px;
+        }}
+        
+        .explanation p {{
+            line-height: 1.6;
+            color: #34495e;
+        }}
+        
+        .visualization {{
+            position: relative;
+        }}
+        
+        #network {{
+            width: 100%;
+            height: 600px;
+            background: #fafafa;
+        }}
+        
+        .controls {{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }}
+        
+        .control-btn {{
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            margin: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
+        
+        .control-btn:hover {{
+            background: #f0f0f0;
+        }}
+        
+        .node-details {{
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }}
+        
+        .footer {{
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9em;
+        }}
+        
+        @media (max-width: 768px) {{
+            .content {{
+                grid-template-columns: 1fr;
+            }}
+            
+            .explanation {{
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{title}</h1>
+            <div class="subtitle">Variable: <code>{var_name}</code></div>
+            <div class="risk-indicator">{risk_messages.get(risk_level, 'Analysis Complete')}</div>
+        </div>
+        
+        <div class="content">
+            <div class="explanation">
+                <h2>📝 Analysis Summary</h2>
+                <div style="white-space: pre-line;">{explanation}</div>
+            </div>
+            
+            <div class="visualization">
+                <div class="controls">
+                    <button class="control-btn" onclick="network.fit()">📍 Center</button>
+                    <button class="control-btn" onclick="togglePhysics()">⚡ Physics</button>
+                    <button class="control-btn" onclick="exportImage()">📸 Export</button>
+                </div>
+                <div id="network"></div>
+                <div id="nodeDetails" class="node-details">
+                    <h4>Node Details</h4>
+                    <div id="detailsContent">Click a node to see details</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Generated by Data Flow Tracker V2 | Interactive visualization powered by vis.js
+        </div>
+    </div>
+
+    <script>
+        // Network data
+        const nodes = new vis.DataSet({json.dumps(nodes, indent=8)});
+        const edges = new vis.DataSet({json.dumps(edges, indent=8)});
+        
+        // Network options
+        const options = {{
+            nodes: {{
+                shape: 'box',
+                margin: 10,
+                font: {{ size: 14, face: 'Arial', color: '#2c3e50' }},
+                borderWidth: 2,
+                shadow: true,
+                borderWidthSelected: 3
+            }},
+            edges: {{
+                width: 2,
+                shadow: true,
+                smooth: {{ type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.4 }}
+            }},
+            groups: {{
+                source: {{ color: {{ background: '#3498DB', border: '#2980B9' }}, font: {{ color: 'white' }} }},
+                return: {{ color: {{ background: '#2ECC71', border: '#27AE60' }} }},
+                side_effect: {{ color: {{ background: '#E74C3C', border: '#C0392B' }}, font: {{ color: 'white' }} }},
+                state_change: {{ color: {{ background: '#F39C12', border: '#E67E22' }} }},
+                calculation: {{ color: {{ background: '#9B59B6', border: '#8E44AD' }}, font: {{ color: 'white' }} }},
+                input: {{ color: {{ background: '#95A5A6', border: '#7F8C8D' }} }},
+                type: {{ color: {{ background: '#1ABC9C', border: '#16A085' }} }},
+                affected: {{ color: {{ background: '#E67E22', border: '#D35400' }} }},
+                dependency: {{ color: {{ background: '#34495E', border: '#2C3E50' }}, font: {{ color: 'white' }} }}
+            }},
+            layout: {{
+                hierarchical: {{
+                    direction: 'LR',
+                    sortMethod: 'directed',
+                    levelSeparation: 150,
+                    nodeSpacing: 100
+                }}
+            }},
+            physics: {{
+                enabled: true,
+                hierarchicalRepulsion: {{
+                    centralGravity: 0.0,
+                    springLength: 100,
+                    springConstant: 0.01,
+                    nodeDistance: 120,
+                    damping: 0.09
+                }}
+            }},
+            interaction: {{
+                dragNodes: true,
+                dragView: true,
+                zoomView: true
+            }}
+        }};
+        
+        // Initialize network
+        const container = document.getElementById('network');
+        const data = {{ nodes: nodes, edges: edges }};
+        const network = new vis.Network(container, data, options);
+        
+        // Event handlers
+        network.on('click', function(params) {{
+            if (params.nodes.length > 0) {{
+                const nodeId = params.nodes[0];
+                const node = nodes.get(nodeId);
+                showNodeDetails(node);
+            }} else {{
+                hideNodeDetails();
+            }}
+        }});
+        
+        let physicsEnabled = true;
+        
+        function togglePhysics() {{
+            physicsEnabled = !physicsEnabled;
+            network.setOptions({{ physics: {{ enabled: physicsEnabled }} }});
+        }}
+        
+        function showNodeDetails(node) {{
+            const details = document.getElementById('nodeDetails');
+            const content = document.getElementById('detailsContent');
+            
+            let html = `<strong>${{node.label}}</strong><br>`;
+            if (node.details) {{
+                html += node.details.replace(/\\n/g, '<br>');
+            }} else {{
+                html += `Group: ${{node.group}}<br>Level: ${{node.level}}`;
+            }}
+            
+            content.innerHTML = html;
+            details.style.display = 'block';
+        }}
+        
+        function hideNodeDetails() {{
+            document.getElementById('nodeDetails').style.display = 'none';
+        }}
+        
+        function exportImage() {{
+            const canvas = document.querySelector('#network canvas');
+            const link = document.createElement('a');
+            link.download = '{title.lower().replace(" ", "_")}_{var_name}.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }}
+        
+        // Initialize
+        network.once('stabilizationIterationsDone', function() {{
+            network.fit();
+        }});
+    </script>
+</body>
+</html>"""
     
     def _get_location(self, var_name: str) -> str:
         """Get location of variable definition"""
@@ -1567,6 +2254,10 @@ Examples:
                        help="Show minimal calculation path for the variable")
     parser.add_argument("--track-state", action="store_true",
                        help="Track type and state evolution")
+    parser.add_argument("--explain", action="store_true",
+                       help="Provide natural language explanations of analysis results")
+    parser.add_argument("--output-html", action="store_true",
+                       help="Generate interactive HTML visualization report")
     
     args = parser.parse_args()
     
@@ -1631,9 +2322,49 @@ Examples:
         else:
             result = analyzer.track_backward(args.var, args.max_depth)
     
-    # Format and output
-    output = analyzer.format_output(result, args.format)
-    print(output)
+    # Determine analysis type for explanations and HTML
+    if args.show_impact:
+        analysis_type = "impact"
+    elif args.show_calculation_path:
+        analysis_type = "calculation_path"
+    elif args.track_state:
+        analysis_type = "state_tracking"
+    else:
+        analysis_type = "standard"
+    
+    # Handle special output modes
+    if args.output_html:
+        # Generate interactive HTML report
+        html_output = analyzer.generate_html_report(result, analysis_type, args.var)
+        
+        # Save to file
+        import os
+        filename = f"data_flow_{analysis_type}_{args.var}_{os.path.basename(args.file).replace('.', '_')}.html"
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(html_output)
+        
+        print(f"📊 Interactive HTML report generated: {filename}")
+        print(f"🌐 Open in browser to explore the visualization")
+        
+        # Also show explanation if requested
+        if args.explain:
+            print("\n" + "="*60)
+            print(analyzer.generate_explanation(result, analysis_type, args.var))
+    
+    elif args.explain:
+        # Show explanation first, then formatted results
+        explanation = analyzer.generate_explanation(result, analysis_type, args.var)
+        print(explanation)
+        print("\n" + "="*60)
+        print("📋 DETAILED ANALYSIS RESULTS:")
+        print("="*60)
+        output = analyzer.format_output(result, args.format)
+        print(output)
+    
+    else:
+        # Standard output
+        output = analyzer.format_output(result, args.format)
+        print(output)
 
 
 if __name__ == "__main__":

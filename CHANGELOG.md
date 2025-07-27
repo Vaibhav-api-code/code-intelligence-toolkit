@@ -19,6 +19,35 @@ All notable changes to the Code Intelligence Toolkit will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2025-07-27
+
+### Added - Intelligence Layer
+- **Natural Language Explanations** (`--explain` flag): Transform complex technical analysis into intuitive explanations
+  - **Impact Analysis Explanations**: Risk assessment with actionable recommendations
+  - **Calculation Path Explanations**: Step-by-step algorithm understanding in plain English
+  - **State Tracking Explanations**: Type evolution analysis with warnings and advice
+  - **Template-Based Consistency**: Professional formatting with risk-based messaging
+- **Interactive HTML Visualization** (`--output-html` flag): Self-contained professional reports
+  - **vis.js Network Graphs**: Click-to-explore node relationships and dependencies
+  - **Risk-Based Styling**: Color-coded by impact level and confidence scoring
+  - **Progressive Disclosure**: Overview → drill-down → code context workflow
+  - **Export Capabilities**: Save visualizations as PNG images for documentation
+  - **Responsive Design**: Works on desktop, tablet, and mobile devices
+  - **Zero Dependencies**: Self-contained HTML files using vis.js CDN
+
+### Enhanced
+- **data_flow_tracker_v2.py**: Intelligence layer integration across all analysis modes
+  - All V2 features (impact, calculation path, state tracking) support explanations
+  - Standard forward/backward analysis now supports natural language explanations
+  - Combined intelligence: explanation + visualization in single command
+- **Five Core Capabilities**: Complete V2 suite now includes intelligence transformation
+- **Strategic Achievement**: Visualization + Explanation = Intuitive Code Understanding
+
+### Documentation
+- **README.md**: Updated with intelligence layer features and wrapper clarification
+- **DATA_FLOW_TRACKER_GUIDE.md**: Comprehensive intelligence layer documentation with examples
+- **Quick Start**: Added note about run_any_python_tool.sh wrapper purpose
+
 ## [1.2.1] - 2025-07-27
 
 ### Added

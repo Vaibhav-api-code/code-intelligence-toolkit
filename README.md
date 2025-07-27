@@ -60,6 +60,8 @@ chmod +x run_any_python_tool.sh
 ./run_any_python_tool.sh safe_file_manager.py move old new  # Reversible file ops
 ```
 
+> **Note**: The `run_any_python_tool.sh` wrapper handles environment setup and ensures all tools run with the correct shared configuration.
+
 **What you get immediately:**
 - ⚡ **10-100x faster** code analysis than traditional tools
 - 🛡️ **Automatic backups** before any destructive operation
@@ -260,38 +262,72 @@ Built for safety at every level:
 - **Atomic operations** - No partial states
 - **Comprehensive logging** - Full audit trail
 
-## 🆕 What's New (v1.2.1)
+## 🆕 What's New (v1.2.1+)
 
-### 🎯 Data Flow Tracker V2 - Advanced Code Intelligence
-- **NEW: data_flow_tracker_v2.py** - Next-generation data flow analysis with three breakthrough capabilities:
+### 🧠 Intelligence Layer - Transform Analysis into Insights
+- **BREAKTHROUGH: Intelligence Layer** - Revolutionary enhancement that transforms complex analysis into intuitive insights through natural language explanations and interactive visualizations.
 
-#### 🔍 V2 Enhanced Features
+#### 🎯 Intelligence Layer Features
   ```bash
-  # V2: Impact Analysis - See where changes will have effects
-  ./run_any_python_tool.sh data_flow_tracker_v2.py --var config --show-impact --file app.py
+  # 🧠 Natural Language Explanations - Understand analysis instantly
+  ./run_any_python_tool.sh data_flow_tracker_v2.py --var config --show-impact --explain --file app.py
   
-  # V2: Calculation Path - Understand complex algorithms
-  ./run_any_python_tool.sh data_flow_tracker_v2.py --var total --show-calculation-path --file calc.py
+  # 🌐 Interactive HTML Visualization - Explore dependencies visually  
+  ./run_any_python_tool.sh data_flow_tracker_v2.py --var total --show-calculation-path --output-html --file calc.py
   
-  # V2: Type Tracking - Monitor type evolution and catch bugs
-  ./run_any_python_tool.sh data_flow_tracker_v2.py --var data --track-state --file process.py
+  # 🎯 Combined Intelligence - Best of both worlds
+  ./run_any_python_tool.sh data_flow_tracker_v2.py --var data --track-state --explain --output-html --file process.py
   
-  # V1: Classic dependency tracking still available
-  ./run_any_python_tool.sh data_flow_tracker.py --var x --direction backward --file module.py
+  # ⚡ All V2 analysis modes support intelligence layer
+  ./run_any_python_tool.sh data_flow_tracker_v2.py --var x --direction backward --explain --file module.py
   ```
 
-- **🚀 V2 Breakthrough Capabilities**:
-  - **Impact Analysis**: Shows where data escapes scope (returns, side effects, state changes) with risk assessment
-  - **Calculation Path Analysis**: Extracts minimal "critical path" for understanding complex calculations
-  - **Type & State Tracking**: Monitors type evolution, nullable states, and warns about potential issues
-  - **Full Java Parity**: Complete Java implementation matching all Python V2 features
-  - **Enhanced Visualization**: Risk levels, type evolution charts, and comprehensive reporting
+### 🚀 **Five Core Capabilities** (Complete V2 Suite):
 
-- **🎯 Both Safety AND Intelligence**:
-  - **Safety**: Know what will break before making changes (impact analysis)
-  - **Intelligence**: Understand complex algorithms (calculation paths, type tracking)
-  - **Multi-language**: Python and Java with identical feature sets
-  - **Production Ready**: Handles massive codebases with enterprise-grade performance
+#### 1. 🔍 **Impact Analysis** - Know What Will Break
+Shows where data escapes scope with **risk assessment** and **actionable recommendations**:
+- **Returns**: Functions that return values dependent on the variable
+- **Side Effects**: File writes, network calls, console output  
+- **State Changes**: Modifications to global variables or class members
+- **Risk Levels**: High/Medium/Low with specific testing advice
+
+#### 2. 🧮 **Calculation Path Analysis** - Understand Complex Logic
+Extracts the minimal "critical path" showing exactly how values are calculated:
+- **Algorithm Flow**: Step-by-step calculation breakdown
+- **Input Tracking**: Shows what each step depends on
+- **Debugging Aid**: Trace issues back to their source
+- **Noise Filtering**: Only shows essential calculation steps
+
+#### 3. 🔄 **Type & State Tracking** - Catch Bugs Early  
+Monitors how variable types and states evolve through code execution:
+- **Type Evolution**: Tracks type changes that could indicate bugs
+- **State Context**: Loop and conditional modification tracking
+- **Warning System**: Alerts about potential null references and type issues
+- **Confidence Scoring**: Statistical confidence in type inference
+
+#### 4. 🧠 **Natural Language Explanations** (`--explain`)
+Converts technical analysis into **intuitive explanations**:
+- **Risk Assessment**: "🚨 High Risk Change: Modifying 'config' affects 5 different places across 3 functions..."
+- **Algorithm Understanding**: "🔍 How 'finalTotal' is Calculated: This value is calculated through 14 steps..."
+- **Bug Prevention**: "⚠️ Type Changes Detected: dict → UserModel. This could indicate potential bugs..."
+- **Actionable Advice**: Specific recommendations for testing and validation
+
+#### 5. 🌐 **Interactive HTML Visualization** (`--output-html`)
+Self-contained professional reports with **zero external dependencies**:
+- **vis.js Network Graphs**: Click-to-explore node relationships
+- **Risk-Based Styling**: Color-coded by impact level and confidence
+- **Progressive Disclosure**: Overview → drill-down → code context
+- **Export Capabilities**: Save visualizations as PNG images
+- **Responsive Design**: Works on desktop, tablet, and mobile
+
+### 🎯 **Strategic Achievement: Accessibility Through Intelligence**
+
+**The Perfect Combination**: Visualization + Explanation = **Intuitive Code Understanding**
+
+- **Before**: Powerful analysis requiring expertise to interpret  
+- **After**: Intuitive intelligence accessible to all skill levels
+- **Impact**: Complex codebases become manageable and understandable
+- **Result**: Confident refactoring and debugging for everyone
 
 ### Enhanced Documentation
 - **Improved EOF handling**: Added warnings to prevent 'EOF < /dev/null' issues in heredocs
