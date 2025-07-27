@@ -8,7 +8,7 @@ Code Intelligence Toolkit
 Author: Vaibhav-api-code
 Co-Author: Claude Code (https://claude.ai/code)
 Created: 2025-07-23
-Updated: 2025-01-26
+Updated: 2025-07-26
 License: Mozilla Public License 2.0 (MPL-2.0)
 -->
 
@@ -42,90 +42,73 @@ A comprehensive suite of 100+ professional development tools that are 10-100x fa
 ### Ripgrep File Type Support
 The toolkit leverages ripgrep's extensive file type definitions, supporting 600+ file types out of the box. Run `rg --type-list` to see all supported types.
 
-## 🚨 Why Safety Matters
+## 🚀 Quick Start - Two Ways to Use This Toolkit
 
-Recent incidents like [Replit's AI wiping production databases](https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/) highlight the critical need for safety-first design in coding tools. **This toolkit was built specifically to prevent such disasters.**
+### 🎯 Level 1: Immediate Safety (For Everyone)
+Clone the repo and start using powerful, reversible tools right away:
 
-### 🛡️ Our Safety Philosophy
+```bash
+# Get started in 30 seconds
+git clone https://github.com/Vaibhav-api-code/code-intelligence-toolkit.git
+cd code-intelligence-toolkit
+chmod +x run_any_python_tool.sh
 
-1. **No Destructive Operations Without Confirmation** - Every potentially dangerous operation requires explicit user confirmation
-2. **Multiple Safety Layers** - SafeGIT wrapper, Safe File Manager, atomic operations, automatic backups
-3. **AI-Agent Protection** - Designed to work safely with AI coding assistants (Claude, GPT, Copilot)
-4. **Zero Trust Architecture** - Tools assume nothing and verify everything
+# Use lightning-fast, safe tools immediately
+./run_any_python_tool.sh find_text.py "TODO" --multiline    # 10-100x faster search
+./run_any_python_tool.sh safegit.py status                  # Git with safety net
+./run_any_python_tool.sh safe_file_manager.py move old new  # Reversible file ops
+```
 
-## 🔒 Built-in Safety Features
+**What you get immediately:**
+- ⚡ **10-100x faster** code analysis than traditional tools
+- 🛡️ **Automatic backups** before any destructive operation
+- ↩️ **Full undo capabilities** for all file operations
+- 🎯 **Smart confirmations** that prevent accidents
+- 📊 **Complete audit trail** of all operations
+
+### 🔒 Level 2: Maximum Security (For AI Developers & Enterprises)
+For those using AI coding assistants or requiring enterprise-grade protection:
+
+```bash
+# Block direct access to dangerous commands
+# See "Achieving Maximum Safety" section below for full setup
+```
+
+**Additional protection:**
+- 🤖 **AI agents cannot bypass** safety mechanisms
+- 🚫 **System-level blocking** of dangerous commands
+- 🔐 **Zero-trust architecture** for production environments
+- 📡 **Monitoring and alerting** for bypass attempts
+
+## 🚨 Why This Toolkit Exists
+
+Recent incidents like [Replit's AI wiping production databases](https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/) show what happens when powerful tools lack safety mechanisms. **We built this toolkit to ensure such disasters never happen to you.**
+
+## 🛡️ Built-in Safety Features (Available to Everyone)
 
 ### SafeGIT - Your Git Safety Net
 ```bash
-# BLOCKS dangerous commands like:
-git reset --hard    # ❌ Requires confirmation + creates backup
-git clean -fdx      # ❌ Shows what will be deleted first
-git push --force    # ❌ Converts to safer --force-with-lease
-
-# AI agents CANNOT bypass these protections
+# Protects against common disasters:
+./run_any_python_tool.sh safegit.py reset --hard    # ✅ Creates backup first
+./run_any_python_tool.sh safegit.py clean -fdx      # ✅ Shows preview
+./run_any_python_tool.sh safegit.py push --force    # ✅ Converts to --force-with-lease
 ```
 
-### Safe File Manager - Atomic Operations Only
+### Safe File Manager - Never Lose Data Again
 ```bash
-# ALL file operations are reversible:
-safe_file_manager.py move file1 file2    # ✅ Creates backup
-safe_file_manager.py trash old_files/     # ✅ Moves to trash, never deletes
-safe_file_manager.py organize downloads/  # ✅ Preview mode by default
-
-# Built-in undo system for recovery
-safe_file_manager.py undo --interactive
+# Every operation is reversible:
+./run_any_python_tool.sh safe_file_manager.py move important.doc backup/
+./run_any_python_tool.sh safe_file_manager.py trash old_files/  # To trash, not gone
+./run_any_python_tool.sh safe_file_manager.py undo --interactive  # Recover anything
 ```
 
-### Risk-Based Confirmation System
-- **Low Risk**: Read operations proceed normally
-- **Medium Risk**: Require `--yes` flag or confirmation
-- **High Risk**: Require typed confirmation phrases like "DELETE ALL"
-- **Critical Risk**: Multiple confirmations + backup creation
+### Data Flow Tracker - Understand Your Code (NEW in v1.2.0)
+```bash
+# Track how data flows through your code:
+./run_any_python_tool.sh data_flow_tracker.py --var user_input --file app.py
+./run_any_python_tool.sh data_flow_tracker.py --var result --direction backward
+```
 
-## ⚠️ CRITICAL: Blocking Direct Access
-
-**The safe tools only protect you if direct access to dangerous commands is blocked!**
-
-### Your Responsibility
-
-As the user/administrator, you MUST:
-
-1. **Block Direct Git Access**
-   ```bash
-   # Add to AI agent's restricted commands:
-   # git reset, git clean, git push --force, git rebase
-   # Or block ALL git commands and require safegit
-   ```
-
-2. **Block Dangerous Shell Commands**
-   ```bash
-   # Must block: rm, mv, cp, chmod, chown, dd, shred
-   # Require use of safe_file_manager.py instead
-   ```
-
-3. **Configure AI Agents Properly**
-   ```python
-   # AI agents should NEVER have access to:
-   blocked_commands = ['git', 'rm', 'mv', 'cp', 'dd', 'shred']
-   
-   # AI agents should ONLY use:
-   allowed_tools = ['safegit.py', 'safe_file_manager.py']
-   ```
-
-### Why This Matters
-
-- **Safe tools can be bypassed** if direct commands are available
-- **AI agents don't know** which commands are dangerous
-- **One mistake** with `rm -rf` or `git reset --hard` can destroy everything
-- **Defense in depth** requires blocking dangerous commands at the source
-
-### Recommended Setup
-
-See [AI_SAFETY_SETUP.md](AI_SAFETY_SETUP.md) for detailed instructions on:
-- Configuring AI agents with proper restrictions
-- Setting up command blocking at the system level
-- Testing your safety configuration
-- Monitoring for bypass attempts
 
 ## 🚀 Overview
 
@@ -269,32 +252,39 @@ Built for safety at every level:
 - **Atomic operations** - No partial states
 - **Comprehensive logging** - Full audit trail
 
-## 🆕 What's New (v1.1.1)
+## 🆕 What's New (v1.2.0)
 
-### Enhanced Text Replacement
-- **Escape Sequence Support**: Both `replace_text_v8.py` and `replace_text_ast_v2.py` now support `--interpret-escapes` flag
+### 🎯 Data Flow Tracker - Track Variable Dependencies Through Code
+- **NEW: data_flow_tracker.py** - Revolutionary tool for understanding how data flows through your codebase
   ```bash
-  # Multi-line replacements are now easy!
-  ./run_any_python_tool.sh replace_text_v8.py "TODO" "TODO:\n- Implement\n- Test\n- Deploy" --interpret-escapes file.py
+  # Track what variable 'x' affects (forward tracking)
+  ./run_any_python_tool.sh data_flow_tracker.py --var x --file calc.py
   
-  # Works in AST tool for comments and strings
-  ./run_any_python_tool.sh replace_text_ast_v2.py _ "error" "Error:\n  Code: E001\n  Details: Failed" --strings-only --interpret-escapes --lang python --file app.py
+  # Track what affects 'result' (backward tracking)
+  ./run_any_python_tool.sh data_flow_tracker.py --var result --direction backward --file module.py
+  
+  # Generate visual dependency graph
+  ./run_any_python_tool.sh data_flow_tracker.py --var data --format graph --file app.py > flow.dot
+  dot -Tpng flow.dot -o flow.png  # Visualize with GraphViz
   ```
 
-### Multiline Search Capability
-- **find_text_v7.py**: Added `--multiline` (`-U`) flag for patterns spanning multiple lines
-  ```bash
-  # Find entire classes
-  ./run_any_python_tool.sh find_text.py "class MyClass.*?^}" --type regex --multiline script.py
-  
-  # Search multiline docstrings
-  ./run_any_python_tool.sh find_text.py '""".*?"""' --type regex --multiline -g "*.py"
-  ```
+- **Key Features**:
+  - **Bidirectional Analysis**: Track forward (what X affects) or backward (what affects Y)
+  - **Inter-procedural Tracking**: Follows data across function boundaries with parameter mapping
+  - **Multi-language Support**: Full support for Python and Java
+  - **Complex Expressions**: Handles ternary operators, comprehensions, method chains, tuple unpacking
+  - **Multiple Output Formats**: Human-readable text, JSON for tooling, GraphViz for visualization
 
-### Release Workflow Automation
-- **Non-interactive release workflow**: Added `--yes` flag for CI/CD automation
-- **Automated version tagging**: Supports patch/minor/major releases
-- **GitHub release creation**: Automatic release notes generation
+- **Use Cases**:
+  - Debug incorrect calculations by tracing backward from wrong values
+  - Understand impact before refactoring by seeing what a variable affects
+  - Document data flow for complex algorithms
+  - Validate that sensitive data doesn't leak to logs or outputs
+
+### Enhanced Documentation
+- **Improved EOF handling**: Added warnings to prevent 'EOF < /dev/null' issues in heredocs
+- **Tool organization**: Better categorization in documentation
+- **More examples**: Real-world use cases for data flow analysis
 
 ### Bug Fixes
 - Fixed stdin processing in replace_text_v8.py
@@ -617,6 +607,7 @@ export SAFEGIT_FORCE_YES=1  # This would bypass critical safety!
 
 | Category | Tool | Version | Key Feature |
 |----------|------|---------|-------------|
+| **Data Flow** | data_flow_tracker.py | NEW | Track variable dependencies bidirectionally |
 | **Search** | find_text.py | v7 | Multiline search with `--multiline` flag |
 | **Replace** | replace_text.py | v8 | Escape sequences with `--interpret-escapes` |
 | **AST Replace** | replace_text_ast.py | v2 | Escape sequences in comments/strings |
@@ -627,6 +618,9 @@ export SAFEGIT_FORCE_YES=1  # This would bypass critical safety!
 ### Most Used Commands
 
 ```bash
+# Track data flow
+./run_any_python_tool.sh data_flow_tracker.py --var input_data --file app.py
+
 # Search
 ./run_any_python_tool.sh find_text.py "pattern" --multiline --type regex
 
@@ -642,6 +636,106 @@ export SAFEGIT_FORCE_YES=1  # This would bypass critical safety!
 # Safe git
 ./run_any_python_tool.sh safegit.py status
 ```
+
+## 🔐 Achieving Maximum Safety (For AI Developers & Enterprises)
+
+While the toolkit provides immediate value with its built-in safety features, achieving **maximum protection** requires blocking direct access to dangerous commands at the system level. This is especially critical when using AI coding assistants.
+
+### Why Full Lockdown Matters
+
+Recent incidents have shown that AI agents can:
+- Execute `rm -rf /` without understanding the consequences
+- Run `git reset --hard` and destroy uncommitted work
+- Use `dd` commands that can overwrite entire disks
+- Chain commands in ways that bypass simple restrictions
+
+### The Defense-in-Depth Approach
+
+```
+Level 1: Safe Tools (What you get immediately)
+├── Automatic backups before destructive operations
+├── Confirmation prompts for dangerous actions
+└── Full undo/recovery capabilities
+
+Level 2: System Lockdown (Maximum protection)
+├── Block direct access to: git, rm, mv, cp, dd, shred
+├── Enforce use of safe alternatives
+├── Monitor and alert on bypass attempts
+└── Zero-trust configuration for AI agents
+```
+
+### Implementation Guide
+
+#### For AI Agent Developers
+
+```python
+# Configure your AI agent with these restrictions:
+blocked_commands = [
+    'git', 'rm', 'mv', 'cp', 'chmod', 'chown', 
+    'dd', 'shred', 'mkfs', 'fdisk', 'parted'
+]
+
+allowed_alternatives = {
+    'git': 'safegit.py',
+    'rm': 'safe_file_manager.py trash',
+    'mv': 'safe_file_manager.py move',
+    'cp': 'safe_file_manager.py copy'
+}
+
+# Enforce at the agent level
+def execute_command(cmd):
+    first_word = cmd.split()[0]
+    if first_word in blocked_commands:
+        alternative = allowed_alternatives.get(first_word, 'No alternative')
+        raise SecurityError(f"Direct '{first_word}' is blocked. Use: {alternative}")
+```
+
+#### For System Administrators
+
+```bash
+# 1. Create restricted shell for AI agents
+sudo useradd -m -s /bin/rbash ai_agent
+
+# 2. Set up command restrictions
+mkdir /home/ai_agent/bin
+ln -s /path/to/safegit.py /home/ai_agent/bin/git
+ln -s /path/to/safe_file_manager.py /home/ai_agent/bin/sfm
+
+# 3. Lock down PATH
+echo 'export PATH=/home/ai_agent/bin' >> /home/ai_agent/.bashrc
+
+# 4. Test the restrictions
+su - ai_agent -c "rm testfile"  # Should fail
+su - ai_agent -c "sfm trash testfile"  # Should work
+```
+
+#### For Enterprise Environments
+
+See [AI_SAFETY_SETUP.md](AI_SAFETY_SETUP.md) for:
+- Container-based isolation strategies
+- SELinux/AppArmor policies
+- Audit logging configuration
+- Compliance reporting tools
+
+### Validation Checklist
+
+- [ ] Direct `git` commands are blocked
+- [ ] Direct `rm/mv/cp` commands are blocked  
+- [ ] Safe alternatives are available and working
+- [ ] AI agents can only use approved tools
+- [ ] Monitoring is in place for bypass attempts
+- [ ] Recovery procedures are tested and documented
+
+### The Payoff
+
+With full lockdown in place:
+- **Zero risk** of AI agents destroying data
+- **Complete audit trail** of all operations
+- **Instant recovery** from any mistake
+- **Peace of mind** when using AI assistants
+- **Compliance ready** for regulated environments
+
+Remember: **The safe tools only protect you if dangerous commands are blocked at the source!**
 
 ## 🤝 Contributing
 
