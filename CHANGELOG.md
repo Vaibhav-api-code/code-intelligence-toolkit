@@ -19,6 +19,29 @@ All notable changes to the Code Intelligence Toolkit will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2025-07-27
+
+### Added - Complete Intelligence Platform
+- **doc_generator.py**: Revolutionary automated documentation generator leveraging intelligence layer
+  - **Five Documentation Styles**: API docs, user guides, technical analysis, quick reference, tutorials
+  - **Four Output Formats**: Markdown, HTML, docstring, reStructuredText
+  - **Intelligence Integration**: Leverages data_flow_tracker_v2.py for smart dependency analysis
+  - **Depth Control**: Surface, medium, deep analysis levels with complexity assessment
+  - **Auto-Generated Examples**: Contextually appropriate code samples and usage patterns
+  - **Multi-Target Support**: Functions, classes, and entire modules
+- **Complete Code Intelligence Platform**: Analysis + Visualization + Documentation = Complete Understanding
+  - **Strategic Achievement**: Transform complex codebases into manageable, understandable, well-documented systems
+  - **Knowledge Sharing**: Enable confident development, debugging, refactoring for all skill levels
+
+### Enhanced
+- **README.md**: Updated with documentation generation features and six core capabilities
+- **DATA_FLOW_TRACKER_GUIDE.md**: Added comprehensive documentation generation section
+- **Tool Reference**: Added doc_generator.py to quick reference with updated command examples
+
+### Documentation
+- **Complete Platform Documentation**: Updated all guides to reflect the complete intelligence platform
+- **Combined Workflow Examples**: Shows integration between analysis, visualization, and documentation
+
 ## [1.2.2] - 2025-07-27
 
 ### Added - Intelligence Layer

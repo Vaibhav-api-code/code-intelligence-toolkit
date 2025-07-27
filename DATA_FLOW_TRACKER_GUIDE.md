@@ -3,6 +3,7 @@
 **Related Code Files:**
 - `code-intelligence-toolkit/data_flow_tracker.py` - Original implementation of the data flow analysis tool
 - `code-intelligence-toolkit/data_flow_tracker_v2.py` - Enhanced version with impact analysis, calculation paths, and type tracking
+- `code-intelligence-toolkit/doc_generator.py` - Automated documentation generator leveraging data flow analysis
 - `code-intelligence-toolkit/run_any_python_tool.sh` - Wrapper script for execution
 - `test_data_flow.py` - Simple test examples
 - `test_complex_data_flow.py` - Complex test scenarios
@@ -699,3 +700,65 @@ This generates both:
 # Verify no unintended dependencies
 ./run_any_python_tool.sh data_flow_tracker.py --var sensitive_data --file security.py
 ```
+
+## Automated Documentation Generation
+
+The intelligence layer now powers automated documentation generation through `doc_generator.py`, which leverages data flow analysis to create intelligent documentation.
+
+### Documentation Generation Features
+
+```bash
+# Generate API documentation for functions
+./run_any_python_tool.sh doc_generator.py --function calculatePrice --file pricing.py --style api-docs
+
+# Create user-friendly guides for classes
+./run_any_python_tool.sh doc_generator.py --class UserManager --file auth.py --style user-guide --depth deep
+
+# Generate technical analysis documentation
+./run_any_python_tool.sh doc_generator.py --module --file database.py --style technical --output html
+
+# Quick reference cards
+./run_any_python_tool.sh doc_generator.py --function process_data --file data.py --style quick-ref --format docstring
+
+# Tutorial-style documentation
+./run_any_python_tool.sh doc_generator.py --class APIClient --file client.py --style tutorial --depth medium
+```
+
+### Documentation Styles
+
+1. **API Documentation** (`--style api-docs`): Technical reference with parameters, return values, and usage examples
+2. **User Guides** (`--style user-guide`): Friendly explanations accessible to all skill levels
+3. **Technical Analysis** (`--style technical`): Deep analysis with data flow, complexity metrics, and architectural insights
+4. **Quick Reference** (`--style quick-ref`): Concise format for immediate lookup
+5. **Tutorials** (`--style tutorial`): Educational approach with step-by-step guidance
+
+### Output Formats
+
+- **Markdown** (`--format markdown`): For documentation systems and README files
+- **HTML** (`--format html`): For web documentation and reports
+- **Docstring** (`--format docstring`): For inline Python documentation
+- **reStructuredText** (`--format rst`): For Sphinx and other documentation generators
+
+### Intelligence Integration
+
+The documentation generator leverages the same data flow analysis used by the intelligence layer:
+
+- **Dependency Analysis**: Shows what functions depend on and affect
+- **Complexity Assessment**: Provides complexity warnings and refactoring suggestions
+- **Auto-Generated Examples**: Creates contextually appropriate code samples
+- **Risk Assessment**: Identifies high-complexity areas that need careful documentation
+
+### Combined Workflow Example
+
+```bash
+# 1. Analyze the data flow first
+./run_any_python_tool.sh data_flow_tracker_v2.py --var config --show-impact --explain --file app.py
+
+# 2. Generate comprehensive documentation
+./run_any_python_tool.sh doc_generator.py --function setup_config --file app.py --style technical --depth deep
+
+# 3. Create user-friendly guide
+./run_any_python_tool.sh doc_generator.py --function setup_config --file app.py --style user-guide --format html
+```
+
+This creates a complete documentation suite: technical analysis for developers, visual impact analysis for code review, and user-friendly guides for broader audiences.
