@@ -64,7 +64,7 @@ Successfully implemented a comprehensive Java refactoring solution using a hybri
 # With project context for better accuracy
 ./run_any_python_tool.sh replace_text_ast.py --file MyClass.java counter newCounter --line 42 \
     --source-dir src/main/java --source-dir src/test/java \
-    --jar lib/bookmap-api.jar
+    --jar lib/external-api.jar
 ```
 
 ### Direct Engine Testing

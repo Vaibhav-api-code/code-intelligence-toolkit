@@ -104,7 +104,7 @@ code-intelligence-toolkit/
 ├── dependency_checker.py    # Multi-platform dep checking
 ├── *.py                    # 40+ analysis tools
 ├── examples/               # Usage examples
-│   └── bookmap-trading/    # Real-world example
+│   └── enterprise-app/     # Real-world example
 └── docs/                   # Additional documentation
 ```
 
@@ -121,7 +121,7 @@ This toolkit now stands out as:
 
 ## 🎊 Celebration
 
-The Code Intelligence Toolkit transformation is complete! From a project-specific trading toolkit to a **professional, open-source, multi-platform code analysis suite** ready to serve the entire developer community.
+The Code Intelligence Toolkit transformation is complete! From a project-specific toolkit to a **professional, open-source, multi-platform code analysis suite** ready to serve the entire developer community.
 
 **Total time invested**: ~2 hours
 **Total improvements**: 100+ changes across the entire codebase

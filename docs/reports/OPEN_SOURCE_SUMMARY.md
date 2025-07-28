@@ -84,7 +84,7 @@ code-intelligence-toolkit/
 ├── INSTALL.md                   # NEW: Installation guide
 ├── requirements.txt             # NEW: Python dependencies
 ├── examples/                    # NEW: Example directory
-│   └── bookmap-trading/         # Project-specific examples
+│   └── domain-specific/         # Project-specific examples
 │       ├── README.md
 │       ├── *.py                 # Moved project-specific tools
 │       └── tests/               # Moved project-specific tests

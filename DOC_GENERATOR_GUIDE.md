@@ -953,7 +953,7 @@ Both tools are maintained and serve different but complementary purposes in the 
 # Generate architecture overview with visual call graph
 ./run_any_python_tool.sh doc_generator_enhanced.py \
   --module \
-  --file trading_system.py \
+  --file core_system.py \
   --style architecture \
   --format html \
   --depth deep \
