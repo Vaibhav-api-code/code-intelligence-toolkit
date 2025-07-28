@@ -87,14 +87,27 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
 # Traditional AI coding can be dangerous
 ai_agent.execute("rm -rf important_files")  # 💥 Disaster!
 
-# With Code Intelligence Toolkit
+# With Code Intelligence Toolkit - Two Approaches:
+
+# 1. CLI Approach (Perfect for Claude Code, GitHub Copilot)
 import subprocess
 result = subprocess.run([
     "./run_any_python_tool.sh", 
     "safe_file_manager.py", 
     "trash", "old_files"  # Safe, reversible operation
 ], capture_output=True, text=True)
+
+# 2. API Approach (For custom AI integrations)
+from code_intelligence.api.client import CodeIntelligenceAPI
+api = CodeIntelligenceAPI()
+result = api.execute({
+    "tool": "safe_file_manager",
+    "params": {"command": "trash", "files": ["old_files"]},
+    "options": {"non_interactive": True}
+})
 ```
+
+> **Important for AI Developers**: While we provide both CLI and API interfaces, AI coding assistants like Claude Code work best with the CLI due to their subprocess execution model. Both interfaces provide identical functionality - the CLI is just more direct for sandbox environments!
 
 ### 🆕 AI Integration Features
 
@@ -246,8 +259,8 @@ The toolkit leverages ripgrep's extensive file type definitions, supporting 600+
 
 ## 🚀 Quick Start - Two Ways to Use This Toolkit
 
-### 🎯 Level 1: Immediate Safety (For Everyone)
-Clone the repo and start using powerful, reversible tools right away:
+### 🎯 Method 1: Command Line Interface (CLI)
+Perfect for quick tasks, shell scripts, and AI coding assistants like Claude Code:
 
 ```bash
 # Get started in 30 seconds
@@ -255,16 +268,75 @@ git clone https://github.com/Vaibhav-api-code/code-intelligence-toolkit.git
 cd code-intelligence-toolkit
 chmod +x run_any_python_tool.sh
 
-# AI agents can use tools safely with structured output
-python -c "
-import subprocess, json
-# Fast, safe search with JSON output
-result = subprocess.run(['./run_any_python_tool.sh', 'find_text_v7.py', 'TODO', '--json'], 
-                       capture_output=True, text=True)
-todos = json.loads(result.stdout)
-print(f'Found {len(todos)} TODOs to process')
-"
+# Find TODOs in your code
+./run_any_python_tool.sh find_text_v7.py "TODO" --scope src/ --json
+
+# Generate documentation
+./run_any_python_tool.sh doc_generator_enhanced.py MyClass --style technical
+
+# Safe refactoring
+./run_any_python_tool.sh replace_text_ast_v2.py --file app.py oldMethod newMethod
+
+# Analyze dependencies
+./run_any_python_tool.sh dependency_analyzer.py MyClass --export-all
 ```
+
+### 🤖 Method 2: Unified JSON API
+Ideal for automation, integrations, and building AI-powered tools:
+
+```python
+# Method 2a: Direct API usage (for Python integrations)
+from code_intelligence.api.client import CodeIntelligenceAPI
+
+api = CodeIntelligenceAPI()
+
+# Single operation
+result = api.execute({
+    "tool": "find_text_v7",
+    "params": {"pattern": "TODO", "--scope": "src/"},
+    "options": {"cache": True, "include_reasoning": True}
+})
+
+# Batch operations
+results = api.batch_execute([
+    {"tool": "find_text_v7", "params": {"TODO": True}},
+    {"tool": "replace_text_v8", "params": {"TODO": True, "DONE": True}}
+])
+```
+
+```bash
+# Method 2b: API via command line (for shell scripts/CI/CD)
+# Single request
+echo '{"tool": "find_text_v7", "params": {"TODO": true, "--json": true}}' | python3 api.py
+
+# Interactive mode
+python3 api.py
+> {"tool": "doc_generator_enhanced", "params": {"MyClass": true}}
+
+# Start API server
+python3 api.py --server --port 8080
+# Then use curl/wget/any HTTP client
+curl -X POST http://localhost:8080/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"tool": "semantic_diff_v3", "params": {"file1": "v1.py", "file2": "v2.py"}}'
+```
+
+### 🎯 Which Method Should You Use?
+
+**Use CLI when:**
+- Running quick one-off commands
+- Working in AI coding assistants (Claude Code, GitHub Copilot)
+- Shell scripting and automation
+- Learning and exploring tools
+- Debugging specific issues
+
+**Use API when:**
+- Building applications or services
+- Need structured error handling
+- Running batch operations
+- Caching results for performance
+- Creating dashboards or monitoring
+- Integrating with other systems
 
 > **Note**: The `run_any_python_tool.sh` wrapper handles environment setup and ensures all tools run with the correct shared configuration.
 

@@ -4,8 +4,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# Universal Python Tool Runner for Java Analysis  
-# This script allows running any Python analysis tool with a single approval
+# Universal Python Tool Runner for AI-Powered Development
+# Comprehensive toolkit for code intelligence, refactoring, and analysis
+# Optimized for complex codebases like Bookmap trading strategies
 # Now supports unified configuration system via .pytoolsrc
 # Automatic error logging enabled for all tools (disable with DISABLE_ERROR_LOGGING=1)
 #
@@ -127,10 +128,51 @@ preflight_check() {
 
 # Function to display usage
 usage() {
+    echo "🚀 Code Intelligence Toolkit - AI-Powered Development Platform"
     echo "Usage: $0 [--skip-preflight] <tool_name> [arguments...]"
     echo ""
     echo "Options:"
     echo "  --skip-preflight    Skip preflight validation checks (not recommended)"
+    echo ""
+    echo "🚀 DEVELOPMENT SUPERPOWERS:"
+    echo "============================="
+    echo ""
+    echo "🧠 Instant Code Understanding:"
+    echo "  $0 doc_generator_enhanced.py ComplexAnalyzer --style technical"
+    echo "  $0 data_flow_tracker_v2.py --var userInput --file ProcessingEngine.java"
+    echo "  $0 show_structure_ast_v4.py ConfigurableService.java --filter-annotation '@Parameter'"
+    echo ""
+    echo "🔧 Safe Refactoring:"
+    echo "  $0 replace_text_ast_v2.py --file Service.java oldMethod newMethod --scope-aware"
+    echo "  $0 unified_refactor.py rename thresholdValue limitValue --backend java_scope"
+    echo "  $0 semantic_diff_v3.py ServiceV1.java ServiceV2.java --risk-analysis"
+    echo ""
+    echo "📊 Architecture & Dependencies:"
+    echo "  $0 dependency_analyzer.py MainProcessor --plotly-graph deps.html --export-all"
+    echo "  $0 cross_file_analysis_ast.py processRequest --project-root . --max-depth 3"
+    echo "  $0 method_analyzer_ast.py calculateMetrics --trace-flow --show-args"
+    echo ""
+    echo "🎯 Logic Analysis:"
+    echo "  $0 find_text_v7.py 'validateInput|checkCondition' --type regex --extract-method"
+    echo "  $0 navigate_ast.py DataProcessor.java --to handleRequest"
+    echo "  $0 replace_text_v8.py 'TODO.*validate' 'IMPLEMENTED: Validation' . -r -g '*.java' --comments-only"
+    echo ""
+    echo "💡 Performance & Quality:"
+    echo "  $0 dead_code_detector.py src/ --confidence high --ext java"
+    echo "  $0 analyze_internal_usage.py src/main/java/core/ --show-unused"
+    echo "  $0 suggest_refactoring.py ComplexProcessor.java --complexity-analysis"
+    echo ""
+    echo "🔒 Enterprise Safety (All operations use SafeGIT & atomic file operations):"
+    echo "  $0 safegit.py status                    # Safe git operations"
+    echo "  $0 safe_file_manager.py move old.java new.java  # Atomic file operations"
+    echo ""
+    echo "💻 AI Integration (JSON API for seamless AI agent development):"
+    echo "  python3 api.py                          # Start unified JSON API server"
+    echo "  from code_intelligence.api.client import CodeIntelligenceAPI  # Python SDK"
+    echo ""
+    echo "⚡ Speed: AST-based precision, parallel analysis, intelligent caching"
+    echo "🛡️  Safety: Atomic operations, automatic backups, undo capabilities"
+    echo "🧠 Intelligence: AI reasoning, risk assessment, natural language explanations"
     echo ""
     echo "Available tools:"
     echo "  Structure and Navigation:"

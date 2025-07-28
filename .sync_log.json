@@ -54,6 +54,21 @@
       "timestamp": "2025-07-28T02:39:52.023140",
       "files_synced": 17,
       "total_files": 17
+    },
+    {
+      "timestamp": "2025-07-28T02:44:23.026352",
+      "files_synced": 1,
+      "total_files": 1
+    },
+    {
+      "timestamp": "2025-07-28T02:48:49.134416",
+      "files_synced": 18,
+      "total_files": 18
+    },
+    {
+      "timestamp": "2025-07-28T03:11:20.823115",
+      "files_synced": 2,
+      "total_files": 2
     }
   ],
   "file_hashes": {
@@ -67,14 +82,14 @@
     "SYNC_TOOLS_GUIDE.md": "6d354223a0012b4813692f93020d9c5d",
     "NON_INTERACTIVE_GUIDE.md": "8761965546b435babe44b2f052a3ada2",
     "SAFE_FILE_MANAGER_GUIDE.md": "6c1d05be80d18a7caebf273ff4d03ce8",
-    "README.md": "777039e6597a0a2668cdc03c12ce595d",
+    "README.md": "a17d2749f11a4e877dd7a980706114a8",
     "TEXT_TOOLS_GUIDE.md": "c811882e8d8df2abcc74dafc5af8b669",
     "PYTHON_TOOLS_MASTER_HELP.md": "b969854a1e64b43ae541f816664475d7",
     "SAFEGIT_README.md": "bfc96ef3750f426f30c877e7e40031c3",
-    "run_any_python_tool.sh": "980d540826241798fee0c7943858e26c",
+    "run_any_python_tool.sh": "25b0c6f40c7cb471f7d45afecff5047e",
     "replace_text_v8.py": "e3b0c23d70e133b1d99f291148c7d796",
     "find_text_v7.py": "fc9bcb5162822a514e8c034ff6d79c34",
-    "CHANGELOG.md": "0d1923918766b18945a100ad1d104ede",
+    "CHANGELOG.md": "067b79762cfdc57763aa1a29819f8098",
     "data_flow_tracker.py": "9eb83883141d6856ad4171e2b20a0ed7",
     "TOOLS_DOCUMENTATION_2025.md": "7a3e2d787b04e60b8198dfa51417fab8",
     "DATA_FLOW_TRACKER_GUIDE.md": "01d34b4d60a92cd48cbc2e75513cac8b",
@@ -94,6 +109,24 @@
     "ENHANCED_DOC_GENERATOR_README.md": "39971d855fc6c2cdf44b74b16d309ded",
     "AI_API_QUICK_START.md": "b04263de002c254cddb989794d68ea9d",
     "ENHANCED_DOC_GENERATOR_IMPLEMENTATION_SUMMARY.md": "03a817c77ecf603a3966c0d08d89248c",
-    "AI_INTEGRATION_ROADMAP.md": "87ca94a6cc5c969c60fb5eaae8c34349"
+    "AI_INTEGRATION_ROADMAP.md": "87ca94a6cc5c969c60fb5eaae8c34349",
+    "src/code_intelligence/__init__.py": "3a60bc8221ec66259781f352ef6a1da6",
+    "src/code_intelligence/core.py": "b60f4f19ca72b6ad6ac31d612e446272",
+    "src/code_intelligence/documentation/__init__.py": "6da1177f4a224e1237a23e18b12a7e8e",
+    "src/code_intelligence/documentation/generator.py": "90f705f5d5cf2bd8a7b6e988e84d390b",
+    "src/code_intelligence/documentation/styles.py": "e560483134496069041c720839dcb641",
+    "src/code_intelligence/analysis/semantic_diff.py": "18fa5e1f32332f371f481ccc55fee642",
+    "src/code_intelligence/analysis/__init__.py": "90d5702eb74553a4d9fa11a33bba6db3",
+    "src/code_intelligence/analysis/data_flow.py": "a5b2e6df9b8f26f8f48ac823b759dd74",
+    "src/code_intelligence/analysis/ast_navigator.py": "7d6fe508873e6658e0e9d758c017062a",
+    "src/code_intelligence/analysis/impact.py": "745009e60a3f9c9c140515a674ccb4c1",
+    "src/code_intelligence/safety/file_safety.py": "48a865edab9c298fc1a7bbe3e6807496",
+    "src/code_intelligence/safety/__init__.py": "bd678ce97da789635f8d8af19f81d494",
+    "src/code_intelligence/safety/git_safety.py": "d3823600159a8f81fdb84027e9a5e446",
+    "src/code_intelligence/api/client.py": "8185aaebbec1ab6f91c477f67bbf263f",
+    "src/code_intelligence/api/__init__.py": "385171c91cd9fac3e75f362b5b183e12",
+    "src/code_intelligence/refactoring/safe_refactorer.py": "0457d3ce6bd17599e3ff06d8c0d24357",
+    "src/code_intelligence/refactoring/__init__.py": "03ec84bffb09d119553070b3a88a1e59",
+    "src/code_intelligence/refactoring/ast_refactor.py": "879de9c99f8f6bd7ba0b5ff57cdef97f"
   }
 }
