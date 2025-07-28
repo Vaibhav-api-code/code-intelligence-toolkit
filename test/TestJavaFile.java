@@ -12,7 +12,7 @@
  * License: Mozilla Public License 2.0 (MPL-2.0)
  */
 
-package com.bookmap.test;
+package com.example.test;
 
 import java.util.List;
 import java.util.ArrayList;
