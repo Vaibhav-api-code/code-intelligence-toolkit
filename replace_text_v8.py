@@ -6,12 +6,15 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 """
-Enhanced text replacement tool (v7) with advanced features and cross-platform robustness.
+Enhanced text replacement tool (v9) with multi-level undo support.
+
+This version adds SafeGIT-style multi-level undo capabilities to all text operations.
+Every replacement is tracked with atomic operations and full recovery support.
 
 Author: Vaibhav-api-code
 Co-Author: Claude Code (https://claude.ai/code)
 Created: 2025-07-23
-Updated: 2025-07-23
+Updated: 2025-07-28
 License: Mozilla Public License 2.0 (MPL-2.0)
 """
 
@@ -32,11 +35,25 @@ from pathlib import Path
 from typing import List, Dict, Set, Tuple, Optional, Any
 
 # ────────────────────────────  logging  ────────────────────────────
-LOG = logging.getLogger("replace_text_v7")
+LOG = logging.getLogger("replace_text_v9")
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
     format="%(asctime)s - %(name)s - %(levelname)s: %(message)s"
 )
+
+# Import undo system (v9 feature)
+try:
+    from text_operation_history import (
+        TextOperationHistory, OperationType, get_history_instance
+    )
+    HAS_UNDO_SYSTEM = True
+except ImportError:
+    HAS_UNDO_SYSTEM = False
+    print("Warning: text_operation_history module not found. Undo features disabled.", file=sys.stderr)
+
+# Global undo tracking
+_undo_enabled = True
+_operations_tracked = {}
 
 # Import shared modules (new in v7)
 try:
@@ -424,7 +441,39 @@ def read_file(filepath):
         sys.exit(1)
 
 def _atomic_write(path: Path, data: str, bak: bool = False, max_retries: int = 3, retry_delay: float = 1.0) -> None:
-    """Write atomically with retry logic for locked files."""
+    """Write atomically with retry logic for locked files and undo support (v9)."""  
+    global _undo_enabled, _operations_tracked
+    
+    # Track operation for undo if enabled (v9 feature)
+    if HAS_UNDO_SYSTEM and _undo_enabled and path.exists():
+        try:
+            # Only track if we haven't already tracked this file in this session
+            file_key = str(path)
+            if file_key not in _operations_tracked:
+                original_content = path.read_text(encoding='utf-8')
+                
+                # Get the history instance
+                history = get_history_instance()
+                
+                # Record the operation
+                operation = history.record_operation(
+                    operation_type=OperationType.REPLACE_TEXT,
+                    file_path=path,
+                    tool_name="replace_text_v9",
+                    command_args=sys.argv[1:],
+                    old_content=original_content,
+                    new_content=data,
+                    changes_count=1,
+                    description="Text replacement operation"
+                )
+                
+                if operation:
+                    _operations_tracked[file_key] = operation.operation_id
+                    if not os.getenv('QUIET_MODE'):
+                        print(f"[Undo ID: {operation.operation_id}] Use 'text_undo.py --operation {operation.operation_id}' to undo.")
+        except Exception as e:
+            # Don't fail the operation if undo tracking fails
+            LOG.warning(f"Could not track undo operation: {e}")
     tmp_fd, tmp_path = tempfile.mkstemp(dir=str(path.parent), suffix=".tmp")
     tmp = Path(tmp_path)
     
@@ -972,16 +1021,19 @@ def get_files_to_process_legacy(paths, glob_pattern, git_only, staged_only, lang
 # ────────────────────────────  Main Function  ────────────────────────────
 
 def main():
-    """Enhanced main function with v7 features."""
+    """Enhanced main function with v9 undo features."""
+    global _operations_tracked
+    _operations_tracked = {}  # Reset for each run
     # Use enhanced parser if available, fallback to standard or basic
     if HAS_ENHANCED_PARSER:
-        parser = create_search_parser('Enhanced text replacement tool (v7) with ripgrep integration and block awareness')
+        parser = create_search_parser('Enhanced text replacement tool (v9) with multi-level undo support')
     elif HAS_STANDARD_PARSER:
-        parser = create_parser('search', 'Enhanced text replacement tool (v7) with ripgrep integration and block awareness')
+        parser = create_parser('search', 'Enhanced text replacement tool (v9) with multi-level undo support')
     else:
         parser = argparse.ArgumentParser(
-            description='Enhanced text replacement tool (v7) with ripgrep integration and block awareness',
-            formatter_class=argparse.RawDescriptionHelpFormatter
+            description='Enhanced text replacement tool (v9) with multi-level undo support',
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog='Use text_undo.py to manage and restore previous versions.'
         )
     
     # Core replacement arguments
@@ -1025,8 +1077,8 @@ def main():
         parser.add_argument('new_text', help='Replacement text')
         parser.add_argument('paths', nargs='*', help='File(s) or directory(ies) to modify')
     
-    # V7 NEW FEATURES
-    v7_group = parser.add_argument_group('V7 Enhanced Features')
+    # V7/V9 NEW FEATURES
+    v7_group = parser.add_argument_group('V7/V9 Enhanced Features')
     v7_group.add_argument('--from-find-json', metavar='JSON_INPUT',
                          help='Use JSON output from find_text as input (file path, - for stdin, or JSON string)')
     v7_group.add_argument('--block-mode', choices=['preserve', 'within', 'extract'],
@@ -1039,6 +1091,12 @@ def main():
                          help='Use ripgrep for file discovery and searching (default: enabled)')
     v7_group.add_argument('--no-ripgrep', action='store_true',
                          help='Disable ripgrep integration, use legacy methods')
+    
+    # V9 Undo features
+    v7_group.add_argument('--no-undo', action='store_true',
+                         help='Disable undo tracking for this operation (NEW IN V9)')
+    v7_group.add_argument('--undo-description',
+                         help='Custom description for undo history (NEW IN V9)')
     
     # Replacement strategies
     strategy_group = parser.add_mutually_exclusive_group()
@@ -1155,7 +1213,12 @@ def main():
         args.use_ripgrep = False
     
     # Apply configuration defaults
-    apply_config_to_args('replace_text_v7', args, parser)
+    apply_config_to_args('replace_text_v9', args, parser)
+    
+    # Handle undo settings (v9 feature)
+    global _undo_enabled
+    if args.no_undo:
+        _undo_enabled = False
     
     # Apply escape sequence interpretation if requested
     if hasattr(args, 'interpret_escapes') and args.interpret_escapes:
@@ -1426,6 +1489,12 @@ def main():
         if not args.quiet:
             print("\nDry run - no changes applied")
             print("Use without --dry-run to apply changes.")
+    
+    # Show undo summary if operations were tracked (v9 feature)
+    if HAS_UNDO_SYSTEM and _operations_tracked and not args.quiet:
+        print(f"\n✅ Tracked {len(_operations_tracked)} file(s) with undo support.")
+        print("📊 Use 'text_undo.py history' to view operation history.")
+        print("↩️  Use 'text_undo.py undo --last' to undo the last operation.")
 
 if __name__ == '__main__':
     try:
