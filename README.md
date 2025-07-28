@@ -47,8 +47,8 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           Users & AI Agents                            │
-└─────────────────────────┬───────────────┬───────────────────────────────┘
+│                           Users & AI Agents                             │
+└─────────────────────────┬───────────────┬──────────────────────────────┘
                           │               │
                           ▼               ▼
                ┌─────────────────┐ ┌─────────────────┐
@@ -60,11 +60,11 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
                          └─────────┬─────────┘
                                    ▼
                     ┌─────────────────────────────┐
-                    │     Intelligence Layer     │
-                    │  • AI Reasoning Engine     │
-                    │  • Risk Assessment         │
-                    │  • Security Analysis       │
-                    │  • Quality Metrics         │
+                    │     Intelligence Layer      │
+                    │  • AI Reasoning Engine      │
+                    │  • Risk Assessment          │
+                    │  • Security Analysis        │
+                    │  • Quality Metrics          │
                     └─────────────┬───────────────┘
                                   ▼
                     ┌─────────────────────────────┐
@@ -77,9 +77,9 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
                     └─────────────┬───────────────┘
                                   ▼
                     ┌─────────────────────────────┐
-                    │        Your Codebase       │
-                    │   Always Current State     │
-                    │    No Persistent Index     │
+                    │        Your Codebase        │
+                    │   Always Current State      │
+                    │    No Persistent Index      │
                     └─────────────────────────────┘
 ```
 
