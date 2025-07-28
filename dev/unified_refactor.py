@@ -116,7 +116,7 @@ class JavaRefactorer:
         # Build the command
         cmd = [
             self.java_cli_path, '-q', 'runMain',
-            '-PmainClass=com.bookmap.tools.JavaRefactorCLI',
+            '-PmainClass=com.example.tools.JavaRefactorCLI',
             '--args=' + ' '.join(f'"{arg}"' for arg in args)
         ]
         

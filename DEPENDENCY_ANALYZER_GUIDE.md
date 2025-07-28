@@ -31,7 +31,7 @@ The `dependency_analyzer.py` is a comprehensive "tool to rule them all" for anal
 - **Dependency Extraction**: Automatically finds and analyzes all dependencies
 - **Line Count Analysis**: Counts lines of code for all classes and dependencies
 - **Complexity Scoring**: Calculates complexity based on size, dependencies, and category
-- **Category Classification**: Automatically categorizes classes (UI, Processing, Analysis, etc.)
+- **Category Classification**: Automatically categorizes classes (UI, Trading, Analysis, etc.)
 
 ### 📊 **Visualization & Reporting**
 - **Dependency Graphs**: Interactive network graphs showing relationships
@@ -42,7 +42,7 @@ The `dependency_analyzer.py` is a comprehensive "tool to rule them all" for anal
 ### 🎯 **Smart Classification**
 Classes are automatically categorized using pattern matching:
 - **UI**: GUI components, frames, dialogs, monitors
-- **Business Logic**: Core business operations and domain logic
+- **Trading**: Order management, positions, portfolio logic
 - **Analysis**: Analyzers, calculators, detectors, trackers
 - **Indicator**: VWAP, moving averages, technical indicators
 - **Data**: Data structures, caches, buffers, stores
@@ -128,7 +128,7 @@ Categories: 8 different functional areas
 ```
 
 ### Category Breakdown
-- **Core Systems**: DataProcessorControllerV2, StateManagerControllerV3
+- **Trading Systems**: DataProcessorControllerV2, StateManagerControllerV3
 - **Market Analysis**: DataProfileAnalyzerV4, ClusterAnalyzerV1_7
 - **UI Components**: Multiple monitoring and debug interfaces
 - **Indicators**: VWAP calculations, proximity tracking

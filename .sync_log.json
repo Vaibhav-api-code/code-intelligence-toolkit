@@ -74,6 +74,11 @@
       "timestamp": "2025-07-28T11:42:25.834410",
       "files_synced": 1,
       "total_files": 1
+    },
+    {
+      "timestamp": "2025-07-28T11:54:29.434023",
+      "files_synced": 3,
+      "total_files": 3
     }
   ],
   "file_hashes": {
@@ -132,6 +137,8 @@
     "src/code_intelligence/api/__init__.py": "385171c91cd9fac3e75f362b5b183e12",
     "src/code_intelligence/refactoring/safe_refactorer.py": "0457d3ce6bd17599e3ff06d8c0d24357",
     "src/code_intelligence/refactoring/__init__.py": "03ec84bffb09d119553070b3a88a1e59",
-    "src/code_intelligence/refactoring/ast_refactor.py": "879de9c99f8f6bd7ba0b5ff57cdef97f"
+    "src/code_intelligence/refactoring/ast_refactor.py": "879de9c99f8f6bd7ba0b5ff57cdef97f",
+    "DEPENDENCY_ANALYZER_GUIDE.md": "bcf05592ab8383026aad784644a1703b",
+    "OPEN_SOURCE_READY.md": "684ed14d875b00636f99f96d021b0ab3"
   }
 }

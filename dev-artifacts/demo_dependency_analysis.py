@@ -30,15 +30,15 @@ def run_analysis_demo():
     toolkit_dir = Path(__file__).parent
     os.chdir(toolkit_dir)
     
-    print("📍 Analyzing: NubiaAutoMidasAnchoredVWAPV7_1_5")
-    print("🎯 Target: Real-world Java trading strategy with 12,146 lines")
+    print("📍 Analyzing: ExampleComplexAnalyzer")
+    print("🎯 Target: Complex Java analysis class with multiple dependencies")
     print("🔍 Depth: 2 levels of dependencies")
     print()
     
     # Basic line count for context
-    nubia_file = "../src/main/java/com/bookmap/api/simple/demo/indicators/NubiaAutoMidasAnchoredVWAPV7_1_5.java"
-    if Path(nubia_file).exists():
-        result = subprocess.run(['wc', '-l', nubia_file], capture_output=True, text=True)
+    example_file = "../src/main/java/com/example/package/ExampleComplexAnalyzer.java"
+    if Path(example_file).exists():
+        result = subprocess.run(['wc', '-l', example_file], capture_output=True, text=True)
         if result.returncode == 0:
             lines = result.stdout.split()[0]
             print(f"📊 Main class: {lines} lines of code")
@@ -48,7 +48,7 @@ def run_analysis_demo():
     print("⚡ Running basic dependency analysis...")
     cmd = [
         'python3', 'dependency_analyzer.py',
-        'NubiaAutoMidasAnchoredVWAPV7_1_5',
+        'ExampleComplexAnalyzer',
         '--project-root', '..',
         '--summary-only',
         '--categories',
@@ -76,7 +76,7 @@ def run_analysis_demo():
 📈 AUTOMATED METRICS:
   • Total lines of code across all dependencies
   • Complexity scoring for each class
-  • Category-based classification (UI, Trading, Analysis, etc.)
+  • Category-based classification (UI, Processing, Analysis, etc.)
   • Dependency relationship mapping
 
 📊 VISUAL OUTPUTS AVAILABLE:
@@ -97,13 +97,13 @@ def run_analysis_demo():
     
     print("""
 # Generate full analysis with all visualizations:
-./run_any_python_tool.sh dependency_analyzer.py NubiaAutoMidasAnchoredVWAPV7_1_5 --export-all
+./run_any_python_tool.sh dependency_analyzer.py ExampleComplexAnalyzer --export-all
 
 # Create interactive dependency graph:  
-./run_any_python_tool.sh dependency_analyzer.py NubiaAutoMidasAnchoredVWAPV7_1_5 --plotly-graph nubia_deps.html
+./run_any_python_tool.sh dependency_analyzer.py ExampleComplexAnalyzer --plotly-graph analyzer_deps.html
 
 # Quick analysis of any class:
-./run_any_python_tool.sh dependency_analyzer.py OrderSenderControllerV2 --summary-only
+./run_any_python_tool.sh dependency_analyzer.py ExampleController --summary-only
 
 # Deep architectural analysis:
 ./run_any_python_tool.sh dependency_analyzer.py MyClass --depth 4 --html-report --graph
