@@ -1401,6 +1401,295 @@ class DataFlowAnalyzerV2:
         else:
             return self._format_text(result)
     
+    def generate_ai_reasoning(self, result: Dict[str, Any], analysis_type: str, variable: str) -> Dict[str, Any]:
+        """Generate structured reasoning output for AI consumption"""
+        from datetime import datetime
+        
+        reasoning = {
+            "reasoning_version": "1.0",
+            "timestamp": datetime.now().isoformat(),
+            "analysis_type": analysis_type,
+            "target_variable": variable,
+            "logical_steps": [],
+            "risk_assessment": {
+                "level": "unknown",
+                "factors": [],
+                "overall_confidence": 0.0
+            },
+            "recommendations": [],
+            "context_requirements": {
+                "needs_human_review": False,
+                "needs_additional_analysis": [],
+                "safe_for_automation": True
+            }
+        }
+        
+        # Analyze based on analysis type
+        if analysis_type == "impact":
+            reasoning["logical_steps"] = self._generate_impact_reasoning_steps(result)
+            reasoning["risk_assessment"] = self._assess_impact_risk(result)
+            reasoning["recommendations"] = self._generate_impact_recommendations(result)
+        elif analysis_type == "calculation":
+            reasoning["logical_steps"] = self._generate_calculation_reasoning_steps(result)
+            reasoning["risk_assessment"] = self._assess_calculation_risk(result)
+            reasoning["recommendations"] = self._generate_calculation_recommendations(result)
+        else:  # standard tracking
+            reasoning["logical_steps"] = self._generate_tracking_reasoning_steps(result)
+            reasoning["risk_assessment"] = self._assess_tracking_risk(result)
+            reasoning["recommendations"] = self._generate_tracking_recommendations(result)
+        
+        # Update context requirements based on risk
+        risk_level = reasoning["risk_assessment"]["level"]
+        if risk_level == "high":
+            reasoning["context_requirements"]["needs_human_review"] = True
+            reasoning["context_requirements"]["safe_for_automation"] = False
+        elif risk_level == "medium":
+            reasoning["context_requirements"]["needs_additional_analysis"] = ["security_scan", "test_coverage"]
+        
+        return reasoning
+    
+    def _generate_impact_reasoning_steps(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate reasoning steps for impact analysis"""
+        steps = []
+        step_num = 1
+        
+        # Step 1: Variable identification
+        steps.append({
+            "step": step_num,
+            "action": "identified_variable_scope",
+            "targets": list(result.get("definitions", {}).keys()),
+            "confidence": 0.95,
+            "reasoning": f"Located {len(result.get('definitions', {}))} definitions of the target variable"
+        })
+        step_num += 1
+        
+        # Step 2: Direct dependencies
+        if "direct_uses" in result or "uses" in result:
+            uses = result.get("direct_uses", result.get("uses", []))
+            steps.append({
+                "step": step_num,
+                "action": "traced_direct_dependencies",
+                "targets": [use.get("location", "unknown") for use in uses[:5]],  # First 5
+                "confidence": 0.90,
+                "reasoning": f"Found {len(uses)} direct uses of the variable"
+            })
+            step_num += 1
+        
+        # Step 3: Impact analysis
+        impact_categories = ["returns", "side_effects", "state_changes", "external_calls"]
+        impacts_found = []
+        for category in impact_categories:
+            if category in result and result[category]:
+                impacts_found.append(category)
+        
+        if impacts_found:
+            steps.append({
+                "step": step_num,
+                "action": "analyzed_impact_categories",
+                "targets": impacts_found,
+                "confidence": 0.88,
+                "reasoning": f"Variable impacts {len(impacts_found)} different system aspects"
+            })
+            step_num += 1
+        
+        # Step 4: Exit point analysis
+        if "returns" in result and result["returns"]:
+            steps.append({
+                "step": step_num,
+                "action": "identified_exit_points",
+                "targets": [ret.get("function", "unknown") for ret in result["returns"]],
+                "confidence": 0.92,
+                "reasoning": f"Variable affects {len(result['returns'])} function return values"
+            })
+            step_num += 1
+        
+        return steps
+    
+    def _assess_impact_risk(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Assess risk level based on impact analysis"""
+        risk_factors = []
+        total_severity = 0.0
+        
+        # Check for external API calls
+        if result.get("external_calls"):
+            risk_factors.append({
+                "factor": "external_api_calls",
+                "severity": 0.8,
+                "description": f"{len(result['external_calls'])} external API calls affected"
+            })
+            total_severity += 0.8
+        
+        # Check for side effects
+        if result.get("side_effects"):
+            high_severity_count = sum(1 for se in result["side_effects"] if se.get("severity") == "high")
+            if high_severity_count > 0:
+                risk_factors.append({
+                    "factor": "high_severity_side_effects",
+                    "severity": 0.9,
+                    "description": f"{high_severity_count} high-severity side effects detected"
+                })
+                total_severity += 0.9
+        
+        # Check for state changes
+        if result.get("state_changes"):
+            risk_factors.append({
+                "factor": "state_mutations",
+                "severity": 0.6,
+                "description": f"{len(result['state_changes'])} state changes identified"
+            })
+            total_severity += 0.6
+        
+        # Check for multiple return impacts
+        if result.get("returns") and len(result["returns"]) > 3:
+            risk_factors.append({
+                "factor": "widespread_return_impact",
+                "severity": 0.7,
+                "description": f"Affects {len(result['returns'])} function return values"
+            })
+            total_severity += 0.7
+        
+        # Determine overall risk level
+        avg_severity = total_severity / len(risk_factors) if risk_factors else 0
+        if avg_severity >= 0.7:
+            risk_level = "high"
+        elif avg_severity >= 0.4:
+            risk_level = "medium"
+        else:
+            risk_level = "low"
+        
+        # Calculate confidence based on analysis completeness
+        confidence = min(0.95, 0.6 + (len(risk_factors) * 0.1))
+        
+        return {
+            "level": risk_level,
+            "factors": risk_factors,
+            "overall_confidence": confidence
+        }
+    
+    def _generate_impact_recommendations(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate recommendations based on impact analysis"""
+        recommendations = []
+        
+        # Check for missing tests
+        if result.get("external_calls") or result.get("side_effects"):
+            recommendations.append({
+                "action": "add_integration_tests",
+                "priority": "high",
+                "reasoning": "Variable affects external systems - integration tests needed"
+            })
+        
+        # Check for state mutations
+        if result.get("state_changes"):
+            recommendations.append({
+                "action": "add_state_validation",
+                "priority": "medium",
+                "reasoning": "Multiple state changes detected - add validation checks"
+            })
+        
+        # Check for widespread impact
+        total_impacts = sum(len(result.get(cat, [])) for cat in ["returns", "side_effects", "state_changes", "external_calls"])
+        if total_impacts > 10:
+            recommendations.append({
+                "action": "consider_refactoring",
+                "priority": "medium",
+                "reasoning": f"Variable has {total_impacts} impact points - consider breaking down functionality"
+            })
+        
+        # Security recommendations
+        if any("password" in str(item).lower() or "token" in str(item).lower() or "key" in str(item).lower() 
+               for item in result.get("external_calls", [])):
+            recommendations.append({
+                "action": "security_review",
+                "priority": "high",
+                "reasoning": "Potential security-sensitive data flow detected"
+            })
+        
+        return recommendations
+    
+    def _generate_calculation_reasoning_steps(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate reasoning steps for calculation path analysis"""
+        steps = []
+        
+        if "critical_path" in result:
+            path = result["critical_path"]
+            steps.append({
+                "step": 1,
+                "action": "extracted_critical_path",
+                "targets": [step.get("location", "unknown") for step in path[:3]],
+                "confidence": 0.85,
+                "reasoning": f"Identified {len(path)}-step critical calculation path"
+            })
+            
+            # Analyze path complexity
+            has_loops = any("loop" in str(step).lower() for step in path)
+            has_conditions = any("condition" in str(step).lower() for step in path)
+            
+            if has_loops or has_conditions:
+                steps.append({
+                    "step": 2,
+                    "action": "identified_control_flow",
+                    "targets": ["loops" if has_loops else None, "conditions" if has_conditions else None],
+                    "confidence": 0.80,
+                    "reasoning": "Critical path includes complex control flow"
+                })
+        
+        return steps
+    
+    def _assess_calculation_risk(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Assess risk for calculation paths"""
+        risk_factors = []
+        
+        if "critical_path" in result:
+            path_length = len(result["critical_path"])
+            if path_length > 10:
+                risk_factors.append({
+                    "factor": "complex_calculation",
+                    "severity": 0.6,
+                    "description": f"Long calculation path with {path_length} steps"
+                })
+        
+        # Default to medium risk for calculations
+        return {
+            "level": "medium" if risk_factors else "low",
+            "factors": risk_factors,
+            "overall_confidence": 0.75
+        }
+    
+    def _generate_calculation_recommendations(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate recommendations for calculation paths"""
+        recommendations = []
+        
+        if "critical_path" in result and len(result["critical_path"]) > 10:
+            recommendations.append({
+                "action": "add_intermediate_validation",
+                "priority": "medium",
+                "reasoning": "Long calculation path - add validation at intermediate steps"
+            })
+        
+        return recommendations
+    
+    def _generate_tracking_reasoning_steps(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate reasoning steps for standard tracking"""
+        return [{
+            "step": 1,
+            "action": "tracked_data_flow",
+            "targets": list(result.keys()),
+            "confidence": 0.90,
+            "reasoning": "Standard data flow tracking completed"
+        }]
+    
+    def _assess_tracking_risk(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Assess risk for standard tracking"""
+        return {
+            "level": "low",
+            "factors": [],
+            "overall_confidence": 0.85
+        }
+    
+    def _generate_tracking_recommendations(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate recommendations for standard tracking"""
+        return []
+    
     def _format_text(self, result: Dict[str, Any]) -> str:
         """Enhanced text formatting for V2 features"""
         output = []
@@ -2568,6 +2857,8 @@ Examples:
                        help="Maximum tracking depth (-1 for unlimited)")
     parser.add_argument("--format", choices=["text", "json", "graph"], default="text",
                        help="Output format")
+    parser.add_argument("--output-reasoning-json", action="store_true",
+                       help="Output AI reasoning in JSON format (for AI agents)")
     parser.add_argument("--show-all", action="store_true",
                        help="Show all variables and their dependencies")
     parser.add_argument("--inter-procedural", action="store_true",
@@ -2733,6 +3024,18 @@ Examples:
         print("="*60)
         output = analyzer.format_output(result, args.format)
         print(output)
+    
+    elif args.output_reasoning_json:
+        # Generate AI reasoning output
+        reasoning = analyzer.generate_ai_reasoning(result, analysis_type, args.var)
+        
+        # If format is JSON, include reasoning in the result
+        if args.format == "json":
+            result["ai_reasoning"] = reasoning
+            print(json.dumps(result, indent=2))
+        else:
+            # Output just the reasoning
+            print(json.dumps(reasoning, indent=2))
     
     else:
         # Standard output

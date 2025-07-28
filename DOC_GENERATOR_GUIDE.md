@@ -8,15 +8,21 @@ Documentation Generator Guide
 Author: Vaibhav-api-code
 Co-Author: Claude Code (https://claude.ai/code)
 Created: 2025-07-27
-Updated: 2025-07-27
+Updated: 2025-07-28
 License: Mozilla Public License 2.0 (MPL-2.0)
 -->
 
 # Documentation Generator - Comprehensive Guide
 
 **Related Code Files:**
-- `code-intelligence-toolkit/doc_generator.py` - Automated documentation generator with data flow intelligence
+- `code-intelligence-toolkit/doc_generator.py` - Original with sophisticated content generation and intelligence layer
+- `code-intelligence-toolkit/doc_generator_enhanced.py` - Enhanced AST integration and interactive HTML (complementary tool)
 - `code-intelligence-toolkit/data_flow_tracker_v2.py` - Underlying analysis engine
+- `code-intelligence-toolkit/navigate_ast_v2.py` - AST navigation tool
+- `code-intelligence-toolkit/method_analyzer_ast_v2.py` - Method analysis tool
+- `code-intelligence-toolkit/trace_calls_with_timeout.py` - Call tracing tool
+- `code-intelligence-toolkit/show_structure_ast.py` - Structure analysis tool
+- `code-intelligence-toolkit/cross_file_analysis_ast.py` - Cross-file dependency analysis
 - `code-intelligence-toolkit/run_any_python_tool.sh` - Wrapper script for execution
 - `code-intelligence-toolkit/templates/` - HTML templates (optional Jinja2 support)
 
@@ -24,17 +30,42 @@ License: Mozilla Public License 2.0 (MPL-2.0)
 
 ## Overview
 
-The Documentation Generator is an advanced tool that transforms code analysis into intelligent, comprehensive documentation. Built on top of the data flow analysis engine (data_flow_tracker_v2.py), it automatically generates documentation that goes far beyond simple code comments to provide deep insights into code behavior, dependencies, and architectural patterns.
+The Documentation Generator comes in two complementary versions, each with unique strengths:
+
+**doc_generator.py (Original)** - Sophisticated content generation with intelligence layer:
+- Deep data flow integration with natural language explanations
+- Rich, contextual documentation with impact analysis
+- Sophisticated helper methods for inferring purpose and extracting parameters
+- 2768 lines of comprehensive documentation logic
+
+**doc_generator_enhanced.py (Enhanced)** - AST tool integration with interactive UI:
+- Integrates all five major AST analysis tools for comprehensive code understanding
+- Interactive HTML with 6-tab navigation interface
+- Adds architecture and call-graph documentation styles
+- Focuses on tool integration over content generation
+
+Choose based on your needs:
+
+- **Navigation Analysis**: Uses navigate_ast_v2.py for precise symbol location
+- **Call Flow Analysis**: Uses method_analyzer_ast_v2.py and trace_calls_with_timeout.py for method relationships
+- **Data Flow Analysis**: Uses data_flow_tracker_v2.py for variable dependencies and impact analysis
+- **Structure Analysis**: Uses show_structure_ast.py for hierarchical code organization
+- **Cross-File Dependencies**: Uses cross_file_analysis_ast.py for import and dependency tracking
+
+Built on top of the data flow analysis engine, it automatically generates documentation that goes far beyond simple code comments to provide deep insights into code behavior, dependencies, and architectural patterns.
 
 ### Key Features
 
-- **Multiple Documentation Styles**: API docs, user guides, technical references, tutorials, and quick references
+- **Multiple Documentation Styles**: API docs, user guides, technical references, tutorials, quick references, architecture docs, and call graphs
+- **Comprehensive AST Integration**: Combines 5 specialized AST tools for complete code analysis
+- **Interactive HTML Reports**: Multi-tab navigation with Overview, Navigation, Call Flow, Data Flow, Structure, and Dependencies
+- **Full Java/Python Parity**: Both languages support all analysis features including data flow
 - **Intelligent Analysis**: Leverages data flow tracking and impact analysis for accuracy
 - **Natural Language Explanations**: Converts complex code behavior into readable explanations
-- **Multi-Language Support**: Python (full support) and Java (AST-based parsing)
-- **Multiple Output Formats**: Markdown, HTML, reStructuredText, and Python docstrings
+- **Multiple Output Formats**: Markdown, HTML, interactive HTML, reStructuredText, and Python docstrings
 - **Depth Control**: Surface, medium, or deep analysis levels
-- **Interactive Visualizations**: HTML reports with dependency graphs and interactive elements
+- **Smart Caching**: Caches expensive AST operations for better performance
+- **ANSI Code Handling**: Automatically strips color codes for clean HTML output
 
 ### When to Use
 
@@ -48,8 +79,11 @@ The Documentation Generator is an advanced tool that transforms code analysis in
 
 ### Core Requirements
 ```bash
-# Already included in code-intelligence-toolkit
+# Original version
 ./run_any_python_tool.sh doc_generator.py --help
+
+# Enhanced version with full AST integration (recommended)
+./run_any_python_tool.sh doc_generator_enhanced.py --help
 ```
 
 ### Language Support
@@ -66,16 +100,19 @@ The Documentation Generator is an advanced tool that transforms code analysis in
 
 ```bash
 # Generate API documentation for a function
-./run_any_python_tool.sh doc_generator.py --function calculatePrice --file pricing.py --style api-docs
+./run_any_python_tool.sh doc_generator_enhanced.py --function calculate --file module.py --style api-docs
 
 # Generate user guide for a class
-./run_any_python_tool.sh doc_generator.py --class UserManager --file auth.py --style user-guide --depth deep
+./run_any_python_tool.sh doc_generator_enhanced.py --class UserManager --file auth.py --style user-guide --depth deep
 
-# Generate technical documentation for a module
-./run_any_python_tool.sh doc_generator.py --module --file database.py --style technical --format html
+# Generate interactive HTML documentation with all AST analysis
+./run_any_python_tool.sh doc_generator_enhanced.py --class MyClass --file MyClass.java --style api-docs --format interactive
 
-# Generate quick reference
-./run_any_python_tool.sh doc_generator.py --function process_data --file data.py --style quick-ref --format docstring
+# Generate architecture documentation
+./run_any_python_tool.sh doc_generator_enhanced.py --module --file database.py --style architecture --format html
+
+# Generate call graph visualization
+./run_any_python_tool.sh doc_generator_enhanced.py --function process --file module.py --style call-graph --format markdown
 ```
 
 ## Command-Line Reference
@@ -90,13 +127,25 @@ The Documentation Generator is an advanced tool that transforms code analysis in
 - `--module` - Document the entire module
 
 ### Style Options
-- `--style {api-docs,user-guide,technical,quick-ref,tutorial}` - Documentation style (default: api-docs)
+- `--style {api-docs,user-guide,technical,quick-ref,tutorial,architecture,call-graph}` - Documentation style (default: api-docs)
+  - `api-docs`: Comprehensive API reference with all AST analysis
+  - `user-guide`: End-user focused documentation
+  - `technical`: Deep technical implementation details
+  - `quick-ref`: Concise reference guide
+  - `tutorial`: Step-by-step learning guide
+  - `architecture`: System design and structure overview
+  - `call-graph`: Visual representation of function/method relationships
 
 ### Analysis Depth
 - `--depth {surface,medium,deep}` - Analysis depth level (default: medium)
 
 ### Output Format
-- `--format {markdown,html,docstring,rst}` - Output format (default: markdown)
+- `--format {markdown,html,interactive,docstring,rst}` - Output format (default: markdown)
+  - `markdown`: Standard Markdown format
+  - `html`: Static HTML with styling
+  - `interactive`: Interactive HTML with tabbed navigation (recommended for api-docs style)
+  - `docstring`: Python docstring format
+  - `rst`: reStructuredText format
 
 ### Output Control
 - `--output OUTPUT` - Output file (default: stdout)
@@ -120,32 +169,32 @@ The Documentation Generator is an advanced tool that transforms code analysis in
 
 **Example Output** (Markdown):
 ```markdown
-# Function: `calculateTax`
+# Function: `calculate`
 
-**Location**: `tax_calculator.py` (Line 45)
+**Location**: `calculator.py` (Line 45)
 
 ## Purpose
-Calculates tax amount based on income and tax brackets with progressive rate application.
+Performs complex calculations based on input parameters with advanced algorithm application.
 
 ## Signature
 ```python
-calculateTax(income: float, brackets: Dict[str, float], deductions: float = 0.0)
+calculate(value: float, params: Dict[str, float], options: float = 0.0)
 ```
 
 ## Parameters
-- `income`: Gross income amount for tax calculation
-- `brackets`: Dictionary mapping income ranges to tax rates
-- `deductions`: Optional deductions to subtract from income
+- `value`: Primary input value for calculation
+- `params`: Dictionary mapping parameter names to values
+- `options`: Optional configuration parameters
 
 ## Key Variables
-- `taxable_income`: Adjusted income after deductions
-- `tax_amount`: Calculated tax based on progressive brackets
-- `effective_rate`: Final effective tax rate
+- `processed_value`: Intermediate calculation result
+- `final_result`: Final calculated output
+- `performance_metric`: Calculation efficiency metric
 
 ## Usage Example
 ```python
-tax_owed = calculateTax(75000, {"0-50000": 0.22, "50000+": 0.32}, 12000)
-print(f"Tax owed: ${tax_owed}")
+result = calculate(75000, {"param1": 0.22, "param2": 0.32}, 12000)
+print(f"Result: {result}")
 ```
 ```
 
@@ -168,16 +217,16 @@ print(f"Tax owed: ${tax_owed}")
 
 **Example Output**:
 ```markdown
-# Using the TaxCalculator Class
+# Using the Calculator Class
 
 ## What it does
-The TaxCalculator helps you compute accurate tax amounts for different income levels. It handles complex tax bracket calculations automatically, so you don't have to worry about the mathematical details.
+The Calculator helps you perform complex calculations automatically. It handles all the mathematical details internally, so you don't have to worry about the implementation complexity.
 
 ## When to use it
-Use TaxCalculator when you need to:
-- Calculate taxes for payroll processing
-- Estimate tax liability for financial planning
-- Process tax calculations in accounting software
+Use Calculator when you need to:
+- Perform automated calculations in your application
+- Process numerical data with business logic
+- Handle complex computational workflows
 
 ## How to use it
 1. Create a calculator instance with your tax brackets
@@ -187,7 +236,7 @@ Use TaxCalculator when you need to:
 ## Example walkthrough
 ```python
 # Step 1: Set up the calculator
-calculator = TaxCalculator()
+calculator = Calculator()
 
 # Step 2: Calculate tax for someone earning $75,000
 tax_amount = calculator.calculate(75000)
@@ -217,19 +266,19 @@ print(f"Tax owed: ${tax_amount:,.2f}")
 
 **Example Output**:
 ```markdown
-# Technical Analysis: calculateOptimalRoute
+# Technical Analysis: processData
 
 ## Architecture Overview
-The `calculateOptimalRoute` function follows these architectural patterns:
+The `processData` function follows these architectural patterns:
 - **Transformer Pattern**: Balanced input/output data flow
 - **Complex Processing**: High variable count indicates sophisticated logic
 
 ## Data Flow Analysis
 ### Dependencies (What This Depends On)
-- `graph_data`: Network topology and edge weights
-- `start_node`: Initial position in the graph
-- `end_node`: Target destination
-- `algorithm_params`: Configuration for pathfinding algorithm
+- `input_data`: Core data structure for processing
+- `initial_state`: Starting configuration
+- `target_state`: Desired end state
+- `algorithm_params`: Configuration parameters
 
 ### Effects (What This Affects)
 - Return value affects 5 downstream functions
@@ -270,20 +319,20 @@ Recommendation: Comprehensive testing required for navigation systems.
 
 **Example Output**:
 ```markdown
-# encrypt - Quick Reference
+# process - Quick Reference
 
-**Purpose**: Encrypts data using AES-256 encryption
+**Purpose**: Processes data using advanced algorithms
 
-**Signature**: `encrypt(data: bytes, key: bytes) -> bytes`
+**Signature**: `process(data: bytes, config: bytes) -> bytes`
 
 **Key Points**:
 - Works with 3 variables
 - Has 2 dependencies
-- Returns encrypted bytes
+- Returns processed bytes
 
 **Example**:
 ```python
-encrypted = encrypt(data, secret_key)
+result = process(data, config)
 ```
 ```
 
@@ -306,7 +355,7 @@ encrypted = encrypt(data, secret_key)
 
 **Example Output**:
 ```markdown
-# Tutorial: Working with the DatabaseConnection Class
+# Tutorial: Working with the Connection Class
 
 ## What You'll Learn
 By the end of this tutorial, you'll understand:
@@ -319,10 +368,10 @@ By the end of this tutorial, you'll understand:
 Let's start with the simplest possible database connection:
 
 ```python
-from database import DatabaseConnection
+from database import Connection
 
 # Create a connection
-db = DatabaseConnection("localhost", "myapp")
+db = Connection("localhost", "myapp")
 ```
 
 ## Step 2: Adding Configuration
@@ -335,7 +384,7 @@ config = {
     "pool_size": 10,
     "timeout": 30
 }
-db = DatabaseConnection(config)
+db = Connection(config)
 ```
 
 ## Practice Exercises
@@ -443,6 +492,88 @@ templates/
     technical.html
 ```
 
+## Enhanced Version Features (doc_generator_enhanced.py)
+
+### Comprehensive AST Tool Integration
+
+The enhanced version integrates all five major AST analysis tools for unprecedented code understanding:
+
+**1. Navigation Analysis (navigate_ast_v2.py)**:
+- Precise symbol location and context
+- Cross-file symbol tracking
+- Import resolution
+- Definition finding
+
+**2. Call Flow Analysis (method_analyzer_ast_v2.py + trace_calls_with_timeout.py)**:
+- Method call hierarchies
+- Argument tracking
+- Call frequency analysis
+- Execution path visualization
+
+**3. Data Flow Analysis (data_flow_tracker_v2.py)**:
+- Variable dependency tracking
+- Impact analysis
+- Type evolution
+- State change detection
+- Full Java/Python parity
+
+**4. Structure Analysis (show_structure_ast.py)**:
+- Hierarchical code organization
+- Class/method relationships
+- Annotation support (Java)
+- Multi-language parsing
+
+**5. Cross-File Dependencies (cross_file_analysis_ast.py)**:
+- Import tracking
+- External dependencies
+- Module relationships
+- Package structure
+
+### Interactive HTML Reports
+
+The enhanced version's `--format interactive` creates multi-tab documentation:
+
+**Tab Structure**:
+- **Overview**: Quick summary and key metrics
+- **Navigation**: Symbol locations and definitions
+- **Call Flow**: Method relationships and execution paths
+- **Data Flow**: Variable dependencies and impact analysis
+- **Structure**: Code organization and hierarchy
+- **Dependencies**: Import and module relationships
+
+**Features**:
+- Clean, modern UI with Bootstrap styling
+- Tab navigation with JavaScript
+- ANSI code stripping for clean output
+- Responsive design
+- Self-contained (no external dependencies)
+
+### Performance Optimizations
+
+**Smart Caching**:
+- AST operations cached per file
+- Expensive analyses cached in memory
+- Graceful degradation on tool failures
+
+**Error Handling**:
+- Individual tool failures don't break generation
+- Fallback content for failed analyses
+- Clear error reporting
+
+### Java/Python Feature Parity
+
+**Full Java Support**:
+- JavaDataFlowAnalyzerV2 for complete data flow
+- Method analysis for Java classes
+- Structure analysis with annotation filtering
+- Import and dependency tracking
+
+**Consistent Features Across Languages**:
+- All documentation styles work for both languages
+- All output formats supported
+- Same analysis depth levels
+- Identical interactive HTML structure
+
 ## Language-Specific Features
 
 ### Python Analysis
@@ -513,7 +644,7 @@ done
 ```bash
 # 1. Generate technical analysis
 ./run_any_python_tool.sh doc_generator.py \
-  --class DataProcessor \
+  --class MyProcessor \
   --file processor.py \
   --style technical \
   --depth deep \
@@ -521,14 +652,14 @@ done
 
 # 2. Generate user guide
 ./run_any_python_tool.sh doc_generator.py \
-  --class DataProcessor \
+  --class MyProcessor \
   --file processor.py \
   --style user-guide \
   --output guides/data_processor.md
 
 # 3. Generate API reference
 ./run_any_python_tool.sh doc_generator.py \
-  --class DataProcessor \
+  --class MyProcessor \
   --file processor.py \
   --style api-docs \
   --format html \
@@ -609,7 +740,7 @@ docs/
 ```bash
 # Generate complete API documentation for a web service
 ./run_any_python_tool.sh doc_generator.py \
-  --class WebAPIHandler \
+  --class APIHandler \
   --file api_handler.py \
   --style api-docs \
   --depth deep \
@@ -624,12 +755,12 @@ docs/
 ```bash
 # Document a complex sorting algorithm
 ./run_any_python_tool.sh doc_generator.py \
-  --function quicksort_optimized \
+  --function optimize_algorithm \
   --file algorithms.py \
   --style technical \
   --depth deep \
   --format markdown \
-  --output docs/quicksort_analysis.md
+  --output docs/algorithm_analysis.md
 ```
 
 **Result**: Technical analysis showing time complexity, memory usage, and optimization techniques.
@@ -639,7 +770,7 @@ docs/
 ```bash
 # Create user-friendly documentation for a configuration class
 ./run_any_python_tool.sh doc_generator.py \
-  --class ConfigurationManager \
+  --class ConfigManager \
   --file config.py \
   --style user-guide \
   --format html \
@@ -741,7 +872,7 @@ def setup(app):
 # mkdocs.yml
 nav:
   - API Reference: 
-    - DataProcessor: api/data_processor.md
+    - MyProcessor: api/my_processor.md
     - ConfigManager: api/config_manager.md
   - User Guides:
     - Getting Started: guides/getting_started.md
@@ -778,4 +909,103 @@ The Documentation Generator transforms the tedious process of creating comprehen
 The tool's integration with the data flow analysis engine ensures that generated documentation reflects the actual behavior of the code, not just surface-level descriptions. This makes it invaluable for maintaining accurate, up-to-date documentation in fast-moving development environments.
 
 Whether you're documenting a single function or an entire codebase, the Documentation Generator provides the flexibility and intelligence needed to create professional, comprehensive documentation that truly serves its intended audience.
+
+## Choosing Between Versions
+
+### Use doc_generator.py when you need:
+- **Rich content generation** with natural language explanations
+- **Deep intelligence** about code purpose and impact
+- **Sophisticated analysis** with contextual understanding
+- **Production-ready documentation** with professional formatting
+
+### Use doc_generator_enhanced.py when you need:
+- **Interactive HTML** with multi-tab navigation
+- **Comprehensive AST analysis** from 5 different tools
+- **Architecture and call-graph** documentation styles
+- **Visual exploration** of code relationships
+
+### Best Practice:
+Consider using both tools together:
+1. Use `doc_generator_enhanced.py` for interactive exploration and AST analysis
+2. Use `doc_generator.py` for final production documentation with rich content
+
+Both tools are maintained and serve different but complementary purposes in the documentation workflow.
+
+## Enhanced Version Examples (doc_generator_enhanced.py)
+
+### Example 1: Interactive API Documentation
+
+```bash
+# Generate interactive HTML with all AST analysis tabs
+./run_any_python_tool.sh doc_generator_enhanced.py \
+  --class MyClass \
+  --file /path/to/MyClass.java \
+  --style api-docs \
+  --format interactive \
+  --output MyClass_Interactive.html
+```
+
+**Result**: Interactive HTML with 6 tabs showing Overview, Navigation, Call Flow, Data Flow, Structure, and Dependencies.
+
+### Example 2: Architecture Documentation with Call Graph
+
+```bash
+# Generate architecture overview with visual call graph
+./run_any_python_tool.sh doc_generator_enhanced.py \
+  --module \
+  --file trading_system.py \
+  --style architecture \
+  --format html \
+  --depth deep \
+  --output architecture_overview.html
+```
+
+**Result**: Complete architectural analysis with method relationships, data flow patterns, and system structure.
+
+### Example 3: Java Data Flow Analysis
+
+```bash
+# Full Java support including data flow analysis
+./run_any_python_tool.sh doc_generator_enhanced.py \
+  --class MyProcessor \
+  --file DataProcessor.java \
+  --style technical \
+  --format markdown \
+  --output java_data_flow.md
+```
+
+**Result**: Complete Java analysis with variable dependencies, impact analysis, and type tracking - full parity with Python.
+
+### Example 4: Multi-Style Documentation Generation
+
+```bash
+# Generate multiple documentation styles for the same code
+for style in api-docs user-guide technical quick-ref tutorial architecture call-graph; do
+    ./run_any_python_tool.sh doc_generator_enhanced.py \
+      --class UserManager \
+      --file auth.py \
+      --style $style \
+      --format markdown \
+      --output "docs/UserManager_${style}.md"
+done
+```
+
+**Result**: 7 different documentation perspectives for comprehensive coverage.
+
+### Example 5: Call Graph Visualization
+
+```bash
+# Generate detailed call graph analysis
+./run_any_python_tool.sh doc_generator_enhanced.py \
+  --function main \
+  --file application.py \
+  --style call-graph \
+  --format html \
+  --depth deep \
+  --output call_graph.html
+```
+
+**Result**: Visual representation of all function calls, execution paths, and method relationships.
+
+The enhanced version represents the next evolution of intelligent documentation generation, combining the power of multiple AST tools to provide unprecedented code understanding and documentation quality.
 

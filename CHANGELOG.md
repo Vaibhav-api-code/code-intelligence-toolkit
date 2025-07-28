@@ -8,7 +8,7 @@ Changelog
 Author: Vaibhav-api-code
 Co-Author: Claude Code (https://claude.ai/code)
 Created: 2025-01-26
-Updated: 2025-01-26
+Updated: 2025-07-28
 License: Mozilla Public License 2.0 (MPL-2.0)
 -->
 
@@ -18,6 +18,28 @@ All notable changes to the Code Intelligence Toolkit will be documented in this 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased] - 2025-07-28
+
+### 🌟 Major Enhancement
+- **NEW: doc_generator_enhanced.py** - Complementary documentation generator focusing on AST tool integration
+  - Integrates 5 specialized AST analysis tools for comprehensive code understanding
+  - Interactive HTML format with 6-tab navigation interface
+  - Full Java/Python feature parity including data flow analysis
+  - ANSI code stripping for clean HTML output
+  - Smart caching for improved performance
+  - 7 documentation styles including architecture and call graphs
+  - Graceful degradation when individual tools fail
+  - NOTE: Complements (not replaces) doc_generator.py - each tool has unique strengths
+
+### 🔧 Enhanced Automation
+- **Enhanced: release_workflow.sh** - Added non-interactive automation support
+  - `--yes` flag for auto-confirming all prompts (CI/CD friendly)
+  - `--non-interactive` flag for strict non-interactive mode
+  - Environment variable support: `RELEASE_WORKFLOW_ASSUME_YES=1`
+  - Auto-detection of CI environments (GitHub Actions, GitLab CI, Jenkins, Travis)
+  - Comprehensive help system with `--help` flag
+  - Consistent with other Python tool automation patterns
 
 ## [1.3.0] - 2025-07-27
 

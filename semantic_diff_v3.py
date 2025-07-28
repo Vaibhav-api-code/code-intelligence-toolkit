@@ -1787,6 +1787,202 @@ class SemanticDiffAnalyzer:
             recommendations.append(f"Conduct security review for {len(sec_changes)} security-sensitive changes")
         
         return recommendations
+    
+    def generate_ai_reasoning(self, report: DiffReport, file1: str, file2: str) -> Dict[str, Any]:
+        """Generate structured reasoning output for AI consumption"""
+        from datetime import datetime
+        
+        reasoning = {
+            "reasoning_version": "1.0",
+            "timestamp": datetime.now().isoformat(),
+            "analysis_type": "semantic_diff",
+            "files_compared": {
+                "source": file1,
+                "target": file2
+            },
+            "logical_steps": [],
+            "change_assessment": {
+                "total_changes": len(report.changes),
+                "risk_distribution": {},
+                "change_complexity": "unknown",
+                "breaking_changes_count": len(report.breaking_changes)
+            },
+            "recommendations": [],
+            "context_requirements": {
+                "needs_human_review": False,
+                "needs_additional_analysis": [],
+                "safe_for_automation": True
+            }
+        }
+        
+        # Generate reasoning steps
+        steps = []
+        step_num = 1
+        
+        # Step 1: File parsing and entity extraction
+        steps.append({
+            "step": step_num,
+            "action": "parsed_code_structures",
+            "targets": [file1, file2],
+            "confidence": 0.95,
+            "reasoning": f"Successfully parsed {report.files_analyzed} files and extracted {report.total_entities} code entities"
+        })
+        step_num += 1
+        
+        # Step 2: Change detection
+        if report.changes:
+            change_types = set(c.change_type.name for c in report.changes)
+            steps.append({
+                "step": step_num,
+                "action": "detected_semantic_changes",
+                "targets": list(change_types),
+                "confidence": 0.90,
+                "reasoning": f"Identified {len(report.changes)} semantic changes across {len(change_types)} change categories"
+            })
+            step_num += 1
+        
+        # Step 3: Risk assessment
+        risk_counts = {}
+        for change in report.changes:
+            risk_level = change.risk_level.name
+            risk_counts[risk_level] = risk_counts.get(risk_level, 0) + 1
+        
+        if risk_counts:
+            steps.append({
+                "step": step_num,
+                "action": "assessed_change_risks",
+                "targets": list(risk_counts.keys()),
+                "confidence": 0.88,
+                "reasoning": f"Evaluated risk levels for all changes: {dict(risk_counts)}"
+            })
+            step_num += 1
+        
+        # Step 4: Impact analysis
+        if hasattr(report, 'impact_analysis') and report.impact_analysis:
+            affected_files = report.summary.get('affected_files', 0)
+            steps.append({
+                "step": step_num,
+                "action": "analyzed_cross_file_impact",
+                "targets": [f"{affected_files}_files_affected"],
+                "confidence": 0.85,
+                "reasoning": f"Traced impact across {affected_files} files and analyzed dependencies"
+            })
+            step_num += 1
+        
+        # Step 5: Pattern recognition
+        if hasattr(report, 'refactoring_patterns') and report.refactoring_patterns:
+            patterns = list(report.refactoring_patterns.keys()) if isinstance(report.refactoring_patterns, dict) else report.refactoring_patterns
+            steps.append({
+                "step": step_num,
+                "action": "identified_refactoring_patterns",
+                "targets": patterns[:3],  # First 3 patterns
+                "confidence": 0.82,
+                "reasoning": f"Detected {len(patterns)} refactoring patterns in the changes"
+            })
+            step_num += 1
+        
+        reasoning["logical_steps"] = steps
+        
+        # Assess change complexity and risk distribution
+        reasoning["change_assessment"]["risk_distribution"] = risk_counts
+        reasoning["change_assessment"]["change_complexity"] = self._assess_change_complexity(report)
+        
+        # Generate AI-specific recommendations
+        ai_recommendations = []
+        
+        # High-risk changes
+        high_risk_count = risk_counts.get("HIGH", 0) + risk_counts.get("CRITICAL", 0)
+        if high_risk_count > 0:
+            ai_recommendations.append({
+                "action": "require_manual_review",
+                "priority": "critical",
+                "reasoning": f"{high_risk_count} high/critical risk changes detected - manual review mandatory"
+            })
+        
+        # Breaking changes
+        if report.breaking_changes:
+            ai_recommendations.append({
+                "action": "update_api_documentation",
+                "priority": "high",
+                "reasoning": f"{len(report.breaking_changes)} breaking API changes require documentation updates"
+            })
+            ai_recommendations.append({
+                "action": "plan_migration_strategy",
+                "priority": "high", 
+                "reasoning": "Breaking changes need migration plan for dependent code"
+            })
+        
+        # Large impact scope
+        total_impact = report.summary.get('total_impact_score', 0)
+        if total_impact > 10:
+            ai_recommendations.append({
+                "action": "comprehensive_testing",
+                "priority": "medium",
+                "reasoning": f"High impact score ({total_impact:.1f}) suggests need for extensive testing"
+            })
+        
+        # Pattern-based recommendations
+        if hasattr(report, 'refactoring_patterns') and report.refactoring_patterns:
+            if 'EXTRACT_METHOD' in str(report.refactoring_patterns):
+                ai_recommendations.append({
+                    "action": "consider_further_refactoring",
+                    "priority": "low",
+                    "reasoning": "Method extraction patterns suggest opportunities for additional refactoring"
+                })
+        
+        reasoning["recommendations"] = ai_recommendations
+        
+        # Update context requirements based on analysis
+        if high_risk_count > 0 or len(report.breaking_changes) > 0:
+            reasoning["context_requirements"]["needs_human_review"] = True
+            reasoning["context_requirements"]["safe_for_automation"] = False
+        
+        if total_impact > 15 or len(report.changes) > 50:
+            reasoning["context_requirements"]["needs_additional_analysis"] = ["impact_assessment", "performance_testing"]
+        
+        if len(report.breaking_changes) > 0:
+            reasoning["context_requirements"]["needs_additional_analysis"].append("api_compatibility_check")
+        
+        return reasoning
+    
+    def _assess_change_complexity(self, report: DiffReport) -> str:
+        """Assess overall complexity of changes"""
+        complexity_score = 0
+        
+        # Factor in number of changes
+        if len(report.changes) > 50:
+            complexity_score += 3
+        elif len(report.changes) > 20:
+            complexity_score += 2
+        elif len(report.changes) > 5:
+            complexity_score += 1
+        
+        # Factor in risk levels
+        for change in report.changes:
+            if change.risk_level == RiskLevel.CRITICAL:
+                complexity_score += 3
+            elif change.risk_level == RiskLevel.HIGH:
+                complexity_score += 2
+            elif change.risk_level == RiskLevel.MEDIUM:
+                complexity_score += 1
+        
+        # Factor in breaking changes
+        complexity_score += len(report.breaking_changes) * 2
+        
+        # Factor in cross-file impact
+        affected_files = report.summary.get('affected_files', 0)
+        if affected_files > 10:
+            complexity_score += 2
+        elif affected_files > 5:
+            complexity_score += 1
+        
+        # Determine complexity level
+        if complexity_score >= 8:
+            return "high"
+        elif complexity_score >= 4:
+            return "medium"
+        else:
+            return "low"
 
 def main():
     """Main entry point"""
@@ -1822,6 +2018,8 @@ def main():
                        help='Output file for report')
     parser.add_argument('--format', choices=['text', 'json', 'html', 'markdown'],
                        default='text', help='Output format')
+    parser.add_argument('--output-reasoning-json', action='store_true',
+                       help='Output AI reasoning in JSON format (for AI agents)')
     # Advanced options
     parser.add_argument('--parallel', type=int, metavar='N',
                        help='Number of parallel workers')
@@ -1865,8 +2063,44 @@ def main():
             )
             report.impact_analysis['test_impact'] = test_impact
         
+        # Handle AI reasoning output
+        if args.output_reasoning_json:
+            reasoning = analyzer.generate_ai_reasoning(report, args.file1, args.file2 or args.directory2 or "")
+            
+            if args.format == 'json':
+                # Include reasoning in the JSON output
+                output = {
+                    'timestamp': report.timestamp.isoformat(),
+                    'summary': report.summary,
+                    'changes': [
+                        {
+                            'type': c.change_type.name,
+                            'description': c.description,
+                            'risk': c.risk_level.name,
+                            'impact_score': c.impact_score,
+                            'files': list(c.affected_files)
+                        }
+                        for c in report.changes
+                    ],
+                    'recommendations': report.recommendations,
+                    'ai_reasoning': reasoning
+                }
+                
+                if args.output:
+                    with open(args.output, 'w') as f:
+                        json.dump(output, f, indent=2)
+                else:
+                    print(json.dumps(output, indent=2))
+            else:
+                # Output just the reasoning
+                if args.output:
+                    with open(args.output, 'w') as f:
+                        json.dump(reasoning, f, indent=2)
+                else:
+                    print(json.dumps(reasoning, indent=2))
+        
         # Generate output
-        if args.format == 'json':
+        elif args.format == 'json':
             # JSON output
             output = {
                 'timestamp': report.timestamp.isoformat(),

@@ -8,7 +8,7 @@ Python Tools Documentation 2025
 Author: Vaibhav-api-code
 Co-Author: Claude Code (https://claude.ai/code)
 Created: 2025-07-23
-Updated: 2025-07-23
+Updated: 2025-07-28
 License: Mozilla Public License 2.0 (MPL-2.0)
 -->
 
@@ -368,6 +368,82 @@ Key tools now support configurable thread counts:
 Critical tools wrapped with configurable timeouts:
 - `dead_code_detector.py`: 60s default (via `DEAD_CODE_TIMEOUT`)
 - `trace_calls_with_timeout.py`: Protected tracing
+
+### 6. Intelligent Documentation Generation (NEW)
+
+#### doc_generator.py & doc_generator_enhanced.py
+**Revolutionary documentation generation combining code analysis with natural language understanding**
+
+**Core Features:**
+- **Original Version** (`doc_generator.py`): Integrated with data_flow_tracker_v2.py for intelligent analysis
+- **Enhanced Version** (`doc_generator_enhanced.py`): Full integration with 5 AST analysis tools
+- **7 Documentation Styles**: API docs, user guides, technical analysis, quick reference, tutorials, architecture, call graphs
+- **5 Output Formats**: Markdown, HTML, interactive HTML, reStructuredText, Python docstrings
+- **Full Language Parity**: Both Python and Java support all features including data flow analysis
+
+**Enhanced Version AST Tool Integration:**
+1. **navigate_ast_v2.py** - Precise symbol location and context
+2. **method_analyzer_ast_v2.py** - Method call hierarchies and relationships
+3. **trace_calls_with_timeout.py** - Execution path visualization
+4. **data_flow_tracker_v2.py** - Variable dependencies and impact analysis
+5. **cross_file_analysis_ast.py** - Import and module relationships
+6. **show_structure_ast.py** - Hierarchical code organization
+
+**Interactive HTML Documentation:**
+```bash
+# Generate interactive documentation with 6-tab analysis
+./run_any_python_tool.sh doc_generator_enhanced.py \
+  --class MyClass \
+  --file MyClass.java \
+  --style api-docs \
+  --format interactive \
+  --output MyClass_Interactive.html
+```
+
+**Generated Interactive Tabs:**
+- **Overview**: Quick summary and key metrics
+- **Navigation**: Symbol locations with AST context
+- **Call Flow**: Method relationships and execution paths
+- **Data Flow**: Variable dependencies and impact visualization
+- **Structure**: Code organization and hierarchy
+- **Dependencies**: Import and cross-file relationships
+
+**Documentation Styles:**
+```bash
+# API Documentation - Technical reference with complete analysis
+./run_any_python_tool.sh doc_generator_enhanced.py --function calculate --file calc.py --style api-docs
+
+# User Guide - Friendly documentation for end users
+./run_any_python_tool.sh doc_generator_enhanced.py --class UserManager --file auth.py --style user-guide
+
+# Technical Analysis - Deep dive with complexity metrics
+./run_any_python_tool.sh doc_generator_enhanced.py --module --file system.py --style technical --depth deep
+
+# Architecture Overview - System design and structure
+./run_any_python_tool.sh doc_generator_enhanced.py --module --file main.py --style architecture --format html
+
+# Call Graph - Visual function relationships
+./run_any_python_tool.sh doc_generator_enhanced.py --function main --file app.py --style call-graph
+
+# Quick Reference - Concise API summary
+./run_any_python_tool.sh doc_generator_enhanced.py --class API --file api.py --style quick-ref
+
+# Tutorial - Step-by-step learning guide
+./run_any_python_tool.sh doc_generator_enhanced.py --class Database --file db.py --style tutorial
+```
+
+**Advanced Features:**
+- **Smart Caching**: AST operations cached for performance
+- **ANSI Code Stripping**: Clean HTML output from tool results
+- **Graceful Degradation**: Individual tool failures don't break generation
+- **Java Support**: Full parity with Python including data flow analysis
+- **Template System**: Custom Jinja2 templates for branding
+
+**Performance Characteristics:**
+- Small files (< 500 lines): ~1-2 seconds for all styles
+- Medium files (500-2000 lines): ~3-5 seconds with deep analysis
+- Large files (> 2000 lines): ~5-10 seconds, use surface depth for speed
+- Interactive HTML: Additional ~2-3 seconds for tab generation
 
 ## 📋 Configuration System
 

@@ -193,7 +193,7 @@ class JavaDependencyAnalyzer:
         # Category multipliers
         category_multipliers = {
             "UI": 1.5,      # UI classes tend to be complex
-            "Processing": 2.0,  # Trading logic is inherently complex
+            "Processing": 2.0,  # Processing logic is inherently complex
             "Analysis": 1.8, # Analysis algorithms are complex
             "Analyzer": 1.3,
             "Core": 1.2,
