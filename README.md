@@ -50,7 +50,7 @@ While many excellent tools exist for individual tasks, the Code Intelligence Too
 
 Our focus is not on replacing these tools, but on providing a cohesive, scriptable, and safe layer on top of them, specifically designed for AI agents and automation while solving the critical pain points developers face in 2025.
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 16px; margin: 16px 0; background-color: #f6f8fa;">
+---
 
 ### 🔍 **Code Search**
 
@@ -63,9 +63,9 @@ Our focus is not on replacing these tools, but on providing a cohesive, scriptab
 
 **Our Advantage:** **Ripgrep Speed + Intelligence** - Matches Ripgrep's speed but adds AST context, multiline search, and complete code block extraction. Navigate results by class→method hierarchy, not just line numbers.
 
-</div>
+---
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 16px; margin: 16px 0; background-color: #f6f8fa;">
+---
 
 ### ⚙️ **Code Refactoring**
 
@@ -78,9 +78,9 @@ Our focus is not on replacing these tools, but on providing a cohesive, scriptab
 
 **Our Advantage:** **Command-Line Power** - Provides IDE-level semantic accuracy directly on the command line with 40x faster performance than IDE refactoring. Every operation protected by automatic backups and Multi-Level Undo System. **Cost: $0**
 
-</div>
+---
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 16px; margin: 16px 0; background-color: #f6f8fa;">
+---
 
 ### 🔍 **Static Analysis**
 
@@ -94,9 +94,9 @@ Our focus is not on replacing these tools, but on providing a cohesive, scriptab
 
 **Our Advantage:** **AI-Powered Accuracy** - AI Reasoning System provides natural language explanations with confidence scoring and risk assessment. Interactive HTML reports turn raw data into actionable insights, eliminating noise and false positive fatigue.
 
-</div>
+---
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 16px; margin: 16px 0; background-color: #f6f8fa;">
+---
 
 ### 🛡️ **AI Safety Infrastructure**
 
@@ -110,9 +110,7 @@ Our focus is not on replacing these tools, but on providing a cohesive, scriptab
 
 **Our Advantage:** **AI-First Safety Platform** - Works WITH any AI assistant (Claude Code, Cursor, Copilot, Aider) to provide unbreakable safety guarantees. Structured JSON APIs and CLI interfaces make AI automation safer and more reliable. **Enhances rather than replaces your AI workflow**.
 
-</div>
-
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 16px; margin: 16px 0; background-color: #f6f8fa;">
+---
 
 ### 🔒 **System Safety**
 
@@ -126,9 +124,7 @@ Our focus is not on replacing these tools, but on providing a cohesive, scriptab
 
 **Our Advantage:** **Enterprise Safety** - SafeGIT adapts to environment (production/development), Safe File Manager makes ALL operations reversible, context-aware confirmations prevent accidents.
 
-</div>
-
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 16px; margin: 16px 0; background-color: #f6f8fa;">
+---
 
 ### 📚 **Documentation**
 
@@ -142,7 +138,7 @@ Our focus is not on replacing these tools, but on providing a cohesive, scriptab
 
 **Our Advantage:** **Intelligence-Driven** - Analyzes what code actually DOES through data flow tracking. Creates interactive multi-tab dashboards with live code analysis, not just comment parsing.
 
-</div>
+---
 
 ### 🚨 **The AI Safety Crisis of 2025**
 
