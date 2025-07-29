@@ -50,14 +50,50 @@ While many excellent tools exist for individual tasks, the Code Intelligence Too
 
 Our focus is not on replacing these tools, but on providing a cohesive, scriptable, and safe layer on top of them, specifically designed for AI agents and automation while solving the critical pain points developers face in 2025.
 
-| **Capability** | **Conventional Tools** | **Developer Pain Points (2025)** | **Our Advantage (Code Intelligence Toolkit)** |
-|:---:|:---:|:---:|:---|
-| **Code Search** | grep, ripgrep (rg), IDE search | • grep "can be quite slow" on large codebases<br>• "search results can be difficult to navigate"<br>• No semantic understanding of code structure | Matches Ripgrep's speed but adds AST context, multiline search, and complete code block extraction. Navigate results by class→method hierarchy, not just line numbers. |
-| **Code Refactoring** | IDEs (VS Code, IntelliJ), Cursor ($20/mo), GitHub Copilot ($10-39/mo) | • IDEs "can be resource-intensive, need decent machine"<br>• IntelliJ Ultimate "isn't free but worth investment"<br>• Performance degradation with certain patterns | Provides IDE-level semantic accuracy directly on the command line with 40x faster performance than IDE refactoring. Every operation protected by automatic backups and Multi-Level Undo System. **Cost: $0** |
-| **Static Analysis** | CodeQL, SonarQube, Semgrep, CodeAnt.ai ($10-20/mo) | • **"Up to 50% false positives" if not configured properly**<br>• "15-30 minutes to triage each false positive"<br>• Causes "alert fatigue" and trust erosion<br>• "Substantial drain on productivity" | AI Reasoning System provides natural language explanations with confidence scoring and risk assessment. Interactive HTML reports turn raw data into actionable insights, eliminating noise and false positive fatigue. |
-| **AI Safety Infrastructure** | Basic shell access, no AI protection systems | • **Safety Crisis**: Recent Replit AI disaster wiped entire databases<br>• AI assistants have direct access to dangerous commands<br>• No structured APIs for AI agents<br>• No protection against `rm -rf /` or destructive git operations | **AI-First Safety Platform** - Works WITH any AI assistant (Claude Code, Cursor, Copilot, Aider) to provide unbreakable safety guarantees. Structured JSON APIs and CLI interfaces make AI automation safer and more reliable. **Enhances rather than replaces your AI workflow**. |
-| **System Safety** | trash-cli, shell aliases, custom scripts | • No comprehensive protection system<br>• Manual setup required for each command<br>• No context awareness (dev vs production)<br>• Limited undo capabilities | **Enterprise-grade safety platform**: SafeGIT adapts to environment (production/development), Safe File Manager makes ALL operations reversible, context-aware confirmations prevent accidents. |
-| **Documentation** | Sphinx, Javadoc, Doxygen, AI tools | • Only parses comments, not actual code behavior<br>• Manual setup and configuration required<br>• Static output, no interactivity<br>• No integration with code analysis | **Intelligence-driven documentation**: Analyzes what code actually DOES through data flow tracking. Creates interactive multi-tab dashboards with live code analysis, not just comment parsing. |
+<table>
+<tr>
+<th style="width: 15%; text-align: center;"><strong>Capability</strong></th>
+<th style="width: 20%; text-align: center;"><strong>Conventional Tools</strong></th>
+<th style="width: 30%; text-align: center;"><strong>Developer Pain Points (2025)</strong></th>
+<th style="width: 35%; text-align: left;"><strong>Our Advantage (Code Intelligence Toolkit)</strong></th>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Code Search</strong></td>
+<td style="text-align: center;">grep, ripgrep (rg), IDE search</td>
+<td>• grep "can be quite slow" on large codebases<br>• "search results can be difficult to navigate"<br>• No semantic understanding of code structure</td>
+<td>Matches Ripgrep's speed but adds AST context, multiline search, and complete code block extraction. Navigate results by class→method hierarchy, not just line numbers.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Code Refactoring</strong></td>
+<td style="text-align: center;">IDEs (VS Code, IntelliJ), Cursor ($20/mo), GitHub Copilot ($10-39/mo)</td>
+<td>• IDEs "can be resource-intensive, need decent machine"<br>• IntelliJ Ultimate "isn't free but worth investment"<br>• Performance degradation with certain patterns</td>
+<td>Provides IDE-level semantic accuracy directly on the command line with 40x faster performance than IDE refactoring. Every operation protected by automatic backups and Multi-Level Undo System. <strong>Cost: $0</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Static Analysis</strong></td>
+<td style="text-align: center;">CodeQL, SonarQube, Semgrep, CodeAnt.ai ($10-20/mo)</td>
+<td>• <strong>"Up to 50% false positives" if not configured properly</strong><br>• "15-30 minutes to triage each false positive"<br>• Causes "alert fatigue" and trust erosion<br>• "Substantial drain on productivity"</td>
+<td>AI Reasoning System provides natural language explanations with confidence scoring and risk assessment. Interactive HTML reports turn raw data into actionable insights, eliminating noise and false positive fatigue.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>AI Safety Infrastructure</strong></td>
+<td style="text-align: center;">Basic shell access, no AI protection systems</td>
+<td>• <strong>Safety Crisis</strong>: Recent Replit AI disaster wiped entire databases<br>• AI assistants have direct access to dangerous commands<br>• No structured APIs for AI agents<br>• No protection against <code>rm -rf /</code> or destructive git operations</td>
+<td><strong>AI-First Safety Platform</strong> - Works WITH any AI assistant (Claude Code, Cursor, Copilot, Aider) to provide unbreakable safety guarantees. Structured JSON APIs and CLI interfaces make AI automation safer and more reliable. <strong>Enhances rather than replaces your AI workflow</strong>.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>System Safety</strong></td>
+<td style="text-align: center;">trash-cli, shell aliases, custom scripts</td>
+<td>• No comprehensive protection system<br>• Manual setup required for each command<br>• No context awareness (dev vs production)<br>• Limited undo capabilities</td>
+<td><strong>Enterprise-grade safety platform</strong>: SafeGIT adapts to environment (production/development), Safe File Manager makes ALL operations reversible, context-aware confirmations prevent accidents.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Documentation</strong></td>
+<td style="text-align: center;">Sphinx, Javadoc, Doxygen, AI tools</td>
+<td>• Only parses comments, not actual code behavior<br>• Manual setup and configuration required<br>• Static output, no interactivity<br>• No integration with code analysis</td>
+<td><strong>Intelligence-driven documentation</strong>: Analyzes what code actually DOES through data flow tracking. Creates interactive multi-tab dashboards with live code analysis, not just comment parsing.</td>
+</tr>
+</table>
 
 ### 🚨 **The AI Safety Crisis of 2025**
 
