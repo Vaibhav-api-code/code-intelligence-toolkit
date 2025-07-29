@@ -53,7 +53,7 @@ Our focus is not on replacing these tools, but on providing a cohesive, scriptab
 ### 🔍 **Code Search**
 | Conventional Tools | Developer Pain Points (2025) | Our Advantage |
 |:---:|:---|:---|
-| grep, ripgrep (rg), IDE search | **Performance Issues:** grep "can be quite slow" on large codebases<br>**Navigation Problems:** "search results can be difficult to navigate"<br>**No Context:** No semantic understanding of code structure | **Ripgrep Speed + Intelligence:** Matches Ripgrep's speed but adds AST context, multiline search, and complete code block extraction. Navigate results by class→method hierarchy, not just line numbers. |
+| grep, ripgrep (rg), IDE search | **Performance Issues:** grep "can be quite slow" on large codebases<br><br>**Navigation Problems:** "search results can be difficult to navigate"<br><br>**No Context:** No semantic understanding of code structure | **Ripgrep Speed + Intelligence:** Matches Ripgrep's speed but adds AST context, multiline search, and complete code block extraction. Navigate results by class→method hierarchy, not just line numbers. |
 
 ### ⚙️ **Code Refactoring** 
 | Conventional Tools | Developer Pain Points (2025) | Our Advantage |
