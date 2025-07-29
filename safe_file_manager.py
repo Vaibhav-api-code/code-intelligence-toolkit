@@ -78,6 +78,37 @@ except ImportError:
     SecureFileHandler = object
     def validate_path(path): return path
 
+# Import interactive utilities
+try:
+    from interactive_utils import (
+        get_confirmation, get_numbered_selection, check_auto_yes_env,
+        get_tool_env_var, PromptChoice
+    )
+    HAS_INTERACTIVE_UTILS = True
+except ImportError:
+    HAS_INTERACTIVE_UTILS = False
+    # Fallback implementations
+    def get_confirmation(prompt, **kwargs):
+        response = input(prompt + " [y/N]: ").strip().lower()
+        return response in ['y', 'yes']
+    def get_numbered_selection(prompt, items, **kwargs):
+        for i, item in enumerate(items, 1):
+            print(f"{i}. {item}")
+        try:
+            choice = input(f"{prompt} (1-{len(items)}) or 0 to cancel: ").strip()
+            if choice == '0':
+                return None
+            idx = int(choice) - 1
+            if 0 <= idx < len(items):
+                return idx
+        except (ValueError, EOFError):
+            pass
+        return None
+    def check_auto_yes_env(tool_name, args):
+        pass
+    class PromptChoice:
+        pass
+
 # ─────────────────────────── Helper Functions ─────────────────────────────
 
 def _to_path(p: Union[str, Path]) -> Path:
@@ -1094,27 +1125,57 @@ class SafeFileManager(SecureFileHandler):
                 self._print(f"Auto-confirming: {prompt} [yes]", 'verbose')
                 return True
         
-        # Interactive mode
+        # Interactive mode using interactive_utils
         if risk_level.value == RiskLevel.SAFE.value:
             return True
         elif risk_level.value == RiskLevel.LOW.value:
-            response = input(f"{prompt} [Y/n]: ").strip().lower()
-            return response in ['', 'y', 'yes']
-        elif risk_level.value == RiskLevel.MEDIUM.value:
-            if typed_response:
-                response = input(f"{prompt}\nType '{typed_response}' to confirm: ").strip()
-                return response == typed_response
+            if HAS_INTERACTIVE_UTILS:
+                return get_confirmation(
+                    prompt,
+                    default=True,
+                    tool_name='safe_file_manager',
+                    env_var='SFM_ASSUME_YES',
+                    flag_hint='--yes'
+                )
             else:
-                response = input(f"{prompt} [y/N]: ").strip().lower()
-                return response in ['y', 'yes']
+                response = input(f"{prompt} [Y/n]: ").strip().lower()
+                return response in ['', 'y', 'yes']
+        elif risk_level.value == RiskLevel.MEDIUM.value:
+            if HAS_INTERACTIVE_UTILS:
+                return get_confirmation(
+                    prompt,
+                    default=False,
+                    tool_name='safe_file_manager',
+                    env_var='SFM_ASSUME_YES',
+                    flag_hint='--yes',
+                    typed_confirmation=typed_response
+                )
+            else:
+                if typed_response:
+                    response = input(f"{prompt}\nType '{typed_response}' to confirm: ").strip()
+                    return response == typed_response
+                else:
+                    response = input(f"{prompt} [y/N]: ").strip().lower()
+                    return response in ['y', 'yes']
         elif risk_level.value >= RiskLevel.HIGH.value:
             if not typed_response:
                 typed_response = "CONFIRM"
-            response = input(
-                f"⚠️  HIGH RISK OPERATION ⚠️\n{prompt}\n"
-                f"Type '{typed_response}' to confirm: "
-            ).strip()
-            return response == typed_response
+            full_prompt = f"⚠️  HIGH RISK OPERATION ⚠️\n{prompt}"
+            if HAS_INTERACTIVE_UTILS:
+                return get_confirmation(
+                    full_prompt,
+                    default=False,
+                    tool_name='safe_file_manager',
+                    env_var='SFM_FORCE_YES',
+                    flag_hint='--force',
+                    typed_confirmation=typed_response
+                )
+            else:
+                response = input(
+                    f"{full_prompt}\n"
+                    f"Type '{typed_response}' to confirm: "
+                ).strip()
+                return response == typed_response
     
     def _execute_operation(
         self,
@@ -1909,47 +1970,74 @@ class SafeFileManager(SecureFileHandler):
             self._print("Cannot restore interactively in non-interactive mode", 'error')
             return False
         
-        try:
-            choice = input("Enter number to restore (0 to cancel): ").strip()
-            if choice == '0':
+        # Get user selection
+        index = None
+        if HAS_INTERACTIVE_UTILS:
+            # Prepare items for selection
+            display_items = []
+            for i, (item, metadata) in enumerate(items):
+                orig_path = metadata['original_path']
+                trashed_at = metadata['trashed_at']
+                size = format_size(metadata.get('size', 0))
+                display_items.append(f"{item.name} (from {orig_path}, {size}, {trashed_at})")
+            
+            index = get_numbered_selection(
+                "Select item to restore",
+                display_items,
+                allow_quit=True,
+                tool_name='safe_file_manager',
+                env_var='SFM_RESTORE_INDEX',
+                flag_hint='--restore-index INDEX',
+                zero_cancels=True
+            )
+            if index is None:
                 return False
-            
-            index = int(choice) - 1
-            if 0 <= index < len(items):
-                item, metadata = items[index]
-                orig_path = Path(metadata['original_path'])
-                
-                # Restore to original location or current directory
-                if orig_path.parent.exists():
-                    restore_path = orig_path
-                else:
-                    restore_path = Path.cwd() / orig_path.name
-                    self._print(
-                        f"Original directory doesn't exist, restoring to {restore_path}",
-                        'warning'
-                    )
-                
-                # Perform restore
-                result = atomic_operation(
-                    item,
-                    restore_path,
-                    OperationType.MOVE,
-                    False
-                )
-                
-                if result.success:
-                    # Remove metadata file
-                    meta_file = item.with_suffix('.meta')
-                    if meta_file.exists():
-                        meta_file.unlink()
-                    
-                    self._print(f"Restored: {restore_path}", 'success')
-                    return True
-                else:
-                    self._print(f"Failed to restore: {result.error}", 'error')
+        else:
+            # Fallback to original implementation
+            try:
+                choice = input("Enter number to restore (0 to cancel): ").strip()
+                if choice == '0':
                     return False
+                index = int(choice) - 1
+            except (ValueError, IndexError):
+                self._print("Invalid selection", 'error')
+                return False
+        
+        # Validate index and perform restore
+        if index is not None and 0 <= index < len(items):
+            item, metadata = items[index]
+            orig_path = Path(metadata['original_path'])
             
-        except (ValueError, IndexError):
+            # Restore to original location or current directory
+            if orig_path.parent.exists():
+                restore_path = orig_path
+            else:
+                restore_path = Path.cwd() / orig_path.name
+                self._print(
+                    f"Original directory doesn't exist, restoring to {restore_path}",
+                    'warning'
+                )
+            
+            # Perform restore
+            result = atomic_operation(
+                item,
+                restore_path,
+                OperationType.MOVE,
+                False
+            )
+            
+            if result.success:
+                # Remove metadata file
+                meta_file = item.with_suffix('.meta')
+                if meta_file.exists():
+                    meta_file.unlink()
+                
+                self._print(f"Restored: {restore_path}", 'success')
+                return True
+            else:
+                self._print(f"Failed to restore: {result.error}", 'error')
+                return False
+        else:
             self._print("Invalid selection", 'error')
             return False
     
@@ -3002,13 +3090,18 @@ def main():
     if apply_config_to_args is not None:
         apply_config_to_args('safe_file_manager', args, parser)
     
-    # Handle environment variables
+    # Handle environment variables using interactive_utils if available
+    if HAS_INTERACTIVE_UTILS:
+        check_auto_yes_env('safe_file_manager', args)
+    
+    # Also check legacy environment variables for backward compatibility
     if os.getenv('SAFE_FILE_NONINTERACTIVE') == '1':
         args.non_interactive = True
     if os.getenv('SAFE_FILE_ASSUME_YES') == '1':
         args.yes = True
     if os.getenv('SAFE_FILE_FORCE') == '1':
         args.force = True
+    # SFM_* variables are handled by check_auto_yes_env
     
     # Create manager instance
     manager_kwargs = {

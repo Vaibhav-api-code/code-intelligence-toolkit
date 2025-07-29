@@ -2,114 +2,181 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #
-# Code Intelligence Toolkit CI/CD Configuration
-# Non-interactive settings for automated environments
+# Code Intelligence Toolkit Configuration - CI/CD Environment
+# Non-interactive configuration for continuous integration and automated testing
 #
 # Author: Vaibhav-api-code
 # Co-Author: Claude Code (https://claude.ai/code)
-# Created: 2025-07-24
-# Updated: 2025-07-24
+# Created: 2025-07-28
+# Updated: 2025-07-28 - v1.5.0 CI/CD configuration
 # License: Mozilla Public License 2.0 (MPL-2.0)
+
+# ===== CI/CD CONFIGURATION PROFILE =====
+# This configuration is designed for continuous integration environments
+# where no human interaction is possible.
 #
-# Usage: export PYTOOLSRC=.pytoolsrc.ci
+# Usage:
+#   export PYTOOLSRC=.pytoolsrc.ci
+#   ./run_any_python_tool.sh [tool] [args]
 
 [defaults]
-# CI/CD optimized settings
-all = false
-include_build = false
-max_depth = 10
-quiet = true                         # Reduce output noise
-ast_context = true
-check_compile = false                # Skip compile checks in CI
+# Global CI/CD defaults - prioritize automation and safety
+non_interactive = true               # Force non-interactive mode
+assume_yes = true                   # Auto-confirm medium-risk operations
+force = false                       # Never auto-confirm dangerous operations
+quiet = true                        # Reduce output verbosity for CI logs
+dry_run = false                     # Actually perform operations (not just preview)
+backup = true                       # Always create backups in CI
+check_compile = false               # Skip compilation checks for speed
+verbose = false                     # Minimal logging for cleaner CI output
 
-# Non-interactive settings for automation
-non_interactive = true               # No prompts
-assume_yes = true                    # Auto-confirm medium-risk operations
-force = false                        # Still require explicit --force for dangerous ops
-auto_confirm = true                  # Skip all confirmations
+# CI-specific behavior
+ci_detection = true                 # Enable automatic CI environment detection
+interactive_mode = false            # Disable all interactive prompts
+auto_confirm = true                 # Auto-confirm when safe
+fail_on_interaction = true          # Fail fast if interaction would be required
 
-# CI-friendly settings
-verbose = false                      # Less output
-dry_run = false                      # Execute operations
-backup = true                        # Still create backups for safety
-
-# Path configurations (same as development)
-default_scope = .
-source_directory = src/
-test_directory = test/
-output_directory = output/
-log_directory = logs/
-backup_directory = .backups/
-
-[paths]
-# Same as development
-java_source = src/main/java/
-python_source = .
-resources = src/main/resources/
-build_output = build/
-documentation = docs/
-examples = examples/
-archive = archive/
+# Safety overrides - these prevent dangerous operations even in CI
+allow_destructive = false           # Block destructive operations
+require_explicit_force = true       # Require --force flag for dangerous ops
 
 [safe_file_manager]
-# Fully automated file operations
+# File operations in CI - safe but automated
+non_interactive = true
+assume_yes = true                   # Auto-confirm file operations
+force = false                       # Still require explicit --force for deletion
+verify_checksum = true              # Extra safety in CI
+preserve_attrs = true
+paranoid_mode = false               # Balance safety with speed
+
+[safegit]
+# Git operations in CI - maximum safety
+non_interactive = true
+assume_yes = true                   # Auto-confirm safe git operations
+force_yes = false                   # Dangerous operations still need --force-yes
+dry_run = false
+
+[replace_text_v9]
+# Text replacement in CI (v9 with undo support)
 non_interactive = true
 assume_yes = true
-force = false                        # Still require --force for deletions
-verify_checksum = false              # Faster operations
-preserve_attrs = true
-paranoid_mode = false
+backup = true                       # Always backup in CI
+check_compile = false               # Skip for speed
+track_undo = true                   # Keep undo history
+interpret_escapes = false           # Conservative for CI
 
 [replace_text]
-# Automated text replacement
-backup = true                        # Keep backups even in CI
-whole_word = false
+# Legacy alias for v9
+non_interactive = true
+assume_yes = true
+backup = true
+track_undo = true
+
+[replace_text_ast_v3]
+# AST refactoring in CI (v3 with undo support)
+non_interactive = true
+assume_yes = true
+backup = true
+track_undo = true
+check_compile = false
+scope_aware = true                  # Enhanced scope analysis
+
+[replace_text_ast]
+# Legacy alias for v3
+non_interactive = true
+assume_yes = true
+backup = true
+track_undo = true
+
+[text_undo]
+# Undo system in CI
+non_interactive = true
+assume_yes = false                  # Be careful with undo operations
+allow_interactive_selection = false # No interactive menus in CI
+max_history_days = 7                # Shorter retention in CI
+
+[unified_refactor_v2]
+# Refactoring in CI (v2 with undo support)
+non_interactive = true
+assume_yes = true
+backend = auto                      # Auto-detect: java_scope for .java, python_ast for .py
 dry_run = false
-check_compile = false                # Skip in CI
+backup = true
+track_undo = true
+
+[unified_refactor]
+# Legacy alias for v2
 non_interactive = true
 assume_yes = true
+backend = auto                      # Auto-detect backend based on file type
+track_undo = true
 
-[git_commit_analyzer]
-# Automated git operations
-non_interactive = true
-assume_yes = true
-auto_stage = false                   # Still require explicit staging
+# ===== TOOL-SPECIFIC CI SETTINGS =====
 
-[organize_files]
-# Automated file organization
-dry_run = false
-non_interactive = true
-assume_yes = true
+[find_text]
+quiet = true                        # Minimal output
+json = false                        # Human-readable format
+no_color = true                     # No ANSI colors in CI logs
 
-[error_analyzer]
-# Error analysis in CI
-recent = 50                          # More history in CI
-hours = 168                          # Last week
-clear_on_success = true              # Clean up on successful builds
+[navigate_ast]
+json = false                        # Human-readable for CI
+highlight = false                   # No syntax highlighting in CI
+context_lines = 5                   # Minimal context
 
 [dead_code_detector]
-# CI-optimized settings
-confidence = high                    # Only report high-confidence issues
-threads = 8                          # Use more threads in CI
-format = json                        # Machine-readable output
-output_file = dead_code_report.json  # Save to file
+confidence = high                   # Only high-confidence results in CI
+threads = 2                         # Conservative threading for CI
+format = text                       # Simple format
 
-[trace_calls]
-# CI performance settings
-max_depth = 2                        # Shallower traces for speed
-timeout = 15                         # Shorter timeout
-direction = both
-ast_context = false                  # Skip for speed
+[error_analyzer]
+recent = 20                         # More errors for CI analysis
+hours = 48                          # Longer window for CI
+quiet = true
 
-# ===== CI/CD NOTES =====
-# This configuration prioritizes:
-# 1. Speed - Skips unnecessary checks
-# 2. Automation - No user interaction required
-# 3. Safety - Still requires --force for dangerous operations
-# 4. Reporting - JSON output for parsing
+# ===== CI ENVIRONMENT DETECTION =====
+# These settings help tools detect CI environments automatically
+# Most tools using interactive_utils will detect these automatically:
 #
-# For even more aggressive automation, you can set:
-# force = true  # DANGEROUS - allows all operations!
+# Environment variables that indicate CI:
+# - CI=true
+# - CONTINUOUS_INTEGRATION=true  
+# - GITHUB_ACTIONS=true
+# - GITLAB_CI=true
+# - JENKINS_URL (set)
+# - TRAVIS=true
+# - CIRCLECI=true
+# - BUILDKITE=true
+
+# ===== USAGE EXAMPLES =====
 #
-# But this is NOT recommended. Instead, use:
-# SAFE_FILE_FORCE=1 ./run_any_python_tool.sh safe_file_manager.py trash old/
+# GitHub Actions:
+#   env:
+#     PYTOOLSRC: .pytoolsrc.ci
+#   run: |
+#     ./run_any_python_tool.sh safe_file_manager.py organize src/
+#     ./run_any_python_tool.sh replace_text.py "old" "new" --scope src/
+#
+# GitLab CI:
+#   variables:
+#     PYTOOLSRC: .pytoolsrc.ci
+#   script:
+#     - ./run_any_python_tool.sh find_text.py "TODO" --scope src/
+#
+# Local CI testing:
+#   PYTOOLSRC=.pytoolsrc.ci ./run_any_python_tool.sh [tool] [args]
+
+# ===== SAFETY NOTES =====
+# 1. This config assumes you want automation with medium-risk tolerance
+# 2. Dangerous operations (delete, force push) still require explicit flags
+# 3. All operations create backups for safety
+# 4. Undo tracking is maintained for post-CI recovery if needed
+# 5. Compilation checking is disabled for speed - enable if needed
+
+# ===== TROUBLESHOOTING =====
+# If tools still prompt for input despite this config:
+# 1. Check that PYTOOLSRC environment variable is set
+# 2. Verify the tool supports interactive_utils (migrated tools)
+# 3. Add tool-specific environment variables:
+#    export TOOL_NAME_ASSUME_YES=1
+# 4. Use --yes flag as backup:
+#    ./run_any_python_tool.sh tool.py --yes [args]

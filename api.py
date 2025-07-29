@@ -47,7 +47,7 @@ class ToolRegistry:
         "data_flow_tracker_v2", "find_text_v7", "doc_generator", 
         "doc_generator_enhanced", "cross_file_analysis_ast", 
         "method_analyzer_ast", "git_commit_analyzer", "semantic_diff_v3",
-        "navigate_ast_v2", "show_structure_ast", "replace_text_v8",
+        "navigate_ast_v2", "show_structure_ast", "replace_text_v9",
         "replace_text_ast_v2", "unified_refactor", "smart_ls",
         "find_files", "recent_files", "dir_stats", "tree_view"
     }
@@ -61,13 +61,13 @@ class ToolRegistry:
     # Tools that require file path validation
     FILE_REQUIRED = {
         "data_flow_tracker_v2", "navigate_ast_v2", "method_analyzer_ast",
-        "doc_generator", "doc_generator_enhanced", "replace_text_v8",
+        "doc_generator", "doc_generator_enhanced", "replace_text_v9",
         "replace_text_ast_v2", "show_structure_ast"
     }
     
     # Tools that support batch operations efficiently
     BATCH_CAPABLE = {
-        "find_text_v7", "replace_text_v8", "safegit", 
+        "find_text_v7", "replace_text_v9", "safegit", 
         "safe_file_manager", "git_commit_analyzer"
     }
     

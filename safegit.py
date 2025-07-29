@@ -37,6 +37,26 @@ from safe_git_commands import SafeGitCommands, format_safety_report
 # Import configuration system
 from common_config import load_config, get_config_value
 
+# Import interactive utilities
+try:
+    from interactive_utils import (
+        get_confirmation, get_multi_choice, check_auto_yes_env,
+        get_tool_env_var, PromptChoice, safe_input
+    )
+    HAS_INTERACTIVE_UTILS = True
+except ImportError:
+    HAS_INTERACTIVE_UTILS = False
+    # Fallback implementations
+    def get_confirmation(prompt, **kwargs):
+        response = input(prompt + " [y/N]: ").strip().lower()
+        return response in ['y', 'yes']
+    def safe_input(prompt, **kwargs):
+        return input(prompt)
+    class PromptChoice:
+        YES = "yes"
+        NO = "no"
+        FORCE = "force"
+
 # -------- Cross-platform file locking & atomic write utilities --------
 import contextlib
 
@@ -331,7 +351,75 @@ class SafeGitWrapper:
         if self.dry_run:
             print(f"[DRY RUN] Would prompt: {prompt}")
             return 'n'  # Always deny in dry-run mode
+        
+        # Use interactive_utils if available
+        if HAS_INTERACTIVE_UTILS:
+            # Extract typed confirmation phrases
+            typed_phrase = None
+            if any(phrase in prompt for phrase in ['Type', 'type']):
+                # Try to extract the phrase to type
+                if "Type '" in prompt:
+                    start = prompt.find("Type '") + 6
+                    end = prompt.find("'", start)
+                    if end > start:
+                        typed_phrase = prompt[start:end]
+                elif "type '" in prompt:
+                    start = prompt.find("type '") + 6
+                    end = prompt.find("'", start)
+                    if end > start:
+                        typed_phrase = prompt[start:end]
             
+            # Handle multiple choice [1/2/3]
+            if '[1/2/3]' in prompt:
+                choices = [('1', PromptChoice.CUSTOM), ('2', PromptChoice.CUSTOM), ('3', PromptChoice.CUSTOM)]
+                choice = get_multi_choice(
+                    prompt.replace(' [1/2/3]', ''),
+                    choices,
+                    default=PromptChoice.CUSTOM if self.assume_yes or self.force_yes else None,
+                    tool_name='safegit',
+                    env_var='SAFEGIT_ASSUME_YES' if danger_level != 'high' else 'SAFEGIT_FORCE_YES',
+                    flag_hint='--yes' if danger_level != 'high' else '--force-yes'
+                )
+                return '1' if choice == PromptChoice.CUSTOM else choice.value
+            
+            # Handle typed confirmations
+            elif typed_phrase:
+                confirmed = get_confirmation(
+                    prompt.replace(f"Type '{typed_phrase}'" , "Please confirm").replace(f"type '{typed_phrase}'" , "Please confirm"),
+                    default=self.force_yes,
+                    tool_name='safegit',
+                    env_var='SAFEGIT_FORCE_YES',
+                    flag_hint='--force-yes',
+                    typed_confirmation=typed_phrase
+                )
+                return typed_phrase if confirmed else 'n'
+            
+            # Handle yes/no confirmations
+            elif '[Y/n]' in prompt or '[y/N]' in prompt:
+                default = True if '[Y/n]' in prompt else False
+                env_var = 'SAFEGIT_ASSUME_YES' if danger_level != 'high' else 'SAFEGIT_FORCE_YES'
+                flag_hint = '--yes' if danger_level != 'high' else '--force-yes'
+                
+                confirmed = get_confirmation(
+                    prompt.replace(' [Y/n]', '').replace(' [y/N]', ''),
+                    default=default,
+                    tool_name='safegit',
+                    env_var=env_var,
+                    flag_hint=flag_hint
+                )
+                return 'y' if confirmed else 'n'
+            
+            # For any other prompt, use safe_input
+            else:
+                return safe_input(
+                    prompt,
+                    default='n',
+                    tool_name='safegit',
+                    env_var='SAFEGIT_FORCE_YES' if danger_level == 'high' else 'SAFEGIT_ASSUME_YES',
+                    flag_hint='--force-yes' if danger_level == 'high' else '--yes'
+                )
+        
+        # Fallback to original implementation when interactive_utils not available
         if self.non_interactive or self.assume_yes or self.force_yes:
             # Determine automatic response based on danger level and flags
             

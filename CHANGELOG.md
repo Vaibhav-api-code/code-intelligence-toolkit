@@ -19,7 +19,36 @@ All notable changes to the Code Intelligence Toolkit will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.0] - 2025-07-28 - AI Integration Revolution & Universal Release
+## [1.5.0] - 2025-07-28 - Complete Interactive Utils Migration
+
+### 🎯 Major Enhancement: EOF Error Elimination
+- **COMPLETED: interactive_utils.py migration** - All critical tools now handle non-interactive mode gracefully
+  - No more EOF crashes in CI/CD environments
+  - Clear, actionable error messages with solution hints
+  - Consistent behavior across all migrated tools
+  - Multiple configuration methods (flags > env vars > .pytoolsrc > defaults)
+
+### 🔧 Tools Fully Migrated
+- **text_undo.py** - Numbered selections for restore operations
+- **safe_file_manager.py** - Risk-based confirmations with typed phrases
+- **safegit.py** - Multi-choice prompts and typed confirmations
+- **replace_text_v9.py** - Large change confirmations
+- **replace_text_ast_v3.py** - Batch operation confirmations
+
+### 📋 Key Features
+- **Automatic CI/CD Detection** - GitHub Actions, GitLab CI, Jenkins, etc.
+- **Language-Aware Backend Selection** - Auto-detects Java vs Python for optimal AST processing
+- **Configuration Hierarchy** - Command flags override environment variables override config files
+- **Backward Compatible** - All tools include fallback implementations
+- **Unified Experience** - Same configuration patterns work across all tools
+
+### 📚 Documentation Updates
+- Updated CLAUDE.md with v1.5.0 release notes
+- Enhanced NON_INTERACTIVE_GUIDE.md with complete examples
+- Added INTERACTIVE_UTILS_MIGRATION_STATUS.md tracking progress
+- Updated README.md with v1.5.0 features
+
+## [1.4.0] - 2025-07-27 - AI Integration Revolution & Universal Release
 
 ### 🤖 Complete AI Integration Platform
 - **NEW: Unified JSON API (api.py)** - Single endpoint for 100+ code intelligence tools

@@ -14,8 +14,8 @@ License: Mozilla Public License 2.0 (MPL-2.0)
 
 # Python Tools Documentation 2025
 
-**Last Updated**: January 21, 2025  
-**Major Achievement**: Complete standardization of all production tools with enhanced argument parsing and enterprise-grade atomic file operations
+**Last Updated**: July 28, 2025 (v1.5.0)  
+**Major Achievement**: Complete interactive_utils migration eliminating EOF errors in CI/CD environments
 
 **Related Code Files:**
 - `enhanced_standard_arg_parser.py` - Standardized argument parsing framework
@@ -29,6 +29,35 @@ License: Mozilla Public License 2.0 (MPL-2.0)
 ## 🎯 Executive Summary
 
 The code-intelligence-toolkit provides a comprehensive suite of **80+ production-ready Python tools** for advanced code analysis, refactoring, and development workflows. As of January 2025, **ALL production tools have been successfully standardized** with enhanced argument parsing, preflight validation, and enterprise-grade security.
+
+## 🆕 Interactive Utils Module (July 2025)
+
+### Complete Non-Interactive Support Revolution
+
+The new `interactive_utils.py` module provides unified handling for all interactive prompts:
+
+```python
+from interactive_utils import (
+    get_confirmation,      # Yes/no prompts
+    get_multi_choice,      # Multiple choice (y/n/q)
+    get_numbered_selection,# Numbered menus
+    check_auto_yes_env,    # Environment variable support
+    is_interactive,        # Auto-detect CI/CD environments
+)
+```
+
+#### Key Features:
+- **No More EOF Errors**: Clear messages instead of crashes
+- **Automatic Detection**: CI/CD, pipes, no TTY environments
+- **Configuration Hierarchy**: Flags > env vars > .pytoolsrc > defaults
+- **Multiple Prompt Types**: Supports all common interaction patterns
+
+#### Migrated Tools (v1.5.0):
+- `text_undo.py` - Numbered selections for restore
+- `safe_file_manager.py` - Risk-based confirmations
+- `safegit.py` - Multi-choice and typed confirmations
+- `replace_text_v9.py` - Large change confirmations
+- `replace_text_ast_v3.py` - Batch operation confirmations
 
 ## 🚀 Major Achievements in 2025
 
@@ -79,9 +108,9 @@ class EnhancedArgumentParser(ArgumentParser):
 - **safe_move.py**: Interactive undo mode with atomic operations and retry logic
 - **organize_files.py**: Manifest-based operations with full reversibility and atomic writes
 - **refactor_rename.py**: Automation support with `--yes` flag and atomic file/symbol renaming
-- **replace_text_v8.py**: Atomic text replacement with intelligent retry mechanisms
-- **replace_text_ast_v2.py**: AST-based atomic replacements with rollback protection
-- **unified_refactor.py**: Universal refactoring interface with multiple backends (python_ast, rope, java_scope, text_based)
+- **replace_text_v9.py**: Atomic text replacement with intelligent retry mechanisms
+- **replace_text_ast_v3.py**: AST-based atomic replacements with rollback protection
+- **unified_refactor.py**: Universal refactoring interface with language-aware auto-detection (auto, python_ast, rope, java_scope, text_based)
 
 #### 🛠️ Infrastructure (Enterprise Grade)
 - **common_config.py**: Project-aware configuration via `.pytoolsrc`
@@ -123,9 +152,9 @@ All tools inherit from secure base classes providing:
 - **Process Safety**: Protected against interruption and concurrent access
 
 **6 Enhanced Tools with Atomic Operations:**
-- `replace_text_v8.py` - Atomic text replacement with retry logic
-- `replace_text_ast_v2.py` - AST-based atomic replacements
-- `unified_refactor.py` - Universal refactoring interface with multiple backends (replaces ast_refactor.py, ast_refactor_enhanced.py, java_scope_refactor.py)
+- `replace_text_v9.py` - Atomic text replacement with retry logic
+- `replace_text_ast_v3.py` - AST-based atomic replacements
+- `unified_refactor.py` - Universal refactoring interface with language-aware auto-detection (replaces ast_refactor.py, ast_refactor_enhanced.py, java_scope_refactor.py)
 - `refactor_rename.py` - Atomic file/symbol renaming across files
 - `safe_move.py` - Enhanced atomic file moves
 - `organize_files.py` - Atomic batch file organization
@@ -142,6 +171,74 @@ export ATOMIC_OPERATION_TIMEOUT=60  # Default: 30 seconds per operation
 export REPLACE_TEXT_RETRY_ATTEMPTS=5
 export SAFE_MOVE_RETRY_DELAY=0.5
 export REFACTOR_RENAME_TIMEOUT=120
+```
+
+### 5. Multi-Level Undo System (NEW)
+
+**SafeGIT-style protection extended to all text operations** - Every edit is now reversible!
+
+#### Core Components
+- **text_operation_history.py**: Core undo tracking system with atomic operations
+- **text_undo.py**: CLI tool for managing undo operations
+- **Operation tracking**: Automatic for all v9/v3/v2 tools
+
+#### Key Features
+- **Automatic Operation Tracking**: Every text modification is recorded by default
+- **Multi-Level Undo**: Restore to any previous state in history
+- **Atomic Storage**: Thread-safe with file locking for concurrent safety
+- **Smart Compression**: Files >1KB automatically compressed with gzip
+- **Recovery Scripts**: Auto-generated shell scripts for manual recovery
+- **Cross-Tool Support**: Works across all editing tools in the toolkit
+
+#### Integrated Tools with Undo Support
+- **replace_text_v9.py**: Full text replacement with undo (superset of v8)
+- **replace_text_ast_v3.py**: AST-based refactoring with undo (superset of v2)
+- **unified_refactor_v2.py**: Universal refactoring with undo
+- **refactor_rename_v2.py**: Batch renaming with undo
+- **safe_file_manager_undo_wrapper.py**: File operations with undo tracking
+
+#### Usage Examples
+```bash
+# Basic replacement with automatic undo tracking
+./run_any_python_tool.sh replace_text_v9.py "old" "new" file.py
+# Output: [Undo ID: 1753732740927_91513] Use 'text_undo.py undo --operation 1753732740927_91513' to undo.
+
+# View operation history
+./run_any_python_tool.sh text_undo.py history
+./run_any_python_tool.sh text_undo.py history --file script.py
+./run_any_python_tool.sh text_undo.py history --since 2h
+
+# Undo operations
+./run_any_python_tool.sh text_undo.py undo --last
+./run_any_python_tool.sh text_undo.py undo --operation 1753732740927_91513
+./run_any_python_tool.sh text_undo.py undo --interactive
+
+# System management
+./run_any_python_tool.sh text_undo.py stats
+./run_any_python_tool.sh text_undo.py clean  # Remove operations >30 days old
+```
+
+#### Configuration Options
+```bash
+# Disable undo for specific operations
+./run_any_python_tool.sh replace_text_v9.py --no-undo "old" "new" file.py
+
+# Add custom descriptions for better history
+./run_any_python_tool.sh replace_text_v9.py --undo-description "Fix critical bug in auth" "broken" "fixed" *.py
+
+# Environment variables
+export TEXT_UNDO_MAX_HISTORY=10000      # Max operations to keep (default: 5000)
+export TEXT_UNDO_MAX_AGE_DAYS=60        # Backup retention (default: 30)
+export TEXT_UNDO_COMPRESSION=0          # Disable compression (default: 1)
+```
+
+#### Storage Structure
+```
+~/.text_operation_history/
+├── operations.jsonl      # Operation log (append-only)
+├── backups/             # Compressed/uncompressed file backups
+├── metadata/            # Operation metadata
+└── recovery_scripts/    # Auto-generated recovery scripts
 ```
 
 #### Honest Compile Checking
@@ -176,32 +273,32 @@ class AtomicFileOperation:
 
 #### Enhanced Tools with Atomic Operations
 
-##### replace_text_v8.py - Atomic Text Replacement
+##### replace_text_v9.py - Atomic Text Replacement
 ```bash
 # Basic atomic replacement
-./run_any_python_tool.sh replace_text_v8.py "oldText" "newText" file.java --atomic
+./run_any_python_tool.sh replace_text_v9.py "oldText" "newText" file.java --atomic
 
 # With custom retry settings
-./run_any_python_tool.sh replace_text_v8.py "old" "new" src/ --atomic --retry-attempts 5 --retry-delay 2.0
+./run_any_python_tool.sh replace_text_v9.py "old" "new" src/ --atomic --retry-attempts 5 --retry-delay 2.0
 
 # Environment variable configuration
 export REPLACE_TEXT_RETRY_ATTEMPTS=3
 export REPLACE_TEXT_RETRY_DELAY=1.5
 export REPLACE_TEXT_ATOMIC_TIMEOUT=60
-./run_any_python_tool.sh replace_text_v8.py "pattern" "replacement" files/ --atomic
+./run_any_python_tool.sh replace_text_v9.py "pattern" "replacement" files/ --atomic
 ```
 
-##### replace_text_ast_v2.py - AST-Based Atomic Replacement
+##### replace_text_ast_v3.py - AST-Based Atomic Replacement
 ```bash
 # Atomic AST-based replacement with scope awareness
-./run_any_python_tool.sh replace_text_ast_v2.py --file MyClass.java --line 42 oldVar newVar --atomic
+./run_any_python_tool.sh replace_text_ast_v3.py --file MyClass.java --line 42 oldVar newVar --atomic
 
 # With compilation verification
-./run_any_python_tool.sh replace_text_ast_v2.py --file MyClass.java oldMethod newMethod --atomic --check-compile
+./run_any_python_tool.sh replace_text_ast_v3.py --file MyClass.java oldMethod newMethod --atomic --check-compile
 
 # Custom retry configuration
 export REPLACE_TEXT_AST_RETRY_ATTEMPTS=5
-./run_any_python_tool.sh replace_text_ast_v2.py --file Complex.java complex_var simple_var --atomic
+./run_any_python_tool.sh replace_text_ast_v3.py --file Complex.java complex_var simple_var --atomic
 ```
 
 ##### refactor_rename.py - Atomic Symbol Renaming
@@ -220,17 +317,22 @@ export REFACTOR_RENAME_ATOMIC_TIMEOUT=300
 ##### unified_refactor.py - Universal Refactoring Interface (NEW)
 
 **Professional Features:**
+- **Language-Aware Auto-Detection**: Automatically selects optimal backend (.java → java_scope, .py → python_ast)
 - **Unified Diff Previews**: See exact changes before applying with professional diff formatting
 - **AST-Guided Rope Targeting**: Smart offset calculation for precise symbol targeting
 - **JSON Pipeline Integration**: Read operations from JSON files or stdin for workflow automation
+- **Cross-Language Support**: Seamless refactoring across mixed Java/Python codebases
 - **Multi-Engine Support**: Choose optimal backend (python_ast, rope, java_scope, text_based) per task
 
 ```bash
-# Python AST-based refactoring (default backend) with unified diff preview
+# Auto-detection: Python files use python_ast backend automatically
 ./run_any_python_tool.sh unified_refactor.py rename oldFunc newFunc --file script.py --dry-run
 
-# Java scope-aware refactoring with smart targeting
-./run_any_python_tool.sh unified_refactor.py rename OldClass NewClass --backend java_scope --scope src/
+# Auto-detection: Java files use java_scope backend automatically  
+./run_any_python_tool.sh unified_refactor.py rename OldClass NewClass --file MyClass.java --dry-run
+
+# Mixed codebase: each file uses optimal backend automatically
+./run_any_python_tool.sh unified_refactor.py find calculateValue --scope src/  # Auto-detects per file
 
 # JSON pipeline workflow - read operations from file
 echo '[{"file":"script.py","old":"oldMethod","new":"newMethod","line":42}]' | \
@@ -248,7 +350,7 @@ echo '[{"file":"script.py","old":"oldMethod","new":"newMethod","line":42}]' | \
 # Text-based fallback for any language with unified diff
 ./run_any_python_tool.sh unified_refactor.py rename oldVar newVar --backend text_based --file config.yml --dry-run
 
-# Backend options: python_ast (default), rope, java_scope, text_based
+# Backend options: auto (default - language-aware), python_ast, rope, java_scope, text_based
 # Commands: rename, find, analyze, rename-project
 # Professional features: --dry-run, --from-json, --json, unified diffs, smart targeting
 ```
@@ -294,12 +396,12 @@ export ATOMIC_OPERATION_LOG="~/.pytoolserrors/atomic/"  # Atomic operation log d
 
 ##### Tool-Specific Overrides
 ```bash
-# replace_text_v8.py specific settings
+# replace_text_v9.py specific settings
 export REPLACE_TEXT_RETRY_ATTEMPTS=5
 export REPLACE_TEXT_RETRY_DELAY=1.5
 export REPLACE_TEXT_ATOMIC_TIMEOUT=60
 
-# replace_text_ast_v2.py specific settings  
+# replace_text_ast_v3.py specific settings  
 export REPLACE_TEXT_AST_RETRY_ATTEMPTS=3
 export REPLACE_TEXT_AST_RETRY_DELAY=2.0
 export REPLACE_TEXT_AST_ATOMIC_TIMEOUT=45
@@ -445,6 +547,57 @@ Critical tools wrapped with configurable timeouts:
 - Large files (> 2000 lines): ~5-10 seconds, use surface depth for speed
 - Interactive HTML: Additional ~2-3 seconds for tab generation
 
+## 🆕 Interactive Utils Module (July 2025)
+
+### Unified Non-Interactive Mode Support
+
+All Python tools now use a shared `interactive_utils.py` module that provides consistent handling of interactive prompts and non-interactive environments.
+
+**Key Features:**
+- **Automatic Detection**: Detects CI/CD, pipes, no TTY, and non-interactive environments
+- **Clear Error Messages**: No more EOF crashes - helpful instructions instead
+- **Configuration Support**: Respects `.pytoolsrc` settings for project defaults
+- **Multiple Prompt Types**: Yes/no, typed phrases, numbered selections, multi-choice
+
+**Configuration Methods (Priority Order):**
+1. Command-line flags: `--yes`, `--non-interactive` (highest)
+2. Environment variables: `{TOOL}_ASSUME_YES=1`
+3. Tool-specific `.pytoolsrc` section: `[tool_name]`
+4. Global `.pytoolsrc` defaults: `[defaults]`
+5. Hard-coded defaults (lowest)
+
+**Example Usage:**
+```bash
+# Command flag
+./run_any_python_tool.sh text_undo.py undo --last --yes
+
+# Environment variable
+export TEXT_UNDO_ASSUME_YES=1
+./run_any_python_tool.sh text_undo.py undo --last
+
+# .pytoolsrc configuration
+[text_undo]
+assume_yes = true
+
+# Global non-interactive mode
+export PYTOOLSRC_NON_INTERACTIVE=1
+```
+
+**Error Messages:**
+```bash
+# Clear, actionable guidance
+ERROR: Interactive confirmation required but running in non-interactive mode.
+       Use --yes flag to skip confirmation
+       Or set TEXT_UNDO_ASSUME_YES=1 environment variable
+       Or set 'assume_yes = true' in .pytoolsrc [text_undo] section
+```
+
+**Tools with Full Support:**
+- `text_undo.py` - Complete with numbered selections
+- `safe_file_manager.py` - Risk-based confirmations
+- `safegit.py` - Typed confirmations
+- All new tools use this module
+
 ## 📋 Configuration System
 
 ### .pytoolsrc Configuration
@@ -528,10 +681,10 @@ max_items = 50            # Default --max value
 ### Bulletproof File Operations with Atomic Safety
 ```bash
 # Atomic text replacement with retry logic
-./run_any_python_tool.sh replace_text_v8.py "oldMethod" "newMethod" src/ --atomic --retry-attempts 5
+./run_any_python_tool.sh replace_text_v9.py "oldMethod" "newMethod" src/ --atomic --retry-attempts 5
 
 # AST-based atomic replacement with rollback protection
-./run_any_python_tool.sh replace_text_ast_v2.py --file MyClass.java --line 42 oldVar newVar --atomic
+./run_any_python_tool.sh replace_text_ast_v3.py --file MyClass.java --line 42 oldVar newVar --atomic
 
 # Safe move with atomic operations and compile checking
 ./run_any_python_tool.sh safe_move.py move old.java new.java --check-compile --atomic
@@ -682,7 +835,7 @@ export ATOMIC_RETRY_DELAY=1.5
 #### Production Environments
 ```bash
 # Always use atomic operations for production changes
-./run_any_python_tool.sh replace_text_v8.py "old" "new" src/ --atomic --retry-attempts 5
+./run_any_python_tool.sh replace_text_v9.py "old" "new" src/ --atomic --retry-attempts 5
 
 # Enable comprehensive logging
 ./run_any_python_tool.sh refactor_rename.py --replace oldVar newVar --in "**/*.java" --atomic --log-level debug
@@ -707,7 +860,7 @@ export ATOMIC_OPERATION_TIMEOUT=120
 export ATOMIC_OPERATION_TIMEOUT=300
 
 # Use progress monitoring
-./run_any_python_tool.sh replace_text_ast_v2.py --file LargeFile.java oldVar newVar --atomic --progress
+./run_any_python_tool.sh replace_text_ast_v3.py --file LargeFile.java oldVar newVar --atomic --progress
 
 # Enable batch processing
 ./run_any_python_tool.sh organize_files.py large_directory/ --atomic --batch-size 100

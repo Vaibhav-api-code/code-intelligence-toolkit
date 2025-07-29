@@ -8,14 +8,14 @@ Code Intelligence Toolkit
 Author: Vaibhav-api-code
 Co-Author: Claude Code (https://claude.ai/code)
 Created: 2025-07-23
-Updated: 2025-07-28
+Updated: 2025-07-28 (v1.5.0)
 License: Mozilla Public License 2.0 (MPL-2.0)
 -->
 
 # Code Intelligence Toolkit: An AI-First Platform for Safe Code Analysis & Refactoring
 
 ![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)
-![Release: v1.4.4](https://img.shields.io/badge/Release-v1.4.4-blue.svg)
+![Release: v1.5.0](https://img.shields.io/badge/Release-v1.5.0-blue.svg)
 ![Languages: Python, Java](https://img.shields.io/badge/Languages-Python%2C%20Java-orange.svg)
 ![Platform: AI-First](https://img.shields.io/badge/Platform-AI--First-success)
 ![Build: Passing](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
@@ -37,6 +37,7 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
 - **⚡ 10-100x faster** than grep, IDEs, or manual refactoring - critical for AI token efficiency
 - **🛡️ Disaster-proof** - Prevents AI agents from executing destructive operations
 - **🎯 100% accurate** AST-based code understanding - no hallucinations, just facts
+- **🌐 Language-aware** - Auto-detects Java vs Python for optimal AST processing
 - **📊 Structured Output** - JSON APIs, reasoning schemas, programmatic interfaces
 - **🔧 100+ tools** - Complete toolkit for any AI coding task with intelligent insights
 - **📏 Handles massive files** - Edit 10k+ line files that break AI IDE edit tools
@@ -47,8 +48,8 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           Users & AI Agents                             │
-└─────────────────────────┬───────────────┬──────────────────────────────┘
+│                           Users & AI Agents                            │
+└─────────────────────────┬───────────────┬───────────────────────────────┘
                           │               │
                           ▼               ▼
                ┌─────────────────┐ ┌─────────────────┐
@@ -60,11 +61,11 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
                          └─────────┬─────────┘
                                    ▼
                     ┌─────────────────────────────┐
-                    │     Intelligence Layer      │
-                    │  • AI Reasoning Engine      │
-                    │  • Risk Assessment          │
-                    │  • Security Analysis        │
-                    │  • Quality Metrics          │
+                    │     Intelligence Layer     │
+                    │  • AI Reasoning Engine     │
+                    │  • Risk Assessment         │
+                    │  • Security Analysis       │
+                    │  • Quality Metrics         │
                     └─────────────┬───────────────┘
                                   ▼
                     ┌─────────────────────────────┐
@@ -77,9 +78,9 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
                     └─────────────┬───────────────┘
                                   ▼
                     ┌─────────────────────────────┐
-                    │        Your Codebase        │
-                    │   Always Current State      │
-                    │    No Persistent Index      │
+                    │        Your Codebase       │
+                    │   Always Current State     │
+                    │    No Persistent Index     │
                     └─────────────────────────────┘
 ```
 
@@ -222,7 +223,7 @@ class SafeAICodingAgent:
         """Safe refactoring with automatic backups"""
         cmd = [
             f"{self.toolkit}/run_any_python_tool.sh",
-            "replace_text_ast_v2.py",
+            "replace_text_ast_v3.py",
             "--file", file_path,
             old_name, new_name,
             "--yes"  # Non-interactive mode
@@ -281,7 +282,7 @@ chmod +x run_any_python_tool.sh
 ./run_any_python_tool.sh doc_generator_enhanced.py MyClass --style technical
 
 # Safe refactoring
-./run_any_python_tool.sh replace_text_ast_v2.py --file app.py oldMethod newMethod
+./run_any_python_tool.sh unified_refactor_v2.py rename oldMethod newMethod --file app.py   # Auto-detects backend
 
 # Analyze dependencies
 ./run_any_python_tool.sh dependency_analyzer.py MyClass --export-all
@@ -306,7 +307,7 @@ result = api.execute({
 # Batch operations
 results = api.batch_execute([
     {"tool": "find_text_v7", "params": {"TODO": True}},
-    {"tool": "replace_text_v8", "params": {"TODO": True, "DONE": True}}
+    {"tool": "replace_text_v9", "params": {"TODO": True, "DONE": True}}
 ])
 ```
 
@@ -395,7 +396,7 @@ For those using AI coding assistants or requiring enterprise-grade protection:
 ./run_any_python_tool.sh safe_file_manager.py undo --interactive  # Recover anything
 ```
 
-### Data Flow Tracker - Understand Your Code (Enhanced in v1.3.0)
+### Data Flow Tracker - Understand Your Code (Enhanced in v1.5.0)
 ```bash
 # Track how data flows through your code:
 ./run_any_python_tool.sh data_flow_tracker_v2.py --var user_input --file app.py
@@ -529,9 +530,9 @@ print(f"Risk: {result.reasoning['risk_assessment']['overall_risk']}")
 docs = ci.generate_documentation('MyClass.java', style='api-docs')
 print(f"Quality: {docs.reasoning['quality_assessment']['clarity_score']:.1%}")
 
-# Safe refactoring with impact analysis
-refactor = ci.refactor_safely('oldName', 'newName', scope='project')
-print(f"Modified {refactor.files_modified} files")
+# Safe refactoring with language-aware backend selection and impact analysis
+refactor = ci.refactor_safely('oldName', 'newName', scope='project')  # Auto-detects Java/Python per file
+print(f"Modified {refactor.files_modified} files using {len(refactor.backends_used)} different backends")
 ```
 
 **SDK Packages:**
@@ -558,25 +559,26 @@ print(f"Modified {refactor.files_modified} files")
 
 ### 🎯 Professional Refactoring Suite
 
-#### Text-Based Operations (replace_text_v8.py)
+#### Text-Based Operations (replace_text_v9.py)
 - **Surgical precision** - Replace text with regex, whole-word, or fixed-string modes
 - **Multi-file operations** - Refactor across entire projects in seconds
 - **Git-aware** - Target only staged files or specific commits
 - **Block-aware** - Replace within specific code blocks (if/for/while/try)
 - **JSON pipelines** - Chain operations for complex transformations
 
-#### AST-Based Refactoring (replace_text_ast_v2.py)
+#### AST-Based Refactoring (replace_text_ast_v3.py)
 - **Semantic accuracy** - Understands code structure, not just text
 - **Symbol renaming** - Rename variables/functions/classes with confidence
 - **Scope awareness** - Changes only affect intended scope
 - **Multi-language** - Python and Java with extensible architecture
 - **Comment/string modes** - Target only comments or string literals
 
-#### Universal Refactoring (unified_refactor.py)
-- **Multiple backends** - Choose between AST, Rope, or text engines
-- **Cross-language** - Single interface for Python, Java, JavaScript
+#### Universal Refactoring (unified_refactor_v2.py)
+- **Language-aware auto-detection** - Java files use Java AST, Python files use Python AST
+- **Multiple backends** - Choose between AST, Rope, or text engines, or use auto-detection
+- **Cross-language** - Single interface for Python, Java, JavaScript with optimal backend selection
 - **Intelligent suggestions** - AI-powered refactoring recommendations
-- **Batch operations** - Rename hundreds of symbols in one command
+- **Batch operations** - Rename hundreds of symbols in one command across mixed codebases
 
 ### 🔍 Advanced Code Analysis
 
@@ -626,11 +628,11 @@ print(f"Searched 1M+ lines in {time.time() - start:.1f}s")  # 0.8s vs grep's 45s
 
 # Edit 15,000 line file
 AI IDE tools                           # ❌ Timeout/crash/truncate
-replace_text_v8.py "old" "new" big.py  # ✅ 0.3 seconds + backup
+replace_text_v9.py "old" "new" big.py  # ✅ 0.3 seconds + backup + undo
 
 # Rename variable across 500 files
 Manual IDE refactoring                  # 2-3 minutes + verification
-replace_text_ast.py oldVar newVar      # 3 seconds + automatic backup
+replace_text_ast_v3.py oldVar newVar    # 3 seconds + automatic backup
 
 # Extract all methods from large file
 Manual copy/paste                       # 10+ minutes
@@ -642,9 +644,9 @@ find_text_v7.py --extract-method-alllines  # 0.2 seconds
 | Task | Traditional Method | Our Tools | Speedup |
 |------|-------------------|-----------|----------|
 | Search 1M lines | `grep -r`: 45s | `find_text_v7.py`: 0.8s | **56x faster** |
-| Edit 15k line file | AI IDE: crash/timeout | `replace_text_v8.py`: 0.3s | **✅ Works** |
+| Edit 15k line file | AI IDE: crash/timeout | `replace_text_v9.py`: 0.3s | **✅ Works** |
 | Find symbol usage | IDE indexing: 30s+ | `navigate_ast.py`: 0.1s | **300x faster** |
-| Rename across project | IDE refactor: 2-3 min | `replace_text_ast_v2.py`: 3s | **40x faster** |
+| Rename across project | IDE refactor: 2-3 min | `replace_text_ast_v3.py`: 3s | **40x faster** |
 | Extract all methods | Manual: 10+ min | `find_text_v7.py`: 0.2s | **3000x faster** |
 | Safe file move | `mv` + manual backup | `safe_file_manager.py`: instant | **✓ Reversible** |
 | Git reset recovery | Often impossible | `safegit.py`: automatic | **✓ Always safe** |
@@ -679,9 +681,75 @@ Built for safety at every level:
 - **Atomic operations** - No partial states
 - **Comprehensive logging** - Full audit trail
 
-## 🆕 What's New (v1.3.0) - Intelligence Layer & Documentation Revolution
+### 🔄 Multi-Level Undo System (NEW)
 
-**Released: July 2025** - This major release introduces revolutionary code intelligence and automated documentation generation capabilities.
+**SafeGIT-style undo capabilities for all text operations:**
+
+- **Automatic tracking** - Every operation creates an undo point
+- **Multi-level history** - Restore to any previous state
+- **Atomic operations** - All changes are reversible
+- **Cross-tool awareness** - Track changes from any v9/v3/v2 tool
+- **Compressed backups** - Efficient storage of operation history
+- **Recovery scripts** - Generated for every operation
+
+```bash
+# Every operation is tracked automatically
+./run_any_python_tool.sh replace_text_v9.py "old" "new" file.py
+# Output: [Undo ID: 1753732740927_91513] Use 'text_undo.py undo --operation 1753732740927_91513' to undo.
+
+# View operation history
+./run_any_python_tool.sh text_undo.py history
+./run_any_python_tool.sh text_undo.py history --file specific.py
+
+# Undo last operation
+./run_any_python_tool.sh text_undo.py undo --last --yes
+
+# Undo specific operation
+./run_any_python_tool.sh text_undo.py undo --operation 1753732740927_91513 --yes
+
+# Clean old operations
+./run_any_python_tool.sh text_undo.py clean --older-than 30d
+```
+
+**Tools with integrated undo support:**
+- `replace_text_v9.py` - All text replacements tracked
+- `replace_text_ast_v3.py` - AST-based refactoring with undo
+- `unified_refactor_v2.py` - Universal refactoring with history
+- `refactor_rename_v2.py` - Batch operations with rollback
+- `safe_file_manager.py` - File operations with recovery
+
+## 🆕 What's New (v1.5.0) - Complete Interactive Utils Migration
+
+**Released: July 28, 2025** - This major release completes the migration of all critical tools to use unified interactive utilities, eliminating EOF errors in CI/CD environments while introducing revolutionary tool version updates.
+
+### 🎯 **NEW: interactive_utils.py - Unified Non-Interactive Support**
+
+**All Python tools now use a shared module for handling interactive prompts:**
+- **No More EOF Errors** - Clear, actionable error messages instead of crashes
+- **Automatic CI Detection** - Detects CI/CD, pipes, no TTY environments automatically
+- **Multiple Config Methods** - Command flags > Environment variables > .pytoolsrc > defaults
+- **Tool Version Updates** - `replace_text_v9.py`, `replace_text_ast_v3.py`, `unified_refactor_v2.py`
+- **Multiple Prompt Types** - Yes/no, typed phrases, numbered selections, multi-choice
+
+```bash
+# Before (EOF crash in CI):
+echo "" | python text_undo.py undo --last
+# EOFError: EOF when reading a line
+
+# After (helpful error with solutions):
+echo "" | python text_undo.py undo --last
+# ❌ ERROR: Interactive confirmation required but running in non-interactive mode.
+#       Use --yes flag to skip confirmation
+#       Or set TEXT_UNDO_ASSUME_YES=1 environment variable
+#       Or set 'assume_yes = true' in .pytoolsrc [text_undo] section
+```
+
+**Migrated Tools:**
+- ✅ `text_undo.py` - Multi-level undo with interactive selection
+- ✅ `safe_file_manager.py` - Enterprise file operations
+- ✅ `safegit.py` - Git safety wrapper with risk-based confirmations
+- ✅ `replace_text_v9.py` - Text replacement with multi-level undo
+- ✅ `replace_text_ast_v3.py` - AST refactoring with scope awareness
 
 ### 🧠 **NEW: data_flow_tracker_v2.py - Intelligence Layer Revolution**
 **Complete rewrite with breakthrough intelligence capabilities:**
@@ -742,8 +810,8 @@ print(f"Generated {len(docs['methods'])} method documentations")
 - `doc_generator.py` (automated documentation) ← **NEW MAJOR FEATURE**
 - `doc_generator_enhanced.py` (with full AST integration) ← **ENHANCED VERSION**
 - `find_text_v7.py` (with multiline search) ← Latest
-- `replace_text_v8.py` (with escape sequences) ← Latest  
-- `replace_text_ast_v2.py` (enhanced AST refactoring) ← Latest
+- `replace_text_v9.py` (with escape sequences + multi-level undo) ← Latest  
+- `replace_text_ast_v3.py` (enhanced AST refactoring + multi-level undo) ← Latest
 
 ### 🐛 **Critical Reliability Fixes**
 - **Fixed infinite recursion** in data flow tracking - No more crashes with cyclic dependencies
@@ -860,8 +928,76 @@ Transform code analysis into professional documentation:
 
 ### Bug Fixes
 - Fixed stdin processing in replace_text_v8.py
-- Fixed configuration handling in replace_text_ast_v2.py
+- Fixed configuration handling in replace_text_ast_v3.py
 - Made `--line` optional for `--comments-only` and `--strings-only` modes in AST tool
+
+## 🆕 What's New (v1.5.0) - Complete Interactive Utils Migration
+
+**Released: July 28, 2025** - This major release completes the migration of all critical tools to use unified interactive utilities, eliminating EOF errors in CI/CD environments.
+
+### 🎯 **NEW: interactive_utils.py - Unified Non-Interactive Support**
+
+**All Python tools now use a shared module for handling interactive prompts:**
+- **No More EOF Errors** - Clear, actionable error messages instead of crashes
+- **Automatic Detection** - Detects CI/CD, pipes, no TTY environments
+- **Language-Aware Backends** - Auto-detects Java vs Python for optimal AST processing
+- **Configuration Support** - Respects `.pytoolsrc` settings for project defaults
+- **Multiple Prompt Types** - Yes/no, typed phrases, numbered selections, multi-choice
+
+```bash
+# Before (EOF crash):
+echo "" | python text_undo.py undo --last
+# EOFError: EOF when reading a line
+
+# After (helpful message):
+echo "" | python text_undo.py undo --last
+# ERROR: Interactive confirmation required but running in non-interactive mode.
+#        Use --yes flag to skip confirmation
+#        Or set TEXT_UNDO_ASSUME_YES=1 environment variable
+#        Or set 'assume_yes = true' in .pytoolsrc [text_undo] section
+```
+
+### 📋 **Enhanced Configuration Priority**
+
+Tools now check for settings in this order:
+1. **Command-line flags** - `--yes`, `--non-interactive` (highest priority)
+2. **Environment variables** - `{TOOL}_ASSUME_YES=1`
+3. **Tool-specific .pytoolsrc** - `[tool_name]` section
+4. **Global .pytoolsrc defaults** - `[defaults]` section
+5. **Hard-coded defaults** - Conservative (interactive) by default
+
+### 🎛️ **Specialized Configuration Profiles**
+
+The toolkit includes pre-configured profiles for different environments:
+
+- **`.pytoolsrc.ci`** - CI/CD automation with auto-confirm and non-interactive mode
+- **`.pytoolsrc.automation`** - Local automation with balanced safety and speed
+- **`.pytoolsrc.safe`** - Maximum safety with dry-run and interactive confirmations
+
+```bash
+# Use different configuration profiles
+export PYTOOLSRC=.pytoolsrc.ci          # For CI/CD
+export PYTOOLSRC=.pytoolsrc.automation   # For local automation  
+export PYTOOLSRC=.pytoolsrc.safe         # For production/critical work
+```
+
+### 🔧 **Tools Fully Migrated (v1.5.0)**
+- **text_undo.py** - Complete with numbered selection menus for restore operations
+- **safe_file_manager.py** - Risk-based confirmations with typed phrases for high-risk ops
+- **safegit.py** - Multi-choice prompts and typed confirmations for dangerous operations  
+- **replace_text_v9.py** - Large change confirmations with auto-detection
+- **replace_text_ast_v3.py** - Batch operation confirmations with y/n/q support
+
+### 🎯 **Key Improvements**
+- **100% EOF Error Elimination** - All migrated tools show helpful messages
+- **Consistent Behavior** - Every tool handles non-interactive mode the same way
+- **CI/CD Ready** - Automatic detection of GitHub Actions, GitLab CI, Jenkins, etc.
+- **Backward Compatible** - All tools include fallback implementations
+
+### 📝 **Documentation Updates**
+- Enhanced CLAUDE.md with interactive utils section
+- Updated NON_INTERACTIVE_GUIDE.md with new features
+- Added comprehensive migration guide for tool developers
 
 ## 📦 Installation
 
@@ -960,7 +1096,7 @@ class AIRefactoringAgent:
         for file in occurrences['files']:
             rename_cmd = [
                 f"{self.toolkit}/run_any_python_tool.sh",
-                "replace_text_ast_v2.py",
+                "replace_text_ast_v3.py",
                 "--file", file,
                 old_name, new_name,
                 "--yes"  # Non-interactive
@@ -1156,9 +1292,9 @@ force_yes = false       # Never auto-confirm dangerous operations
 #### 3. Command-Line Flags
 ```bash
 # Use --yes flag for individual commands
-./run_any_python_tool.sh safe_file_manager.py move file1 file2 --yes
+./run_any_python_tool.sh safe_file_manager.py --yes move file1 file2
 ./run_any_python_tool.sh safegit.py add . --yes
-./run_any_python_tool.sh replace_text_ast.py oldVar newVar --file script.py --yes
+./run_any_python_tool.sh replace_text_ast_v3.py oldVar newVar --file script.py --yes
 ```
 
 ### Safety Levels in Non-Interactive Mode
@@ -1190,7 +1326,7 @@ env:
 steps:
   - name: Refactor code
     run: |
-      ./run_any_python_tool.sh replace_text_v8.py "old_api" "new_api" --scope src/
+      ./run_any_python_tool.sh replace_text_v9.py "old_api" "new_api" --scope src/
       ./run_any_python_tool.sh safe_file_manager.py organize build/ --by-date
       ./run_any_python_tool.sh safegit.py add .
       ./run_any_python_tool.sh safegit.py commit -m "Automated refactoring"
@@ -1257,8 +1393,8 @@ export SAFEGIT_FORCE_YES=1  # This would bypass critical safety!
 | **Documentation** | doc_generator_enhanced.py | ENHANCED | Full AST integration with interactive HTML |
 | **Data Flow** | data_flow_tracker_v2.py | v2 | Intelligence layer with explanations & HTML |
 | **Search** | find_text_v7.py | v7 | Multiline search with `--multiline` flag |
-| **Replace** | replace_text_v8.py | v8 | Escape sequences with `--interpret-escapes` |
-| **AST Replace** | replace_text_ast_v2.py | v2 | Escape sequences in comments/strings |
+| **Replace** | replace_text_v9.py | v9 | Escape sequences + multi-level undo support |
+| **AST Replace** | replace_text_ast_v3.py | v3 | Escape sequences + multi-level undo support |
 | **Git Safety** | safegit.py | v2.0 | Complete protection, non-interactive mode |
 | **File Safety** | safe_file_manager.py | Latest | Atomic operations, complete undo |
 | **Release** | release_workflow.sh | Latest | `--yes` flag for automation |
@@ -1282,7 +1418,7 @@ export SAFEGIT_FORCE_YES=1  # This would bypass critical safety!
 ./run_any_python_tool.sh replace_text_v8.py "old" "new\nline" --interpret-escapes
 
 # AST refactoring
-./run_any_python_tool.sh replace_text_ast_v2.py old new --file script.py --line 42
+./run_any_python_tool.sh unified_refactor_v2.py rename old new --file script.py  # Auto-detects Python backend
 
 # Safe file operations
 ./run_any_python_tool.sh safe_file_manager.py move old.txt new.txt

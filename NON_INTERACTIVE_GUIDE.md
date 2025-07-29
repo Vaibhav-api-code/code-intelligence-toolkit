@@ -8,7 +8,7 @@ Non-Interactive Mode Configuration Guide
 Author: Vaibhav-api-code
 Co-Author: Claude Code (https://claude.ai/code)
 Created: 2025-07-24
-Updated: 2025-07-24
+Updated: 2025-07-28 - v1.5.0 Complete interactive_utils migration
 License: Mozilla Public License 2.0 (MPL-2.0)
 -->
 
@@ -18,14 +18,29 @@ This guide explains how to configure the Code Intelligence Toolkit for non-inter
 
 > **📚 Note**: For comprehensive documentation including all tools, CI/CD examples, and best practices, see the [Comprehensive Non-Interactive Mode Guide](docs/NON_INTERACTIVE_MODE_GUIDE.md).
 
-## 🚨 The Problem
+## 🎉 Update (July 28, 2025 - v1.5.0): Complete Migration
 
-When running tools in non-interactive environments (CI/CD, automation, AI agents), you may encounter:
+**All Python tools now use a shared `interactive_utils.py` module** that provides:
+- **Automatic non-interactive detection** (CI/CD, pipes, no TTY)
+- **Clear error messages** instead of EOF crashes
+- **Consistent behavior** across all tools
+- **`.pytoolsrc` configuration support** for project-wide defaults
+- **Multiple prompt types**: yes/no, typed phrases, numbered selections, multi-choice
+
+## 🚨 The Problem (Now Solved!)
+
+Previously, running tools in non-interactive environments would crash with:
 ```
 ❌ Error: EOF when reading a line
 ```
 
-This happens when tools expect user input but stdin is not available.
+Now you get helpful messages:
+```
+❌ ERROR: Interactive confirmation required but running in non-interactive mode.
+       Use --yes flag to skip confirmation
+       Or set TEXT_UNDO_ASSUME_YES=1 environment variable
+       Or set 'assume_yes = true' in .pytoolsrc [text_undo] section
+```
 
 ## ✅ Solutions
 
@@ -72,8 +87,8 @@ Most tools support these flags:
 
 ```bash
 # Safe file operations
-./run_any_python_tool.sh safe_file_manager.py move file1 file2 --yes
-./run_any_python_tool.sh safe_file_manager.py chmod +x script.sh --yes
+./run_any_python_tool.sh safe_file_manager.py --yes move file1 file2
+./run_any_python_tool.sh safe_file_manager.py --yes chmod +x script.sh
 
 # Text replacement
 ./run_any_python_tool.sh replace_text.py "old" "new" file.txt --yes
@@ -84,6 +99,40 @@ Most tools support these flags:
 
 ## 📋 Tool-Specific Settings
 
+### Universal Pattern (All Tools Using interactive_utils)
+
+```bash
+# Method 1: Command flags (highest priority)
+./run_any_python_tool.sh tool_name.py --yes
+
+# Method 2: Environment variables
+export TOOL_NAME_ASSUME_YES=1
+./run_any_python_tool.sh tool_name.py
+
+# Method 3: .pytoolsrc configuration
+[tool_name]
+assume_yes = true
+
+# Method 4: Global non-interactive mode
+export PYTOOLSRC_NON_INTERACTIVE=1  # Affects ALL tools
+```
+
+### text_undo.py (Now with Full Interactive Utils Support)
+
+```bash
+# Basic undo with auto-confirm
+./run_any_python_tool.sh text_undo.py undo --last --yes
+
+# Interactive selection in non-interactive mode shows helpful error
+echo "" | ./run_any_python_tool.sh text_undo.py undo --interactive
+# ERROR: Interactive selection required but running in non-interactive mode.
+#        Use --operation ID to specify selection
+
+# Config file support
+[text_undo]
+assume_yes = true
+```
+
 ### safe_file_manager.py
 
 ```bash
@@ -91,10 +140,9 @@ Most tools support these flags:
 SFM_ASSUME_YES=1 ./run_any_python_tool.sh safe_file_manager.py move src dst
 
 # Method 2: Command flag
-./run_any_python_tool.sh safe_file_manager.py move src dst --yes
+./run_any_python_tool.sh safe_file_manager.py --yes move src dst
 
 # Method 3: Config file
-# Add to .pytoolsrc:
 [safe_file_manager]
 assume_yes = true
 ```
@@ -103,17 +151,13 @@ assume_yes = true
 
 ```bash
 # Method 1: Configuration file (.pytoolsrc)
-# Add to .pytoolsrc:
 [safegit]
 non_interactive = true
 assume_yes = true
-# Then just run:
-./run_any_python_tool.sh safegit.py add .
 
 # Method 2: Environment variables (override config)
 export SAFEGIT_NONINTERACTIVE=1
 export SAFEGIT_ASSUME_YES=1
-./run_any_python_tool.sh safegit.py add .
 
 # Method 3: Command flags
 ./run_any_python_tool.sh safegit.py add . --yes
@@ -121,9 +165,15 @@ export SAFEGIT_ASSUME_YES=1
 
 ### Other Tools
 
-Check tool help for specific flags:
+All tools using interactive_utils support the same pattern:
 ```bash
-./run_any_python_tool.sh [tool_name] --help | grep -E "(yes|interactive|confirm)"
+# Check if a tool supports interactive_utils
+grep "from interactive_utils import" tool_name.py
+
+# If it does, these all work:
+./run_any_python_tool.sh tool_name.py --yes
+export TOOL_NAME_ASSUME_YES=1
+# Or add to .pytoolsrc
 ```
 
 ## 🏗️ CI/CD Configuration
@@ -224,7 +274,7 @@ SAFE_FILE_FORCE=1 ./run_any_python_tool.sh safe_file_manager.py trash old_files/
 2. Try multiple methods:
    ```bash
    # Combine environment variable and flag
-   SFM_ASSUME_YES=1 ./run_any_python_tool.sh safe_file_manager.py move a b --yes
+   SFM_ASSUME_YES=1 ./run_any_python_tool.sh safe_file_manager.py --yes move a b
    ```
 
 3. Use wrapper script for stubborn tools:
@@ -259,13 +309,20 @@ cat > .pytoolsrc.batch << EOF
 non_interactive = true
 assume_yes = true
 
-[replace_text]
+[replace_text_v9]
 backup = true
 check_compile = false
+track_undo = true
+
+[unified_refactor_v2]
+backend = auto                      # Auto-detect Java vs Python
+backup = true
+track_undo = true
 EOF
 
-# Use it
-PYTOOLSRC=.pytoolsrc.batch ./run_any_python_tool.sh replace_text.py "old" "new" src/
+# Use it for mixed codebase
+PYTOOLSRC=.pytoolsrc.batch ./run_any_python_tool.sh replace_text_v9.py "old" "new" src/
+PYTOOLSRC=.pytoolsrc.batch ./run_any_python_tool.sh unified_refactor_v2.py rename oldFunc newFunc --scope src/
 ```
 
 ### Safe Git Automation
@@ -334,7 +391,7 @@ Tools check for non-interactive settings in this order (first found wins):
 (exec < /dev/null && ./run_any_python_tool.sh safe_file_manager.py list .)
 
 # Test with explicit flags
-./run_any_python_tool.sh safe_file_manager.py move test1.txt test2.txt --dry-run --yes
+./run_any_python_tool.sh safe_file_manager.py --dry-run --yes move test1.txt test2.txt
 
 # Create test configuration
 cat > .pytoolsrc.test << EOF

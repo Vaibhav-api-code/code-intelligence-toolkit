@@ -32,7 +32,7 @@ class ASTRefactorer:
             params["--line"] = line_context
         
         return self.api.execute({
-            "tool": "replace_text_ast_v2",
+            "tool": "replace_text_ast_v3",
             "params": params,
             "options": {
                 "working_dir": str(self.project_root)
@@ -73,7 +73,7 @@ class ASTRefactorer:
                         variable_name: str, line: int) -> Dict[str, Any]:
         """Extract an expression into a variable"""
         return self.api.execute({
-            "tool": "replace_text_ast_v2",
+            "tool": "replace_text_ast_v3",
             "params": {
                 "--file": str(self.project_root / file_path),
                 "--line": line,
@@ -114,7 +114,7 @@ class ASTRefactorer:
     def reorganize_imports(self, file_path: str) -> Dict[str, Any]:
         """Reorganize and optimize imports in a file"""
         return self.api.execute({
-            "tool": "replace_text_ast_v2",
+            "tool": "replace_text_ast_v3",
             "params": {
                 "--file": str(self.project_root / file_path),
                 "--organize-imports": True

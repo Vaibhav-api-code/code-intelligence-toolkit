@@ -8,7 +8,7 @@
 # Author: Vaibhav-api-code
 # Co-Author: Claude Code (https://claude.ai/code)
 # Created: 2025-07-24
-# Updated: 2025-07-24
+# Updated: 2025-07-28  # v1.5.0 - Enhanced CI/automation support
 # License: Mozilla Public License 2.0 (MPL-2.0)
 
 [defaults]
@@ -25,6 +25,11 @@ non_interactive = false      # Keep interactive for development
 assume_yes = false          # Require explicit confirmation
 force = false              # Never auto-confirm dangerous operations
 auto_confirm = false       # Require user interaction by default
+
+# v1.5.0 - Enhanced interactive behavior
+interactive_mode = true    # Allow interactive prompts by default
+ci_detection = true        # Auto-detect CI environments
+quiet_errors = false       # Show full error messages with hints
 
 # Development-friendly settings
 verbose = false            # Set to true for debugging
@@ -87,22 +92,72 @@ show_dirs = true
 show_recent = true
 show_empty = false
 
-[replace_text]
-# Text replacement defaults
+[replace_text_v9]
+# Text replacement defaults (v9 with undo support)
 backup = true                        # Always backup before replacing
 whole_word = false
 dry_run = false
 check_compile = true
+track_undo = true                    # Enable undo tracking by default
+interpret_escapes = false            # Enable with --interpret-escapes flag
 # For automation, set these in environment or use --yes flag
 non_interactive = false
 assume_yes = false
 
-[replace_text_ast]
-# AST-based refactoring defaults
+[replace_text]
+# Legacy alias - redirects to v9 settings
+backup = true
+track_undo = true
+non_interactive = false
+assume_yes = false
+
+[replace_text_ast_v3]
+# AST-based refactoring defaults (v3 with undo support)
 dry_run = false
 backup = true
 language = auto                      # Auto-detect language
 check_compile = true
+track_undo = true                    # Enable undo tracking
+scope_aware = true                   # Enhanced scope analysis
+# v1.5.0 - Interactive support
+non_interactive = false
+assume_yes = false
+
+[replace_text_ast]
+# Legacy alias - redirects to v3 settings
+dry_run = false
+backup = true
+track_undo = true
+non_interactive = false
+assume_yes = false
+
+[text_undo]
+# Text undo system defaults (v1.5.0 - interactive_utils support)
+non_interactive = false
+assume_yes = false
+allow_interactive_selection = true   # Allow numbered menu selections
+max_history_days = 30                # Keep undo history for 30 days
+auto_cleanup = true                  # Automatically clean old entries
+
+[unified_refactor_v2]
+# Universal refactoring defaults (v2 with undo support)
+backend = auto                       # Auto-detect: java_scope for .java, python_ast for .py
+dry_run = false
+backup = true
+check_compile = true
+track_undo = true                    # Enable undo tracking
+# v1.5.0 - Interactive support
+non_interactive = false
+assume_yes = false
+
+[unified_refactor]
+# Legacy alias - redirects to v2 settings
+backend = auto                       # Auto-detect backend based on file type
+dry_run = false
+backup = true
+track_undo = true
+non_interactive = false
+assume_yes = false
 
 [navigate_ast]
 # AST navigation defaults
@@ -197,13 +252,19 @@ format = text
 #
 # Then use: export PYTOOLSRC=.pytoolsrc.ci
 
-# ===== ENVIRONMENT VARIABLE OVERRIDES =====
+# ===== ENVIRONMENT VARIABLE OVERRIDES (v1.5.0) =====
 # These override config file settings:
 #
 # SFM_ASSUME_YES=1                   - Auto-confirm safe_file_manager
 # SAFEGIT_NONINTERACTIVE=1           - Non-interactive git operations
 # PYTOOLSRC_NON_INTERACTIVE=1        - Global non-interactive mode
 # PYTOOLSRC=/path/to/config          - Use different config file
+#
+# Tool-specific variables (v1.5.0):
+# TEXT_UNDO_ASSUME_YES=1             - Auto-confirm text_undo operations
+# REPLACE_TEXT_ASSUME_YES=1          - Auto-confirm replace operations
+# REPLACE_TEXT_AST_ASSUME_YES=1      - Auto-confirm AST refactoring
+# UNIFIED_REFACTOR_ASSUME_YES=1      - Auto-confirm refactoring
 
 # ===== QUICK AUTOMATION SETUP =====
 # For temporary automation without changing this file:
@@ -211,5 +272,36 @@ format = text
 # export SFM_ASSUME_YES=1
 # export SAFEGIT_NONINTERACTIVE=1
 # export SAFEGIT_ASSUME_YES=1
+# export TEXT_UNDO_ASSUME_YES=1
+# export REPLACE_TEXT_ASSUME_YES=1
+# export REPLACE_TEXT_AST_ASSUME_YES=1
+# export UNIFIED_REFACTOR_ASSUME_YES=1
 # # Run your automated tasks...
-# unset SFM_ASSUME_YES SAFEGIT_NONINTERACTIVE SAFEGIT_ASSUME_YES
+# unset SFM_ASSUME_YES SAFEGIT_NONINTERACTIVE SAFEGIT_ASSUME_YES TEXT_UNDO_ASSUME_YES REPLACE_TEXT_ASSUME_YES REPLACE_TEXT_AST_ASSUME_YES UNIFIED_REFACTOR_ASSUME_YES
+
+# ===== CI/CD AUTOMATION PROFILE =====
+# Complete environment setup for CI/CD environments
+# Copy to .pytoolsrc.ci or export these variables:
+#
+# # Core automation
+# export PYTOOLSRC_NON_INTERACTIVE=1
+# export CI=true
+# export DISABLE_ERROR_LOGGING=1  # Optional: disable error logging in CI
+#
+# # File operations
+# export SFM_ASSUME_YES=1
+# export SFM_NON_INTERACTIVE=1
+#
+# # Git operations  
+# export SAFEGIT_NONINTERACTIVE=1
+# export SAFEGIT_ASSUME_YES=1
+#
+# # Text operations with undo
+# export TEXT_UNDO_ASSUME_YES=1
+# export REPLACE_TEXT_ASSUME_YES=1
+# export REPLACE_TEXT_AST_ASSUME_YES=1
+# export UNIFIED_REFACTOR_ASSUME_YES=1
+#
+# # Analysis tools
+# export FIND_TEXT_NON_INTERACTIVE=1
+# export NAVIGATE_AST_NON_INTERACTIVE=1

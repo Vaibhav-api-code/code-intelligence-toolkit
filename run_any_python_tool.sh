@@ -13,7 +13,7 @@
 # Author: Vaibhav-api-code
 # Co-Author: Claude Code (https://claude.ai/code)
 # Created: 2025-01-01
-# Updated: 2025-07-23
+# Updated: 2025-07-28 (v1.5.0)
 # License: Mozilla Public License 2.0 (MPL-2.0)
 
 set -Eeuo pipefail
@@ -128,7 +128,7 @@ preflight_check() {
 
 # Function to display usage
 usage() {
-    echo "🚀 Code Intelligence Toolkit - AI-Powered Development Platform"
+    echo "🚀 Code Intelligence Toolkit v1.5.0 - AI-Powered Development Platform"
     echo "Usage: $0 [--skip-preflight] <tool_name> [arguments...]"
     echo ""
     echo "Options:"
@@ -143,8 +143,8 @@ usage() {
     echo "  $0 show_structure_ast_v4.py ConfigurableService.java --filter-annotation '@Parameter'"
     echo ""
     echo "🔧 Safe Refactoring:"
-    echo "  $0 replace_text_ast_v2.py --file Service.java oldMethod newMethod --scope-aware"
-    echo "  $0 unified_refactor.py rename thresholdValue limitValue --backend java_scope"
+    echo "  $0 replace_text_ast_v3.py --file Service.java oldMethod newMethod --scope-aware"
+    echo "  $0 unified_refactor_v2.py rename thresholdValue limitValue --backend java_scope"
     echo "  $0 semantic_diff_v3.py ServiceV1.java ServiceV2.java --risk-analysis"
     echo ""
     echo "📊 Architecture & Dependencies:"
@@ -155,7 +155,7 @@ usage() {
     echo "🎯 Logic Analysis:"
     echo "  $0 find_text_v7.py 'validateInput|checkCondition' --type regex --extract-method"
     echo "  $0 navigate_ast.py DataProcessor.java --to handleRequest"
-    echo "  $0 replace_text_v8.py 'TODO.*validate' 'IMPLEMENTED: Validation' . -r -g '*.java' --comments-only"
+    echo "  $0 replace_text_v9.py 'TODO.*validate' 'IMPLEMENTED: Validation' . -r -g '*.java' --comments-only"
     echo ""
     echo "💡 Performance & Quality:"
     echo "  $0 dead_code_detector.py src/ --confidence high --ext java"
@@ -210,7 +210,7 @@ usage() {
     echo "    cross_file_analysis_ast.py - Enhanced with AST-based caller identification"
     echo "    semantic_diff_v3.py - Main semantic diff tool with enterprise-grade features and impact scoring"
     echo "    navigate_ast.py - AST-based definition finder with 100% accuracy (NEW)"
-    echo "    replace_text_ast.py - Scope-aware variable renaming using AST (NEW)"
+    echo "    replace_text_ast_v3.py - Scope-aware variable renaming using AST (V3 with multi-level undo)"
     echo "    data_flow_tracker.py - Track variable dependencies and data flow through code"
     echo "    data_flow_tracker_v2.py - Enhanced with impact analysis, calculation paths, and type tracking (NEW)"
     echo "    doc_generator.py - Automated documentation with sophisticated content generation & intelligence (2768 lines)"
@@ -220,15 +220,15 @@ usage() {
     echo "    suggest_refactoring.py - Get refactoring suggestions for Java code complexity"
     echo "    analyze_internal_usage.py - Analyze internal method usage (supports files and directories)"
     echo "    smart_diff.py - Smart diff between files"
-    echo "    replace_text_v8.py - Enhanced text replacement tool (V8) with escape sequence support"
+    echo "    replace_text_v9.py - Enhanced text replacement tool (V9) with multi-level undo and escape sequence support"
     echo "                     ALL FEATURES: V7 features + escape sequence interpretation (\\n, \\t, \\r, \\x, \\u)"
     echo "                     (ripgrep search, block-aware modes, JSON pipeline, multi-strategy replacement)"
-    echo "    replace_text_ast.py - Definitive AST replacement (V2 consolidated) with enhanced features"
+    echo "    replace_text_ast_v3.py - Definitive AST replacement (V3 consolidated) with multi-level undo and enhanced features"
     echo "                         ALL FEATURES: V7 compatibility (block-mode, git integration, comments-only, strings-only)"
     echo "                         (scope-aware renaming, symbol discovery, batch rename, JSON pipeline integration)"
     echo "    ast_refactor.py - AST-based intelligent code refactoring (Python)"
     echo "                     (type-aware renaming, intelligent transformations, syntax preservation)"
-    echo "    unified_refactor.py - Professional unified refactoring tool with multiple backends"
+    echo "    unified_refactor_v2.py - Professional unified refactoring tool (V2) with multi-level undo and multiple backends"
     echo "                        - Backends: python_ast, rope, java_scope, text_based"
     echo "                        - Commands: rename, rename-project, find, analyze, replace"
     echo "                        - NEW: Unified diff previews, AST-guided rope targeting, JSON pipeline"
@@ -288,7 +288,7 @@ usage() {
     echo "                  (move/copy files safely, automatic backups, full undo history)"
     echo "    organize_files.py - File organization with manifest/undo system and archiving"
     echo "                       (organize by extension, date, size with complete reversibility)"
-    echo "    refactor_rename.py - AST-based code-aware file and symbol renaming"
+    echo "    refactor_rename.py - AST-based code-aware file and symbol renaming (V2) with multi-level undo"
     echo "                        (batch rename files and update imports/references)"
     echo ""
     echo "  Configuration Management (NEW):"
@@ -347,7 +347,7 @@ usage() {
     echo "  $0 method_analyzer_ast_v2.py processData --scope . --trace-flow"
     echo "  $0 navigate_ast_v2.py MyClass.java --to calculateValue"
     echo "  $0 navigate_ast_v2.py MyClass.java --line 42"
-    echo "  $0 replace_text_ast.py --file utils.py --line 25 data payload  # AST-aware rename"
+    echo "  $0 replace_text_ast_v3.py --file utils.py --line 25 data payload  # AST-aware rename"
     echo "  $0 data_flow_tracker.py --var x --file calc.py                  # Track forward dependencies"
     echo "  $0 data_flow_tracker.py --var result --direction backward --file calc.py  # Track what affects result"
     echo "  $0 data_flow_tracker.py --var result --format graph --file module.py > flow.dot  # Generate dependency graph"
@@ -360,8 +360,8 @@ usage() {
     echo "  $0 doc_generator_enhanced.py --module --file main.py --style architecture  # Architecture overview"
     echo ""
     echo "Enhanced Java refactoring with Spoon (NEW):"
-    echo "  $0 replace_text_ast.py --file MyClass.java --line 42 oldVar newVar"
-    echo "  $0 replace_text_ast.py --file MyClass.java --line 15 --dry-run methodName newMethodName"
+    echo "  $0 replace_text_ast_v3.py --file MyClass.java --line 42 oldVar newVar"
+    echo "  $0 replace_text_ast_v3.py --file MyClass.java --line 15 --dry-run methodName newMethodName"
     echo ""
     echo "Directory and File Management examples (NEW):"
     echo "  ⚠️  NOTE: Use --ext java when analyzing Java code (no longer default)"
@@ -390,31 +390,31 @@ usage() {
     echo "  $0 analyze_errors.py --summary            # Show error summary statistics"
     echo "  # Note: Errors are automatically logged to ~/.pytoolserrors/"
     echo ""
-    echo "replace_text_v8.py examples (V8 - Enhanced with escape sequence support):"
+    echo "replace_text_v9.py examples (V9 - Enhanced with multi-level undo and escape sequence support):"
     echo "  ⚠️  IMPORTANT: Order is <old_text> <new_text> <paths>"
-    echo "  $0 replace_text_v8.py oldMethod newMethod MyClass.java --whole-word    # Safe variable renaming"
-    echo "  $0 replace_text_v8.py 'TODO' 'DONE' . -r -g '*.java' --dry-run        # Multi-file replacement preview"
-    echo "  $0 replace_text_v8.py oldValue newValue . -r --git-only -g '*.py'     # Only Git-tracked files"
-    echo "  $0 replace_text_v8.py old new . -r --staged-only -g '*.java'          # Only staged files"
+    echo "  $0 replace_text_v9.py oldMethod newMethod MyClass.java --whole-word    # Safe variable renaming"
+    echo "  $0 replace_text_v9.py 'TODO' 'DONE' . -r -g '*.java' --dry-run        # Multi-file replacement preview"
+    echo "  $0 replace_text_v9.py oldValue newValue . -r --git-only -g '*.py'     # Only Git-tracked files"
+    echo "  $0 replace_text_v9.py old new . -r --staged-only -g '*.java'          # Only staged files"
     echo "  # CONSOLIDATED: JSON pipeline support for find→replace workflows"
-    echo "  $0 replace_text_v8.py --from-find-json search_results.json old new    # Use find_text results"
+    echo "  $0 replace_text_v9.py --from-find-json search_results.json old new    # Use find_text results"
     echo "  # CONSOLIDATED: Block-aware replacement modes"
-    echo "  $0 replace_text_v8.py old new MyClass.java --block-mode within         # Replace only within code blocks"
-    echo "  $0 replace_text_v8.py old new MyClass.java --block-mode extract        # Extract and replace in blocks"
+    echo "  $0 replace_text_v9.py old new MyClass.java --block-mode within         # Replace only within code blocks"
+    echo "  $0 replace_text_v9.py old new MyClass.java --block-mode extract        # Extract and replace in blocks"
     echo "  # CONSOLIDATED: AST context display during replacement"
-    echo "  $0 replace_text_v8.py calculateValue computeResult MyClass.java --ast-context  # Show class/method context"
+    echo "  $0 replace_text_v9.py calculateValue computeResult MyClass.java --ast-context  # Show class/method context"
     echo "  # V8 NEW: Escape sequence interpretation"
-    echo "  $0 replace_text_v8.py 'PLACEHOLDER' 'Line 1\\nLine 2\\nLine 3' file.txt --interpret-escapes  # Multi-line replacement"
-    echo "  $0 replace_text_v8.py 'TAB' 'Col1\\tCol2\\tCol3' data.txt --interpret-escapes                # Tab-separated values"
-    echo "  $0 replace_text_v8.py 'X' 'Unicode:\\u2713\\nHex:\\x41' file.txt --interpret-escapes         # Unicode & hex chars"
+    echo "  $0 replace_text_v9.py 'PLACEHOLDER' 'Line 1\\nLine 2\\nLine 3' file.txt --interpret-escapes  # Multi-line replacement"
+    echo "  $0 replace_text_v9.py 'TAB' 'Col1\\tCol2\\tCol3' data.txt --interpret-escapes                # Tab-separated values"
+    echo "  $0 replace_text_v9.py 'X' 'Unicode:\\u2713\\nHex:\\x41' file.txt --interpret-escapes         # Unicode & hex chars"
     echo "  # ALL traditional features included:"
-    echo "  $0 replace_text_v8.py 'TODO:.*' 'TODO: Updated' Config.java --regex --comments-only --lang java"
-    echo "  $0 replace_text_v8.py value formattedValue File.java --whole-word        # Avoids value→formattedValueInUnits"
+    echo "  $0 replace_text_v9.py 'TODO:.*' 'TODO: Updated' Config.java --regex --comments-only --lang java"
+    echo "  $0 replace_text_v9.py value formattedValue File.java --whole-word        # Avoids value→formattedValueInUnits"
     echo "  # IMPORTANT: --comments-only and --strings-only require --lang flag:"
-    echo "  $0 replace_text_v8.py 'TODO' 'DONE' script.py --comments-only --lang python       # Comments in Python"
-    echo "  $0 replace_text_v8.py 'old' 'new' app.rb --strings-only --lang ruby              # Strings in Ruby"
+    echo "  $0 replace_text_v9.py 'TODO' 'DONE' script.py --comments-only --lang python       # Comments in Python"
+    echo "  $0 replace_text_v9.py 'old' 'new' app.rb --strings-only --lang ruby              # Strings in Ruby"
     echo "  # Process from stdin (use - as filename):"
-    echo "  echo 'test' | $0 replace_text_v8.py 'test' 'exam' - --interpret-escapes          # stdin input"
+    echo "  echo 'test' | $0 replace_text_v9.py 'test' 'exam' - --interpret-escapes          # stdin input"
     echo ""
     echo "find_text.py examples (V6 COMPLETE - ALL FEATURES COMBINED):"
     echo "  ⚠️  IMPORTANT: Pattern first, then use --file OR --scope (not both)"
@@ -519,49 +519,49 @@ usage() {
     echo "   # Step 1: Find patterns and save results"
     echo "   $0 find_text.py 'calculateTotal' --scope src/ --json > search_results.json"
     echo "   # Step 2: Use results for targeted replacement"
-    echo "   $0 replace_text_v8.py --from-find-json search_results.json calculateTotal computeTotal"
+    echo "   $0 replace_text_v9.py --from-find-json search_results.json calculateTotal computeTotal"
     echo ""
     echo "2. AST-enhanced find→replace for symbol renaming:"
     echo "   # Step 1: Find symbol locations with AST context"
     echo "   $0 find_text.py 'processOrder' --scope . --ast-context --json > symbols.json"
     echo "   # Step 2: Batch rename with scope awareness"
-    echo "   $0 replace_text_ast.py --from-find-json symbols.json processOrder handleOrder"
+    echo "   $0 replace_text_ast_v3.py --from-find-json symbols.json processOrder handleOrder"
     echo ""
     echo "3. Block-aware replacement workflow:"
     echo "   # Step 1: Find patterns in specific code blocks"
     echo "   $0 find_text.py 'validateInput' --scope src/ --extract-block --json > blocks.json"
     echo "   # Step 2: Replace only within extracted blocks"
-    echo "   $0 replace_text_v8.py --from-find-json blocks.json --block-mode within validateInput checkInput"
+    echo "   $0 replace_text_v9.py --from-find-json blocks.json --block-mode within validateInput checkInput"
     echo ""
     echo "4. Symbol discovery and batch rename:"
     echo "   # Step 1: Discover all symbol occurrences"
-    echo "   $0 replace_text_ast.py --discover-symbols oldMethodName src/ --language java"
+    echo "   $0 replace_text_ast_v3.py --discover-symbols oldMethodName src/ --language java"
     echo "   # Step 2: Batch rename with confirmation"
-    echo "   $0 replace_text_ast.py --batch-rename oldMethodName newMethodName src/ --confirm"
+    echo "   $0 replace_text_ast_v3.py --batch-rename oldMethodName newMethodName src/ --confirm"
     echo ""
     echo "5. NEW V7 COMPATIBILITY: Comments-only AST operations:"
     echo "   # Step 1: Find symbols in comments"
     echo "   $0 find_text.py 'oldMethodName' --scope src/ --comments-only --json > comment_symbols.json"
     echo "   # Step 2: AST-based replacement in comments only"
-    echo "   $0 replace_text_ast.py --from-find-json comment_symbols.json oldMethodName newMethodName --comments-only"
+    echo "   $0 replace_text_ast_v3.py --from-find-json comment_symbols.json oldMethodName newMethodName --comments-only"
     echo ""
     echo "6. NEW V7 COMPATIBILITY: Git-integrated AST workflows:"
     echo "   # Step 1: Find staged changes with AST context"
     echo "   $0 find_text.py 'processData' --scope . --staged-only --ast-context --json > staged.json"
     echo "   # Step 2: AST replacement in Git-tracked files only"
-    echo "   $0 replace_text_ast.py --from-find-json staged.json processData handleData --git-only"
+    echo "   $0 replace_text_ast_v3.py --from-find-json staged.json processData handleData --git-only"
     echo ""
     echo "7. Cross-tool integration for complex refactoring:"
     echo "   # Find with context → Replace with AST awareness → Validate with semantic diff"
     echo "   $0 find_text.py 'calculatePrice' --scope . --ast-context --json > price_calc.json"
-    echo "   $0 replace_text_ast.py --from-find-json price_calc.json calculatePrice computePrice"
+    echo "   $0 replace_text_ast_v3.py --from-find-json price_calc.json calculatePrice computePrice"
     echo "   $0 semantic_diff_v3.py original_file.java modified_file.java --risk-analysis"
     echo ""
     echo "8. V8 NEW: Multi-line replacement with escape sequences:"
     echo "   # Replace single-line placeholders with multi-line content"
-    echo "   $0 replace_text_v8.py 'TODO_IMPLEMENT' 'def method():\\n    \"\"\"TODO: Implement this method\"\"\"\\n    pass' *.py --interpret-escapes"
+    echo "   $0 replace_text_v9.py 'TODO_IMPLEMENT' 'def method():\\n    \"\"\"TODO: Implement this method\"\"\"\\n    pass' *.py --interpret-escapes"
     echo "   # Insert formatted data with tabs"
-    echo "   $0 replace_text_v8.py 'DATA_PLACEHOLDER' 'Name\\tAge\\tCity\\nJohn\\t30\\tNYC\\nJane\\t25\\tLA' data.txt --interpret-escapes"
+    echo "   $0 replace_text_v9.py 'DATA_PLACEHOLDER' 'Name\\tAge\\tCity\\nJohn\\t30\\tNYC\\nJane\\t25\\tLA' data.txt --interpret-escapes"
     echo ""
     echo "📋 LANGUAGE SUPPORT:"
     echo "  Most tools support multiple programming languages:"
@@ -576,14 +576,14 @@ usage() {
     echo "  • Shell (.sh, .bash) - Text-based analysis"
     echo ""
     echo "  Tool capabilities by language:"
-    echo "  • AST-based tools (navigate_ast.py, replace_text_ast.py, etc.) - Python, Java, JavaScript"
-    echo "  • Text-based tools (find_text.py, replace_text_v8.py, etc.) - All languages"
+    echo "  • AST-based tools (navigate_ast.py, replace_text_ast_v3.py, etc.) - Python, Java, JavaScript"
+    echo "  • Text-based tools (find_text.py, replace_text_v9.py, etc.) - All languages"
     echo "  • Dead code detection - Python, Java, JavaScript (with AST analysis)"
     echo "  • Semantic diff - All languages (AST-enhanced for Python/Java/JS)"
     echo ""
     echo "🚨 COMMON PITFALLS TO AVOID:"
-    echo "  ❌ WRONG: replace_text_v8.py file.java 'old' 'new'     # File path should be LAST"
-    echo "  ✅ RIGHT: replace_text_v8.py 'old' 'new' file.java     # Correct order"
+    echo "  ❌ WRONG: replace_text_v9.py file.java 'old' 'new'     # File path should be LAST"
+    echo "  ✅ RIGHT: replace_text_v9.py 'old' 'new' file.java     # Correct order"
     echo ""
     echo "  ❌ WRONG: find_text.py --file path 'pattern'        # Pattern should be FIRST"
     echo "  ✅ RIGHT: find_text.py 'pattern' --file path        # Correct order"
@@ -723,19 +723,58 @@ case "$TOOL_NAME" in
         echo "ℹ️  Using show_structure_ast_v4.py - production version with annotation filtering"
         ;;
     "replace_text.py")
-        TOOL_NAME="replace_text_v8.py"
-        echo "ℹ️  Using replace_text_v8.py - Enhanced with escape sequence interpretation (\\n, \\t, \\r, etc.)"
+        TOOL_NAME="replace_text_v9.py"
+        echo "ℹ️  Using replace_text_v9.py - Enhanced with multi-level undo and escape sequence interpretation (\\n, \\t, \\r, etc.)"
         ;;
-    "replace_text_ast.py")
-        TOOL_NAME="replace_text_ast_v2.py"
-        echo "ℹ️  Using replace_text_ast_v2.py - DEFINITIVE AST tool with V7 compatibility features (block-mode, git integration, comments-only, strings-only)"
+    "replace_text_ast_v3.py")
+        TOOL_NAME="replace_text_ast_v3.py"
+        echo "ℹ️  Using replace_text_ast_v3.py - DEFINITIVE AST tool with multi-level undo and V7 compatibility features (block-mode, git integration, comments-only, strings-only)"
+        ;;
+    "unified_refactor_v2.py")
+        TOOL_NAME="unified_refactor_v2.py"
+        echo "ℹ️  Using unified_refactor_v2.py - Universal refactoring with multi-level undo support"
+        ;;
+    "refactor_rename.py")
+        TOOL_NAME="refactor_rename_v2.py"
+        echo "ℹ️  Using refactor_rename_v2.py - Batch renaming with multi-level undo support"
         ;;
 esac
 
 # Full path to the tool
-# Since the script is now in code-intelligence-toolkit/, 
-# the tools are in the same directory
-TOOL_PATH="${SCRIPT_DIR}/${TOOL_NAME}"
+# Search in new reorganized directory structure
+find_tool_path() {
+    local tool_name="$1"
+    
+    # Script is now in self-contained code-intelligence-toolkit/
+    local project_root="$SCRIPT_DIR"
+    
+    # Define search directories in priority order
+    local search_dirs=(
+        "${SCRIPT_DIR}"                          # Current toolkit directory (all tools now in main folder)
+        "${project_root}"                        # Same as SCRIPT_DIR but explicit
+    )
+    
+    # Search for the tool in each directory
+    for dir in "${search_dirs[@]}"; do
+        if [ -f "${dir}/${tool_name}" ]; then
+            echo "${dir}/${tool_name}"
+            return 0
+        fi
+    done
+    
+    # Tool not found anywhere
+    return 1
+}
+
+# Find the tool path
+if TOOL_PATH=$(find_tool_path "$TOOL_NAME"); then
+    : # Tool found, TOOL_PATH is set
+else
+    echo "❌ Error: Tool not found: $TOOL_NAME" 
+    echo "   Searched in: bin/, lib/, tools/"
+    echo "   Expected location: ${SCRIPT_DIR}/bin/${TOOL_NAME}"
+    exit 1
+fi
 
 # Run preflight checks unless skipped
 if [ "$SKIP_PREFLIGHT" -eq 0 ]; then
@@ -743,13 +782,6 @@ if [ "$SKIP_PREFLIGHT" -eq 0 ]; then
         echo "❌ Preflight checks failed. Use --skip-preflight to bypass (not recommended)"
         exit 1
     fi
-fi
-
-# Check if the tool exists
-if [ ! -f "$TOOL_PATH" ]; then
-    echo "Error: Tool '$TOOL_NAME' not found at $TOOL_PATH"
-    echo ""
-    usage
 fi
 
 # Check if the tool is executable, if not make it executable
@@ -802,7 +834,7 @@ if [[ "$TOOL_NAME" == "common_config.py" && $# -eq 0 ]]; then
     echo ""
     echo "LATEST UPDATES (January 2025):"
     echo "• Fixed smart_ls.py extension filter to correctly show directories"
-    echo "• Fixed replace_text_ast.py to properly respect dry_run configuration"
+    echo "• Fixed replace_text_ast_v3.py to properly respect dry_run configuration"
     echo "• Added comprehensive test suite - 34/34 tests passing"
     echo "• All directory and refactoring tools now integrated with config system"
     echo ""
@@ -812,8 +844,8 @@ if [[ "$TOOL_NAME" == "common_config.py" && $# -eq 0 ]]; then
 fi
 
 # Special handling for replace_text.py with no arguments
-if [[ "$TOOL_NAME" == "replace_text_v8.py" && $# -eq 0 ]]; then
-    echo "Quick Start Guide for replace_text_v8.py (V8 - Enhanced with escape sequences):"
+if [[ "$TOOL_NAME" == "replace_text_v9.py" && $# -eq 0 ]]; then
+    echo "Quick Start Guide for replace_text_v9.py (V9 - Enhanced with multi-level undo and escape sequences):"
     echo "=========================================================================="
     echo ""
     echo "Definitive text replacement tool with ALL features consolidated from previous versions:"
@@ -822,40 +854,44 @@ if [[ "$TOOL_NAME" == "replace_text_v8.py" && $# -eq 0 ]]; then
     echo "COMMON USE CASES:"
     echo ""
     echo "1. Rename a variable/method (safe from recursive replacement):"
-    echo "   $0 replace_text_v8.py oldMethod newMethod MyClass.java --whole-word"
+    echo "   $0 replace_text_v9.py oldMethod newMethod MyClass.java --whole-word"
     echo ""
     echo "2. Multi-file replacement with preview:"
-    echo "   $0 replace_text_v8.py \"old text\" \"new text\" . -r -g '*.java' --dry-run"
+    echo "   $0 replace_text_v9.py \"old text\" \"new text\" . -r -g '*.java' --dry-run"
     echo ""
     echo "3. JSON pipeline workflow (find→replace):"
     echo "   $0 find_text.py \"TODO\" --scope src/ --json > results.json"
-    echo "   $0 replace_text_v8.py --from-find-json results.json \"TODO\" \"DONE\""
+    echo "   $0 replace_text_v9.py --from-find-json results.json \"TODO\" \"DONE\""
     echo ""
     echo "4. Block-aware replacement (replace only within code blocks):"
-    echo "   $0 replace_text_v8.py calculateTotal computeTotal MyClass.java --block-mode within"
+    echo "   $0 replace_text_v9.py calculateTotal computeTotal MyClass.java --block-mode within"
     echo ""
     echo "5. Extract and replace in code blocks:"
-    echo "   $0 replace_text_v8.py old new MyClass.java --block-mode extract"
+    echo "   $0 replace_text_v9.py old new MyClass.java --block-mode extract"
     echo ""
     echo "6. AST context display during replacement:"
-    echo "   $0 replace_text_v8.py processData handleData Service.java --ast-context"
+    echo "   $0 replace_text_v9.py processData handleData Service.java --ast-context"
     echo ""
     echo "7. Git-integrated replacement (only tracked files):"
-    echo "   $0 replace_text_v8.py oldValue newValue . -r --git-only -g '*.py'"
+    echo "   $0 replace_text_v9.py oldValue newValue . -r --git-only -g '*.py'"
     echo ""
     echo "8. Traditional features (still supported):"
-    echo "   $0 replace_text_v8.py \"TODO\" \"DONE\" . -r --comments-only --lang java -g '*.java'"
-    echo "   $0 replace_text_v8.py value formattedValue MyClass.java --whole-word"
+    echo "   $0 replace_text_v9.py \"TODO\" \"DONE\" . -r --comments-only --lang java -g '*.java'"
+    echo "   $0 replace_text_v9.py value formattedValue MyClass.java --whole-word"
     echo ""
     echo "9. Language-specific replacements (--lang required for comments/strings):"
-    echo "   $0 replace_text_v8.py \"TODO\" \"DONE\" script.py --comments-only --lang python"
-    echo "   $0 replace_text_v8.py \"error\" \"ERROR\" app.rb --strings-only --lang ruby"
+    echo "   $0 replace_text_v9.py \"TODO\" \"DONE\" script.py --comments-only --lang python"
+    echo "   $0 replace_text_v9.py \"error\" \"ERROR\" app.rb --strings-only --lang ruby"
     echo ""
     echo "10. Process from stdin (use - as filename):"
-    echo "   echo \"test\" | $0 replace_text_v8.py \"test\" \"exam\" - --interpret-escapes"
+    echo "   echo \"test\" | $0 replace_text_v9.py \"test\" \"exam\" - --interpret-escapes"
     echo ""
-    echo "V8 FEATURES (ALL V7 FEATURES + ESCAPE SEQUENCES):"
-    echo "• NEW: Escape sequence interpretation with --interpret-escapes flag:"
+    echo "V9 FEATURES (ALL V8 FEATURES + MULTI-LEVEL UNDO):"
+    echo "• NEW V9: Multi-level undo system - every operation tracked and reversible"
+    echo "  - Use 'text_undo.py history' to view operation history"
+    echo "  - Use 'text_undo.py undo' to revert last operation"  
+    echo "  - Use '--no-undo' to disable undo for specific operations"
+    echo "• V8: Escape sequence interpretation with --interpret-escapes flag:"
     echo "  - Basic escapes: \\n (newline), \\t (tab), \\r (carriage return), \\\\ (backslash)"
     echo "  - Unicode: \\uHHHH (4-digit), \\UHHHHHHHH (8-digit)"
     echo "  - Hex codes: \\xHH (2-digit hex values)"
@@ -869,7 +905,7 @@ if [[ "$TOOL_NAME" == "replace_text_v8.py" && $# -eq 0 ]]; then
     echo "  - AST context display during replacement"
     echo "  - Cross-platform support with enhanced pattern handling"
     echo ""
-    echo "For full help: $0 replace_text_v8.py --help"
+    echo "For full help: $0 replace_text_v9.py --help"
     echo ""
     exit 0
 fi
@@ -1061,9 +1097,9 @@ if [[ "$TOOL_NAME" == "log_analyzer.py" && $# -eq 0 ]]; then
     exit 0
 fi
 
-# Special handling for replace_text_ast.py with no arguments
-if [[ "$TOOL_NAME" == "replace_text_ast_v2.py" && $# -eq 0 ]]; then
-    echo "Quick Start Guide for replace_text_ast_v2.py (CONSOLIDATED with V7 compatibility features):"
+# Special handling for replace_text_ast_v3.py with no arguments
+if [[ "$TOOL_NAME" == "replace_text_ast_v3.py" && $# -eq 0 ]]; then
+    echo "Quick Start Guide for replace_text_ast_v3.py (CONSOLIDATED with multi-level undo and V7 compatibility features):"
     echo "======================================================================================="
     echo ""
     echo "Definitive AST-based refactoring tool with symbol discovery, batch operations, JSON pipeline integration,"
@@ -1073,36 +1109,36 @@ if [[ "$TOOL_NAME" == "replace_text_ast_v2.py" && $# -eq 0 ]]; then
     echo "CORE AST FEATURES:"
     echo ""
     echo "1. Java variable renaming with scope awareness:"
-    echo "   $0 replace_text_ast.py --file MyClass.java --line 42 oldVar newVar"
+    echo "   $0 replace_text_ast_v3.py --file MyClass.java --line 42 oldVar newVar"
     echo ""
     echo "2. Symbol discovery across multiple files:"
-    echo "   $0 replace_text_ast.py --discover-symbols oldMethod src/ --language java"
+    echo "   $0 replace_text_ast_v3.py --discover-symbols oldMethod src/ --language java"
     echo ""
     echo "3. Batch symbol rename across project:"
-    echo "   $0 replace_text_ast.py --batch-rename oldMethod newMethod src/ --confirm"
+    echo "   $0 replace_text_ast_v3.py --batch-rename oldMethod newMethod src/ --confirm"
     echo ""
     echo "4. JSON pipeline integration (find→replace workflow):"
-    echo "   $0 replace_text_ast.py --from-find-json search_results.json oldVar newVar"
+    echo "   $0 replace_text_ast_v3.py --from-find-json search_results.json oldVar newVar"
     echo ""
     echo "5. Preview changes before applying (dry-run):"
-    echo "   $0 replace_text_ast.py --file MyClass.java --line 15 --dry-run data payload"
+    echo "   $0 replace_text_ast_v3.py --file MyClass.java --line 15 --dry-run data payload"
     echo ""
     echo "NEW V7 COMPATIBILITY FEATURES:"
     echo ""
     echo "6. Comments-only replacement (language-aware):"
-    echo "   $0 replace_text_ast.py --file Code.java --line 5 oldVar newVar --comments-only"
+    echo "   $0 replace_text_ast_v3.py --file Code.java --line 5 oldVar newVar --comments-only"
     echo ""
     echo "7. String literals-only replacement:"
-    echo "   $0 replace_text_ast.py --file Config.py --line 10 oldPath newPath --strings-only"
+    echo "   $0 replace_text_ast_v3.py --file Config.py --line 10 oldPath newPath --strings-only"
     echo ""
     echo "8. Git-integrated AST operations (only Git-tracked files):"
-    echo "   $0 replace_text_ast.py --file MyClass.java --line 42 oldMethod newMethod --git-only"
+    echo "   $0 replace_text_ast_v3.py --file MyClass.java --line 42 oldMethod newMethod --git-only"
     echo ""
     echo "9. Block-aware AST replacement modes:"
-    echo "   $0 replace_text_ast.py --file Service.java --line 25 data payload --block-mode within"
+    echo "   $0 replace_text_ast_v3.py --file Service.java --line 25 data payload --block-mode within"
     echo ""
     echo "10. Multi-file AST operations with staging filter:"
-    echo "    $0 replace_text_ast.py --discover-symbols oldVar src/ --staged-only --language java"
+    echo "    $0 replace_text_ast_v3.py --discover-symbols oldVar src/ --staged-only --language java"
     echo ""
     echo "CONSOLIDATED FEATURES (V2 + V7 COMPATIBILITY):"
     echo "• Core AST: Symbol discovery, batch operations, JSON pipeline integration"
@@ -1119,7 +1155,7 @@ if [[ "$TOOL_NAME" == "replace_text_ast_v2.py" && $# -eq 0 ]]; then
     echo "• Multiple validation checks prevent file corruption"
     echo "• Interactive confirmation for batch operations"
     echo ""
-    echo "For full help: $0 replace_text_ast.py --help"
+    echo "For full help: $0 replace_text_ast_v3.py --help"
     echo ""
     exit 0
 fi
@@ -1240,9 +1276,9 @@ if [[ "$TOOL_NAME" == "dead_code_detector.py" && $# -eq 0 ]]; then
     exit 0
 fi
 
-# Special handling for unified_refactor.py with no arguments
-if [[ "$TOOL_NAME" == "unified_refactor.py" && $# -eq 0 ]]; then
-    echo "Unified Refactoring Tool - Multiple backends, multiple languages"
+# Special handling for unified_refactor_v2.py with no arguments
+if [[ "$TOOL_NAME" == "unified_refactor_v2.py" && $# -eq 0 ]]; then
+    echo "Unified Refactoring Tool V2 - Multiple backends, multiple languages with undo support"
     echo "================================================================"
     echo ""
     echo "A single tool that combines all refactoring capabilities with automatic"
@@ -1258,27 +1294,27 @@ if [[ "$TOOL_NAME" == "unified_refactor.py" && $# -eq 0 ]]; then
     echo "COMMON USE CASES:"
     echo ""
     echo "1. Rename a function/method:"
-    echo "   $0 unified_refactor.py rename --old oldFunction --new newFunction file.py"
-    echo "   $0 unified_refactor.py rename --old oldMethod --new newMethod *.java"
+    echo "   $0 unified_refactor_v2.py rename --old oldFunction --new newFunction file.py"
+    echo "   $0 unified_refactor_v2.py rename --old oldMethod --new newMethod *.java"
     echo ""
     echo "2. Rename across entire project:"
-    echo "   $0 unified_refactor.py rename-project --old OldClass --new NewClass"
+    echo "   $0 unified_refactor_v2.py rename-project --old OldClass --new NewClass"
     echo ""
     echo "3. Find symbol occurrences:"
-    echo "   $0 unified_refactor.py find --name myFunction src/"
+    echo "   $0 unified_refactor_v2.py find --name myFunction src/"
     echo ""
     echo "4. Analyze file structure:"
-    echo "   $0 unified_refactor.py analyze MyClass.java"
+    echo "   $0 unified_refactor_v2.py analyze MyClass.java"
     echo ""
     echo "5. Preview changes without applying (dry-run):"
-    echo "   $0 unified_refactor.py --dry-run rename --old old --new new file.py"
+    echo "   $0 unified_refactor_v2.py --dry-run rename --old old --new new file.py"
     echo ""
     echo "6. JSON pipeline workflow:"
     echo "   echo '[{\"file\":\"code.py\",\"old\":\"oldFunc\",\"new\":\"newFunc\",\"line\":42}]' | \\"
-    echo "   $0 unified_refactor.py rename --from-json -"
+    echo "   $0 unified_refactor_v2.py rename --from-json -"
     echo ""
     echo "7. Force specific backend:"
-    echo "   $0 unified_refactor.py --engine python_ast rename --old var --new newVar file.py"
+    echo "   $0 unified_refactor_v2.py --engine python_ast rename --old var --new newVar file.py"
     echo ""
     echo "PROFESSIONAL FEATURES:"
     echo "• Unified diff previews - See exact changes before applying"
@@ -1290,29 +1326,61 @@ if [[ "$TOOL_NAME" == "unified_refactor.py" && $# -eq 0 ]]; then
     echo "• Symbol type awareness (function, class, variable, etc.)"
     echo "• Project-wide refactoring with atomic operations"
     echo ""
-    echo "For full help: $0 unified_refactor.py --help"
+    echo "For full help: $0 unified_refactor_v2.py --help"
     echo ""
     exit 0
 fi
 
-# Set PYTHONPATH to include the toolkit directory for package imports
-# Since the script is now in the toolkit directory, use SCRIPT_DIR directly
-export PYTHONPATH="${SCRIPT_DIR}:${PYTHONPATH:-}"
+# Special handling for refactor_rename.py with no arguments
+if [[ "$TOOL_NAME" == "refactor_rename_v2.py" && $# -eq 0 ]]; then
+    echo "Refactor Rename Tool V2 - Batch renaming with multi-level undo support"
+    echo "======================================================================="
+    echo ""
+    echo "Code-aware batch renaming with automatic import updates and undo tracking."
+    echo ""
+    echo "COMMON USE CASES:"
+    echo ""
+    echo "1. Batch rename variables/symbols:"
+    echo "   $0 refactor_rename_v2.py --replace oldVar newVar --in \"src/**/*.py\""
+    echo ""
+    echo "2. Batch rename files:"
+    echo "   $0 refactor_rename_v2.py --batch \"test_\" \"spec_\" . \"*.py\""
+    echo ""
+    echo "3. Preview changes before applying:"
+    echo "   $0 refactor_rename_v2.py --replace oldMethod newMethod --in \"src/**/*.java\" --dry-run"
+    echo ""
+    echo "4. Rename with confirmation prompts:"
+    echo "   $0 refactor_rename_v2.py --replace oldClass newClass --in \"src/**/*.py\" --yes"
+    echo ""
+    echo "NEW V2 FEATURES:"
+    echo "• Multi-level undo system - all operations tracked and reversible"
+    echo "• Enhanced error handling and validation"
+    echo "• Improved pattern matching and replacement"
+    echo "• Automatic backup creation with undo support"
+    echo ""
+    echo "For full help: $0 refactor_rename_v2.py --help"
+    echo ""
+    exit 0
+fi
 
-# Check if error logging is available and enabled
-ERROR_LOG_WRAPPER="$SCRIPT_DIR/run_with_error_logging.py"
+# Setup paths for self-contained structure
+project_root="$SCRIPT_DIR"
+ERROR_LOG_WRAPPER="${project_root}/run_with_error_logging.py"
+
+# Setup Python path to include lib directory for imports
+export PYTHONPATH="${project_root}:${PYTHONPATH:-}"
 
 # Special handling for SafeGIT help/version only - still use error logging for actual git operations
 if [[ "$TOOL_NAME" == "safegit.py" ]] && [[ $# -eq 0 || "$1" == "--help" || "$1" == "-h" || "$1" == "help" || "$1" == "--version" || "$1" == "-v" || "$1" == "version" || "$1" == "show-context" ]]; then
     # Run SafeGIT directly ONLY for help/version/show-context commands
     echo "▶ ${TOOL_NAME} $@"
-    exec python3 "$TOOL_PATH" "$@"
+    exec env PYTHONPATH="${project_root}:${PYTHONPATH:-}" python3 "$TOOL_PATH" "$@"
 elif [ -f "$ERROR_LOG_WRAPPER" ] && [ "${DISABLE_ERROR_LOGGING:-}" != "1" ]; then
     # Run with error logging for ALL other operations (including SafeGIT git commands)
     echo "▶ ${TOOL_NAME} $@"
-    exec python3 "$ERROR_LOG_WRAPPER" "$TOOL_PATH" "$@"
+    exec env PYTHONPATH="${project_root}:${PYTHONPATH:-}" python3 "$ERROR_LOG_WRAPPER" "$TOOL_PATH" "$@"
 else
     # Run without error logging (fallback)
     echo "▶ ${TOOL_NAME} $@"
-    exec "$TOOL_PATH" "$@"
+    exec env PYTHONPATH="${project_root}:${PYTHONPATH:-}" python3 "$TOOL_PATH" "$@"
 fi

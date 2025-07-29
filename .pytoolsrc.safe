@@ -1,0 +1,195 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Code Intelligence Toolkit Configuration - Safe Mode
+# Conservative configuration with maximum safety checks and user confirmation
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-28
+# Updated: 2025-07-28 - v1.5.0 safe mode configuration
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+# ===== SAFE MODE PROFILE =====
+# This configuration prioritizes safety over convenience.
+# Use for production environments or when working with critical code.
+#
+# Usage:
+#   export PYTOOLSRC=.pytoolsrc.safe
+#   ./run_any_python_tool.sh [tool] [args]
+
+[defaults]
+# Global safe mode defaults - maximum safety
+non_interactive = false             # Always ask for confirmation
+assume_yes = false                  # Never auto-confirm
+force = false                       # Never auto-force
+quiet = false                       # Full output for visibility
+dry_run = true                      # Preview operations by default
+backup = true                       # Always create backups
+check_compile = true                # Always verify compilation
+verbose = true                      # Detailed logging
+
+# Safety-first behavior
+ci_detection = true                 # Still detect CI environments
+interactive_mode = true             # Enable all interactive prompts
+auto_confirm = false                # Manual confirmation required
+fail_on_interaction = false         # Allow interaction
+
+# Enhanced safety checks
+verify_operations = true            # Extra verification steps
+double_confirm_dangerous = true     # Two-step confirmation for dangerous ops
+require_explicit_paths = true       # No wildcards without confirmation
+max_file_changes = 10               # Limit bulk operations
+
+[safe_file_manager]
+# Maximum safety for file operations
+non_interactive = false
+assume_yes = false
+force = false
+verify_checksum = true              # Always verify integrity
+preserve_attrs = true
+paranoid_mode = true                # Maximum safety checks
+create_backups = true
+backup_retention_days = 90          # Long backup retention
+
+[safegit]
+# Maximum git safety
+non_interactive = false
+assume_yes = false
+force_yes = false
+dry_run = true                      # Preview git operations
+require_confirmation = true         # Always confirm
+backup_before_destructive = true
+show_recovery_commands = true
+
+[replace_text_v9]
+# Safe text replacement
+non_interactive = false
+assume_yes = false
+backup = true
+check_compile = true
+track_undo = true
+dry_run = true                      # Preview replacements
+confirm_each_file = true            # Confirm each file change
+max_replacements = 50               # Limit bulk replacements
+
+[replace_text_ast_v3]
+# Safe AST refactoring
+non_interactive = false
+assume_yes = false
+backup = true
+track_undo = true
+check_compile = true
+dry_run = true
+scope_aware = true
+validate_syntax = true              # Extra syntax validation
+
+[text_undo]
+# Safe undo operations
+non_interactive = false
+assume_yes = false
+allow_interactive_selection = true
+max_history_days = 90               # Long history retention
+auto_cleanup = false                # Manual cleanup only
+confirm_undo = true                 # Always confirm undo operations
+
+[unified_refactor_v2]
+# Safe refactoring (v2 with undo)
+non_interactive = false
+assume_yes = false
+backend = auto                      # Auto-detect: java_scope for .java, python_ast for .py                # Most reliable backend
+dry_run = true
+backup = true
+track_undo = true
+validate_changes = true             # Validate all changes
+max_changes = 20                    # Limit scope of changes
+
+[unified_refactor]
+# Legacy alias for v2
+non_interactive = false
+assume_yes = false
+backend = auto                      # Auto-detect: java_scope for .java, python_ast for .py
+dry_run = true
+backup = true
+track_undo = true
+
+# ===== CONSERVATIVE TOOL SETTINGS =====
+
+[find_text]
+quiet = false                       # Full output
+confirm_large_results = true       # Confirm if many results
+limit = 100                         # Reasonable limits
+
+[navigate_ast]
+json = false
+highlight = true
+context_lines = 15                  # More context for safety
+validate_ast = true                 # Extra AST validation
+
+[dead_code_detector]
+confidence = high                   # Only high-confidence detection
+threads = 1                         # Single-threaded for safety
+format = text
+timeout = 30                        # Conservative timeout
+require_confirmation = true         # Confirm before marking as dead
+
+[organize_files]
+non_interactive = false
+assume_yes = false
+dry_run = true                      # Always preview organization
+create_manifest = true              # Create change manifest
+max_moves = 50                      # Limit bulk moves
+
+# ===== ENHANCED VERIFICATION =====
+
+[cross_file_analysis_ast]
+threads = 1                         # Single-threaded for reliability
+recursive = false                   # Explicit recursion only
+max_depth = 3                       # Conservative depth
+validate_results = true             # Extra result validation
+
+[error_analyzer]
+recent = 10                         # Conservative analysis
+hours = 24
+quiet = false
+require_confirmation = true         # Confirm error analysis
+
+# ===== USAGE EXAMPLES =====
+#
+# Safe text replacement (with preview):
+#   PYTOOLSRC=.pytoolsrc.safe ./run_any_python_tool.sh replace_text_v9.py "old" "new" file.txt
+#   # Will show preview, ask for confirmation, create backup
+#
+# Safe file operations:
+#   PYTOOLSRC=.pytoolsrc.safe ./run_any_python_tool.sh safe_file_manager.py move file1.txt file2.txt
+#   # Will verify checksums, create backup, ask for confirmation
+#
+# Safe git operations:
+#   export PYTOOLSRC=.pytoolsrc.safe
+#   ./run_any_python_tool.sh safegit.py reset --hard HEAD~1
+#   # Will show what would change, ask for confirmation, create backup
+
+# ===== PRODUCTION ENVIRONMENT NOTES =====
+# This configuration is ideal for:
+# 1. Production code changes
+# 2. Critical system modifications  
+# 3. Learning the tools safely
+# 4. Validating complex operations
+# 5. Environments where mistakes are costly
+
+# ===== EMERGENCY OVERRIDE =====
+# If you need to override safety settings temporarily:
+#
+# export EMERGENCY_OVERRIDE=1       # Skip some safety checks
+# export SKIP_DRY_RUN=1             # Actually perform operations
+# export FORCE_ASSUME_YES=1         # Auto-confirm (dangerous\!)
+#
+# Use these overrides VERY carefully and only when necessary\!
+
+# ===== VALIDATION LEVELS =====
+validation_level = maximum          # Maximum validation
+syntax_checking = strict            # Strict syntax checking
+type_checking = enabled             # Enable type checking where available
+lint_integration = enabled          # Run linters when available
+test_integration = prompt           # Prompt to run tests after changes

@@ -6,7 +6,10 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 """
-Enhanced text replacement tool (v7) with advanced features and cross-platform robustness.
+Enhanced text replacement tool (v9) with multi-level undo support.
+
+This version adds SafeGIT-style multi-level undo capabilities to all text operations.
+Every replacement is tracked with atomic operations and full recovery support.
 
 Author: Vaibhav-api-code
 Co-Author: Claude Code (https://claude.ai/code)
@@ -32,11 +35,26 @@ from pathlib import Path
 from typing import List, Dict, Set, Tuple, Optional, Any
 
 # ────────────────────────────  logging  ────────────────────────────
-LOG = logging.getLogger("replace_text_v7")
+LOG = logging.getLogger("replace_text_v9")
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
     format="%(asctime)s - %(name)s - %(levelname)s: %(message)s"
 )
+
+# Import undo system (v9 feature)
+try:
+    from text_operation_history import (
+        TextOperationHistory, OperationType, get_history_instance
+    )
+    HAS_UNDO_SYSTEM = True
+except ImportError:
+    HAS_UNDO_SYSTEM = False
+    print("Warning: text_operation_history module not found. Undo features disabled.", file=sys.stderr)
+
+# Global undo tracking
+_undo_enabled = True
+_operations_tracked = {}
+_undo_description = None
 
 # Import shared modules (new in v7)
 try:
@@ -115,6 +133,23 @@ try:
     HAS_AST_CONTEXT = True
 except ImportError:
     HAS_AST_CONTEXT = False
+
+# Import interactive utilities
+try:
+    from interactive_utils import (
+        get_confirmation, check_auto_yes_env, get_tool_env_var
+    )
+    HAS_INTERACTIVE_UTILS = True
+except ImportError:
+    HAS_INTERACTIVE_UTILS = False
+    # Fallback implementations
+    def get_confirmation(prompt, **kwargs):
+        response = input(prompt + " [y/N]: ").strip().lower()
+        return response in ['y', 'yes']
+    def check_auto_yes_env(tool_name, args):
+        pass
+    def get_tool_env_var(tool_name):
+        return f"{tool_name.upper()}_ASSUME_YES"
 
 # ────────────────────────────  Core V7 Features  ────────────────────────────
 
@@ -424,7 +459,56 @@ def read_file(filepath):
         sys.exit(1)
 
 def _atomic_write(path: Path, data: str, bak: bool = False, max_retries: int = 3, retry_delay: float = 1.0) -> None:
-    """Write atomically with retry logic for locked files."""
+    """Write atomically with retry logic for locked files and undo support (v9)."""
+    global _undo_enabled, _operations_tracked, _undo_description
+    
+    # Track operation for undo if enabled (v9 feature)
+    if HAS_UNDO_SYSTEM and _undo_enabled and path.exists():
+        try:
+            # Only track if we haven't already tracked this file in this session
+            file_key = str(path)
+            if file_key not in _operations_tracked:
+                original_content = path.read_text(encoding='utf-8')
+                
+                # Get command line args
+                cmd_args = sys.argv[1:]
+                
+                # Extract old/new text from args if available
+                old_text = ""
+                new_text = ""
+                if len(cmd_args) >= 2:
+                    old_text = cmd_args[0]
+                    new_text = cmd_args[1]
+                
+                # Use custom description if provided, otherwise generate one
+                if _undo_description:
+                    description = _undo_description
+                else:
+                    description = f"Replace '{old_text[:30]}...' with '{new_text[:30]}...'" if old_text else "Text replacement"
+                
+                # Record operation
+                history = get_history_instance()
+                operation = history.record_operation(
+                    operation_type=OperationType.REPLACE_TEXT,
+                    file_path=path,
+                    tool_name="replace_text_v9",
+                    command_args=cmd_args,
+                    old_content=original_content,
+                    new_content=data,
+                    changes_count=1,
+                    description=description
+                )
+                
+                if operation and operation.operation_id not in _operations_tracked:
+                    _operations_tracked[file_key] = operation.operation_id
+                    if not os.getenv('QUIET_MODE'):
+                        print(f"[Undo ID: {operation.operation_id}] Use 'text_undo.py undo --operation {operation.operation_id}' to undo.")
+        except Exception as e:
+            # Don't fail the operation if undo tracking fails
+            if not os.getenv('QUIET_MODE'):
+                print(f"Warning: Could not track undo operation: {e}", file=sys.stderr)
+    
+    # Original atomic write logic
     tmp_fd, tmp_path = tempfile.mkstemp(dir=str(path.parent), suffix=".tmp")
     tmp = Path(tmp_path)
     
@@ -1099,6 +1183,12 @@ def main():
     parser.add_argument('--no-check-compile', action='store_true',
                        help='Disable compile checking')
     
+    # Undo system arguments (v9 feature)
+    parser.add_argument('--no-undo', action='store_true',
+                       help='Disable undo tracking for this operation')
+    parser.add_argument('--undo-description',
+                       help='Custom description for undo history')
+    
     # Parse arguments with enhanced error messages for common mistakes
     try:
         args = parser.parse_args()
@@ -1163,11 +1253,22 @@ def main():
         # Also apply to old_text if searching with escapes
         args.old_text = interpret_escape_sequences(args.old_text)
     
-    # Handle non-interactive mode from environment
-    if os.getenv('REPLACE_TEXT_NONINTERACTIVE') == '1':
-        args.non_interactive = True
-    if os.getenv('REPLACE_TEXT_ASSUME_YES') == '1':
-        args.yes = True
+    # Handle environment variables using interactive_utils if available
+    if HAS_INTERACTIVE_UTILS:
+        check_auto_yes_env('replace_text', args)
+    else:
+        # Fallback to manual environment variable handling
+        if os.getenv('REPLACE_TEXT_NONINTERACTIVE') == '1':
+            args.non_interactive = True
+        if os.getenv('REPLACE_TEXT_ASSUME_YES') == '1':
+            args.yes = True
+    
+    # Handle undo flags (v9 feature)
+    global _undo_enabled, _undo_description
+    if hasattr(args, 'no_undo') and args.no_undo:
+        _undo_enabled = False
+    if hasattr(args, 'undo_description') and args.undo_description:
+        _undo_description = args.undo_description
     
     # V7 FEATURE: Handle JSON pipeline input
     target_matches = []
@@ -1353,23 +1454,37 @@ def main():
                 if len(files_to_modify) > 10:
                     print(f"  ... and {len(files_to_modify) - 10} more files")
                 
-                # Check for non-interactive mode
-                if args.non_interactive:
-                    if args.yes or args.force:
+                # Use interactive_utils for confirmation
+                if HAS_INTERACTIVE_UTILS:
+                    confirmed = get_confirmation(
+                        "\nContinue?",
+                        default=False,
+                        tool_name='replace_text',
+                        env_var='REPLACE_TEXT_ASSUME_YES',
+                        flag_hint='--yes or --force'
+                    )
+                    if not confirmed:
+                        print("Operation cancelled.")
+                        return 1
+                else:
+                    # Fallback to original implementation
+                    if args.non_interactive:
+                        if args.yes or args.force:
+                            print("\n[AUTO-CONFIRM] Continue? [y/N] y")
+                            response = 'y'
+                        else:
+                            print("\n❌ ERROR: Large change confirmation required in non-interactive mode")
+                            print("   Use --yes or --force to auto-confirm")
+                            return 1
+                    elif args.yes:
                         print("\n[AUTO-CONFIRM] Continue? [y/N] y")
                         response = 'y'
                     else:
-                        print("\n❌ ERROR: Large change confirmation required in non-interactive mode")
-                        print("   Use --yes or --force to auto-confirm")
+                        response = input("\nContinue? [y/N] ")
+                    
+                    if response.lower() != 'y':
+                        print("Operation cancelled.")
                         return 1
-                elif args.yes:
-                    print("\n[AUTO-CONFIRM] Continue? [y/N] y")
-                    response = 'y'
-                else:
-                    response = input("\nContinue? [y/N] ")
-                
-                if response.lower() != 'y':
-                    print("Operation cancelled.")
                     return 0
             except (EOFError, KeyboardInterrupt):
                 print("\nOperation cancelled.")
@@ -1426,6 +1541,12 @@ def main():
         if not args.quiet:
             print("\nDry run - no changes applied")
             print("Use without --dry-run to apply changes.")
+    
+    # Show undo summary if operations were tracked (v9 feature)
+    if HAS_UNDO_SYSTEM and _operations_tracked and not args.quiet:
+        print(f"\n✅ Tracked {len(_operations_tracked)} operation(s) with undo support.")
+        print("📊 Use 'text_undo.py history' to view all operations.")
+        print("↩️  Use 'text_undo.py undo --last' to undo the last operation.")
 
 if __name__ == '__main__':
     try:

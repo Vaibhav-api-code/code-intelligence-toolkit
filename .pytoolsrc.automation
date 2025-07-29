@@ -1,0 +1,204 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Code Intelligence Toolkit Configuration - General Automation
+# Configuration for automated scripts, batch processing, and unattended operations
+#
+# Author: Vaibhav-api-code
+# Co-Author: Claude Code (https://claude.ai/code)
+# Created: 2025-07-28
+# Updated: 2025-07-28 - v1.5.0 automation configuration
+# License: Mozilla Public License 2.0 (MPL-2.0)
+
+# ===== GENERAL AUTOMATION PROFILE =====
+# This configuration is designed for local automation, batch scripts,
+# and unattended operations where speed and minimal interaction are priorities.
+#
+# Usage:
+#   export PYTOOLSRC=.pytoolsrc.automation
+#   ./run_any_python_tool.sh [tool] [args]
+
+[defaults]
+# Global automation defaults - balance speed with safety
+non_interactive = true               # No interactive prompts
+assume_yes = true                   # Auto-confirm reasonable operations
+force = false                       # Still require explicit --force
+quiet = false                       # Keep normal output for debugging
+dry_run = false                     # Actually perform operations
+backup = true                       # Always create backups
+check_compile = true                # Keep compilation checks for reliability
+verbose = false                     # Normal verbosity
+
+# Automation behavior
+ci_detection = false                # Not in CI, but still automated
+interactive_mode = false            # Disable interactive prompts
+auto_confirm = true                 # Auto-confirm safe operations
+fail_on_interaction = false         # More forgiving than CI mode
+
+# Performance optimizations
+threads = 4                         # Use more threads for speed
+timeout = 300                       # 5-minute timeout for operations
+
+[safe_file_manager]
+# File operations - automated but safe
+non_interactive = true
+assume_yes = true
+force = false                       # Manual --force still required
+verify_checksum = false             # Skip for speed in automation
+preserve_attrs = true
+paranoid_mode = false
+
+[safegit]
+# Git operations - automated with safety
+non_interactive = true
+assume_yes = true
+force_yes = false                   # Dangerous ops need explicit confirmation
+dry_run = false
+
+[replace_text_v9]
+# Text replacement - automated with backups (v9 with undo)
+non_interactive = true
+assume_yes = true
+backup = true
+check_compile = true                # Keep compilation checking
+track_undo = true
+whole_word = false
+interpret_escapes = false           # Conservative for automation
+
+[replace_text]
+# Legacy alias for v9
+non_interactive = true
+assume_yes = true
+backup = true
+track_undo = true
+
+[replace_text_ast_v3]
+# AST refactoring - automated (v3 with undo)
+non_interactive = true
+assume_yes = true
+backup = true
+track_undo = true
+check_compile = true
+scope_aware = true
+
+[replace_text_ast]
+# Legacy alias for v3
+non_interactive = true
+assume_yes = true
+backup = true
+track_undo = true
+
+[text_undo]
+# Undo system - automated but careful
+non_interactive = true
+assume_yes = false                  # Undo operations should be explicit
+allow_interactive_selection = false
+max_history_days = 30               # Normal retention
+auto_cleanup = true
+
+[unified_refactor_v2]
+# Refactoring - automated (v2 with undo)
+non_interactive = true
+assume_yes = true
+backend = auto                      # Auto-detect: java_scope for .java, python_ast for .py
+dry_run = false
+backup = true
+track_undo = true
+
+[unified_refactor]
+# Legacy alias for v2
+non_interactive = true
+assume_yes = true
+backend = auto                      # Auto-detect: java_scope for .java, python_ast for .py
+track_undo = true
+
+# ===== PERFORMANCE-OPTIMIZED SETTINGS =====
+
+[find_text]
+quiet = false                       # Keep output for batch processing
+json = false                       # Human-readable
+threads = 4                         # Parallel processing
+
+[navigate_ast]
+json = false
+highlight = true                    # Keep syntax highlighting
+context_lines = 10                  # Full context
+
+[dead_code_detector]
+confidence = medium                 # Good balance
+threads = 4                         # Use available cores
+format = text
+timeout = 60                        # 1-minute timeout per file
+
+[cross_file_analysis_ast]
+threads = 4                         # Parallel analysis
+recursive = true
+max_depth = 5
+
+[error_analyzer]
+recent = 50                         # More comprehensive analysis
+hours = 24
+quiet = false
+
+# ===== BATCH PROCESSING SETTINGS =====
+
+[organize_files]
+non_interactive = true
+assume_yes = true
+dry_run = false
+by_type = ext
+
+[smart_ls]
+sort = time
+reverse = true
+summary = true
+show_size = true
+
+[recent_files]
+since = 1d                          # Last day
+show_size = true
+by_dir = true
+
+# ===== USAGE EXAMPLES =====
+#
+# Batch text replacement across project:
+#   PYTOOLSRC=.pytoolsrc.automation ./run_any_python_tool.sh replace_text.py "old" "new" --scope src/
+#
+# Automated file organization:
+#   PYTOOLSRC=.pytoolsrc.automation ./run_any_python_tool.sh organize_files.py ~/Downloads --by-type
+#
+# Batch refactoring:
+#   PYTOOLSRC=.pytoolsrc.automation ./run_any_python_tool.sh unified_refactor.py rename oldFunc newFunc --scope src/
+#
+# Automated git workflow:
+#   export PYTOOLSRC=.pytoolsrc.automation
+#   ./run_any_python_tool.sh safegit.py add .
+#   ./run_any_python_tool.sh safegit.py commit -m "Automated update"
+
+# ===== ENVIRONMENT VARIABLES FOR OVERRIDE =====
+# You can still override specific settings with environment variables:
+#
+# SFM_ASSUME_YES=1                  # Force yes for file manager
+# SAFEGIT_FORCE_YES=1               # Force yes for dangerous git ops (careful\!)
+# REPLACE_TEXT_CHECK_COMPILE=0      # Skip compilation checking
+# TEXT_UNDO_ASSUME_YES=1            # Auto-confirm undo operations
+
+# ===== SAFETY NOTES =====
+# 1. This config enables automation while maintaining reasonable safety
+# 2. Compilation checking is kept enabled for reliability
+# 3. Backups are always created
+# 4. Dangerous operations still require explicit --force flags
+# 5. Undo tracking is maintained for recovery
+
+# ===== SCRIPT INTEGRATION =====
+# For use in shell scripts:
+#
+# #\!/bin/bash
+# export PYTOOLSRC=.pytoolsrc.automation
+# 
+# # Your automated operations here
+# ./run_any_python_tool.sh safe_file_manager.py organize "$1" --by-type
+# ./run_any_python_tool.sh replace_text.py "TODO" "DONE" --scope "$1"
+# 
+# echo "Automation complete\!"
