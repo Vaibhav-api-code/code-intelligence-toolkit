@@ -51,34 +51,74 @@ While many excellent tools exist for individual tasks, the Code Intelligence Too
 Our focus is not on replacing these tools, but on providing a cohesive, scriptable, and safe layer on top of them, specifically designed for AI agents and automation while solving the critical pain points developers face in 2025.
 
 ### 🔍 **Code Search**
-| Conventional Tools | Developer Pain Points (2025) | Our Advantage |
-|:---:|:---|:---|
-| grep, ripgrep (rg), IDE search | **Performance Issues:** grep "can be quite slow" on large codebases<br><br>**Navigation Problems:** "search results can be difficult to navigate"<br><br>**No Context:** No semantic understanding of code structure | **Ripgrep Speed + Intelligence:** Matches Ripgrep's speed but adds AST context, multiline search, and complete code block extraction. Navigate results by class→method hierarchy, not just line numbers. |
 
-### ⚙️ **Code Refactoring** 
-| Conventional Tools | Developer Pain Points (2025) | Our Advantage |
-|:---:|:---|:---|
-| IDEs (VS Code, IntelliJ), Cursor ($20/mo), GitHub Copilot ($10-39/mo) | **Resource Requirements:** IDEs "can be resource-intensive, need decent machine"<br>**Cost Barrier:** IntelliJ Ultimate "isn't free but worth investment"<br>**Performance Issues:** Performance degradation with certain patterns | **Command-Line Power:** Provides IDE-level semantic accuracy directly on the command line with 40x faster performance than IDE refactoring. Every operation protected by automatic backups and Multi-Level Undo System. **Cost: $0** |
+**Conventional Tools:** grep, ripgrep (rg), IDE search
+
+**Developer Pain Points (2025):**
+- **Performance Issues:** grep "can be quite slow" on large codebases
+- **Navigation Problems:** "search results can be difficult to navigate"  
+- **No Context:** No semantic understanding of code structure
+
+**Our Advantage:** **Ripgrep Speed + Intelligence** - Matches Ripgrep's speed but adds AST context, multiline search, and complete code block extraction. Navigate results by class→method hierarchy, not just line numbers.
+
+### ⚙️ **Code Refactoring**
+
+**Conventional Tools:** IDEs (VS Code, IntelliJ), Cursor ($20/mo), GitHub Copilot ($10-39/mo)
+
+**Developer Pain Points (2025):**
+- **Resource Requirements:** IDEs "can be resource-intensive, need decent machine"
+- **Cost Barrier:** IntelliJ Ultimate "isn't free but worth investment" 
+- **Performance Issues:** Performance degradation with certain patterns
+
+**Our Advantage:** **Command-Line Power** - Provides IDE-level semantic accuracy directly on the command line with 40x faster performance than IDE refactoring. Every operation protected by automatic backups and Multi-Level Undo System. **Cost: $0**
 
 ### 🔍 **Static Analysis**
-| Conventional Tools | Developer Pain Points (2025) | Our Advantage |
-|:---:|:---|:---|
-| CodeQL, SonarQube, Semgrep, CodeAnt.ai ($10-20/mo) | **False Positive Crisis:** **"Up to 50% false positives" if not configured properly**<br>**Time Drain:** "15-30 minutes to triage each false positive"<br>**Alert Fatigue:** Causes "alert fatigue" and trust erosion<br>**Productivity Loss:** "Substantial drain on productivity" | **AI-Powered Accuracy:** AI Reasoning System provides natural language explanations with confidence scoring and risk assessment. Interactive HTML reports turn raw data into actionable insights, eliminating noise and false positive fatigue. |
+
+**Conventional Tools:** CodeQL, SonarQube, Semgrep, CodeAnt.ai ($10-20/mo)
+
+**Developer Pain Points (2025):**
+- **False Positive Crisis:** **"Up to 50% false positives" if not configured properly**
+- **Time Drain:** "15-30 minutes to triage each false positive"
+- **Alert Fatigue:** Causes "alert fatigue" and trust erosion
+- **Productivity Loss:** "Substantial drain on productivity"
+
+**Our Advantage:** **AI-Powered Accuracy** - AI Reasoning System provides natural language explanations with confidence scoring and risk assessment. Interactive HTML reports turn raw data into actionable insights, eliminating noise and false positive fatigue.
 
 ### 🛡️ **AI Safety Infrastructure**
-| Conventional Tools | Developer Pain Points (2025) | Our Advantage |
-|:---:|:---|:---|
-| Basic shell access, no AI protection systems | **Safety Crisis:** Recent Replit AI disaster wiped entire databases<br>**Dangerous Access:** AI assistants have direct access to dangerous commands<br>**No APIs:** No structured APIs for AI agents<br>**Command Risks:** No protection against `rm -rf /` or destructive git operations | **AI-First Safety Platform:** Works WITH any AI assistant (Claude Code, Cursor, Copilot, Aider) to provide unbreakable safety guarantees. Structured JSON APIs and CLI interfaces make AI automation safer and more reliable. **Enhances rather than replaces your AI workflow**. |
+
+**Conventional Tools:** Basic shell access, no AI protection systems
+
+**Developer Pain Points (2025):**
+- **Safety Crisis:** Recent Replit AI disaster wiped entire databases
+- **Dangerous Access:** AI assistants have direct access to dangerous commands
+- **No APIs:** No structured APIs for AI agents
+- **Command Risks:** No protection against `rm -rf /` or destructive git operations
+
+**Our Advantage:** **AI-First Safety Platform** - Works WITH any AI assistant (Claude Code, Cursor, Copilot, Aider) to provide unbreakable safety guarantees. Structured JSON APIs and CLI interfaces make AI automation safer and more reliable. **Enhances rather than replaces your AI workflow**.
 
 ### 🔒 **System Safety**
-| Conventional Tools | Developer Pain Points (2025) | Our Advantage |
-|:---:|:---|:---|
-| trash-cli, shell aliases, custom scripts | **No Protection:** No comprehensive protection system<br>**Manual Setup:** Manual setup required for each command<br>**No Context:** No context awareness (dev vs production)<br>**Limited Recovery:** Limited undo capabilities | **Enterprise Safety:** SafeGIT adapts to environment (production/development), Safe File Manager makes ALL operations reversible, context-aware confirmations prevent accidents. |
+
+**Conventional Tools:** trash-cli, shell aliases, custom scripts
+
+**Developer Pain Points (2025):**
+- **No Protection:** No comprehensive protection system
+- **Manual Setup:** Manual setup required for each command
+- **No Context:** No context awareness (dev vs production)
+- **Limited Recovery:** Limited undo capabilities
+
+**Our Advantage:** **Enterprise Safety** - SafeGIT adapts to environment (production/development), Safe File Manager makes ALL operations reversible, context-aware confirmations prevent accidents.
 
 ### 📚 **Documentation**
-| Conventional Tools | Developer Pain Points (2025) | Our Advantage |
-|:---:|:---|:---|
-| Sphinx, Javadoc, Doxygen, AI tools | **Surface-Level:** Only parses comments, not actual code behavior<br>**Setup Burden:** Manual setup and configuration required<br>**Static Output:** Static output, no interactivity<br>**No Integration:** No integration with code analysis | **Intelligence-Driven:** Analyzes what code actually DOES through data flow tracking. Creates interactive multi-tab dashboards with live code analysis, not just comment parsing. |
+
+**Conventional Tools:** Sphinx, Javadoc, Doxygen, AI tools
+
+**Developer Pain Points (2025):**
+- **Surface-Level:** Only parses comments, not actual code behavior
+- **Setup Burden:** Manual setup and configuration required
+- **Static Output:** Static output, no interactivity
+- **No Integration:** No integration with code analysis
+
+**Our Advantage:** **Intelligence-Driven** - Analyzes what code actually DOES through data flow tracking. Creates interactive multi-tab dashboards with live code analysis, not just comment parsing.
 
 ### 🚨 **The AI Safety Crisis of 2025**
 
