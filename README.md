@@ -59,7 +59,6 @@ The rise of AI coding assistants has introduced a new paradigm, but it comes wit
 * **10-100x Faster Analysis**: A zero-index architecture provides instant, 100% accurate results, which is critical for the token efficiency and speed of AI agents.
 * **Intelligence-Driven Analysis**: Our AI Reasoning System provides natural language explanations with confidence scoring, eliminating noise and allowing you to focus only on what matters.
 * **Zero Cost, Enterprise-Grade Platform**: Get a complete suite for analysis, intelligence, and safety that is entirely free and open source.
-
 ## 🆚 How We Compare to Other Tools
 
 While many excellent tools exist for individual tasks, the Code Intelligence Toolkit is unique in its ability to seamlessly integrate these capabilities into a single, AI-first platform governed by a "Safety First" philosophy.
