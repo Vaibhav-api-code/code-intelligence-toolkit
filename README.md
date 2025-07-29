@@ -48,7 +48,7 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           Users & AI Agents                            │
+│                           Users & AI Agents                             │
 └─────────────────────────┬───────────────┬───────────────────────────────┘
                           │               │
                           ▼               ▼
@@ -61,26 +61,26 @@ The most comprehensive suite of AI-optimized development tools, featuring struct
                          └─────────┬─────────┘
                                    ▼
                     ┌─────────────────────────────┐
-                    │     Intelligence Layer     │
-                    │  • AI Reasoning Engine     │
-                    │  • Risk Assessment         │
-                    │  • Security Analysis       │
-                    │  • Quality Metrics         │
+                    │     Intelligence Layer      │
+                    │  • AI Reasoning Engine      │
+                    │  • Risk Assessment          │
+                    │  • Security Analysis        │
+                    │  • Quality Metrics          │
                     └─────────────┬───────────────┘
                                   ▼
                     ┌─────────────────────────────┐
                     │      Core Tool Suite        │
-                    │ • AST Analysis (100% accurate) │
-                    │ • Data Flow Tracking       │
-                    │ • Safe File Operations     │
-                    │ • Git Safety Wrapper       │
-                    │ • Semantic Search          │
+                    │ • AST Analysis (100% accurate)│
+                    │ • Data Flow Tracking        │
+                    │ • Safe File Operations      │
+                    │ • Git Safety Wrapper        │
+                    │ • Semantic Search           │
                     └─────────────┬───────────────┘
                                   ▼
                     ┌─────────────────────────────┐
-                    │        Your Codebase       │
-                    │   Always Current State     │
-                    │    No Persistent Index     │
+                    │        Your Codebase        │
+                    │   Always Current State      │
+                    │    No Persistent Index      │
                     └─────────────────────────────┘
 ```
 
@@ -1445,16 +1445,16 @@ Recent incidents demonstrate that AI agents can cause catastrophic damage:
 ┌─────────────────────────────────────────────────────┐
 │                AI Agent Protection                  │
 ├─────────────────────────────────────────────────────┤
-│ Level 1: Safe Tools (Immediate)                    │
-│  • Automatic backups before operations             │
-│  • Smart confirmations prevent accidents           │
-│  • Complete undo/recovery capabilities             │
+│ Level 1: Safe Tools (Immediate)                     │
+│  • Automatic backups before operations              │
+│  • Smart confirmations prevent accidents            │
+│  • Complete undo/recovery capabilities              │
 ├─────────────────────────────────────────────────────┤
-│ Level 2: System Lockdown (Maximum Protection)      │
-│  • Block dangerous commands at OS level            │  
-│  • Enforce safe alternatives only                  │
-│  • Monitor and alert on bypass attempts            │
-│  • Zero-trust configuration for AI agents          │
+│ Level 2: System Lockdown (Maximum Protection)       │
+│  • Block dangerous commands at OS level             │  
+│  • Enforce safe alternatives only                   │
+│  • Monitor and alert on bypass attempts             │
+│  • Zero-trust configuration for AI agents           │
 └─────────────────────────────────────────────────────┘
 ```
 
